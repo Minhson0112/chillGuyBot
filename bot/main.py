@@ -1,20 +1,46 @@
-import discord
-from discord.ext import commands, tasks
 import asyncio
+
+import discord
+from discord import app_commands
+from discord.ext import commands, tasks
+
 from bot.config.config import DISCORD_TOKEN
 
-intents = discord.Intents.default()
-intents.message_content = True  # Cho phép đọc nội dung tin nhắn
-intents.guilds = True  # đếm số server
-bot = commands.Bot(command_prefix="/", intents=intents) # Tạo bot instance với prefix "/"
 
-# TASK LOOP cập nhật status
+intents = discord.Intents.default()
+intents.members = True
+intents.message_content = True
+intents.guilds = True
+
+bot = commands.Bot(command_prefix="/", intents=intents)
+
+
 @tasks.loop(minutes=10)
 async def update_status():
-    guild_count = len(bot.guilds)
+    guildCount = len(bot.guilds)
     await bot.change_presence(
-        activity=discord.Game(name=f"trong {guild_count} server")
+        activity=discord.Game(name=f"trong {guildCount} server")
     )
+
+
+@bot.tree.error
+async def onAppCommandError(interaction: discord.Interaction, error: app_commands.AppCommandError):
+    if isinstance(error, app_commands.CheckFailure):
+        message = str(error)
+
+        if interaction.response.is_done():
+            await interaction.followup.send(message, ephemeral=True)
+        else:
+            await interaction.response.send_message(message, ephemeral=True)
+        return
+
+    print(f"❌ App command error: {error}")
+
+    if interaction.response.is_done():
+        await interaction.followup.send("Đã xảy ra lỗi khi thực hiện lệnh.", ephemeral=True)
+    else:
+        await interaction.response.send_message("Đã xảy ra lỗi khi thực hiện lệnh.", ephemeral=True)
+
 
 @bot.event
 async def on_ready():
@@ -26,16 +52,15 @@ async def on_ready():
     except Exception as e:
         print(f"❌ Lỗi sync commands: {e}")
 
-    update_status.start()
+    if not update_status.is_running():
+        update_status.start()
 
-# Hàm main để load các extension
+
 async def main():
-    # Danh sách các module cần load
     extensions = [
         "bot.commands.loadMember",
     ]
 
-    # Load từng extension
     for ext in extensions:
         try:
             await bot.load_extension(ext)
@@ -43,9 +68,8 @@ async def main():
         except Exception as e:
             print(f"❌ Không thể load {ext}: {e}")
 
-    # Bắt đầu bot
     await bot.start(DISCORD_TOKEN)
 
-# Entry point
+
 if __name__ == "__main__":
     asyncio.run(main())

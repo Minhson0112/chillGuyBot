@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+CHILL_STATION_GUILD_ID = 1356994231918530690
 
 DB_CONFIG = {
     'host': os.getenv('DB_HOST'),

@@ -16,5 +16,5 @@ COPY . .
 # Set biến môi trường (tuỳ chọn)
 ENV PYTHONUNBUFFERED=1
 
-# Command để chạy bot (giả sử file chính là bot.py)
+# run bot
 CMD ["python", "-m", "bot.main"]

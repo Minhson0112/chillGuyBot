@@ -3,8 +3,8 @@ CREATE TABLE `tournament_master` (
     `id_tournament` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `tournament_name` VARCHAR(255) NOT NULL,
     `game_name` VARCHAR(255) NOT NULL,
-    `total_prize` BIGINT NOT NULL
-    `is_available` BOOLEAN NOT NULL COMMENT 'is available tournament?',
+    `total_prize` BIGINT NOT NULL,
+    `is_available` BOOLEAN NOT NULL COMMENT 'is available tournament?'
 );
 
 CREATE TABLE `partner` (

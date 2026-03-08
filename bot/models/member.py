@@ -7,7 +7,7 @@ from bot.config.database import Base
 class Member(Base):
     __tablename__ = "member"
 
-    user_id = Column(BigInteger, primary_key=True, comment="id discord bot")
+    user_id = Column(BigInteger, primary_key=True, comment="id discord")
     global_name = Column(String(255), nullable=True, comment="global name in discord")
     username = Column(String(255), nullable=False, comment="username in discord")
     nick = Column(String(255), nullable=True, comment="username in chill station")

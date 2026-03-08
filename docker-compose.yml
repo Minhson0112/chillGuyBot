@@ -1,7 +1,7 @@
 services:
   bot:
     build: .
-    container_name: naruto-bot
+    container_name: chill-guy-bot
     env_file: .env
     depends_on:
       - mysql
@@ -12,13 +12,11 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: naruto-db
+    container_name: chill-guy-db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: naruto_card_game
-      MYSQL_USER: naruto
-      MYSQL_PASSWORD: naruto
+      MYSQL_DATABASE: chill_station
     ports:
       - "3307:3306"
     volumes:
