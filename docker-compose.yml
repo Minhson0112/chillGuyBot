@@ -1,0 +1,28 @@
+services:
+  bot:
+    build: .
+    container_name: naruto-bot
+    env_file: .env
+    depends_on:
+      - mysql
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - /app/__pycache__
+
+  mysql:
+    image: mysql:8.0
+    container_name: naruto-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: naruto_card_game
+      MYSQL_USER: naruto
+      MYSQL_PASSWORD: naruto
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

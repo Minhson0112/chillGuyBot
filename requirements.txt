@@ -1,0 +1,18 @@
+# requirements.txt
+
+# Bot Discord
+discord.py
+
+# Database
+mysql-connector-python
+SQLAlchemy
+
+# Hỗ trợ dotenv để load config
+python-dotenv
+
+# Hỗ trợ xử lý ảnh hoặc tạo ảnh embed
+Pillow==10.2.0
+requests==2.31.0
+
+# Scheduler cho các tác vụ định kỳ
+APScheduler==3.10.4
