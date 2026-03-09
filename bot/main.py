@@ -59,6 +59,14 @@ async def on_ready():
 async def main():
     extensions = [
         "bot.commands.loadMember",
+        "bot.commands.ban",
+        "bot.commands.kick",
+        "bot.commands.mute",
+        "bot.events.memberJoinEvent",
+        "bot.events.memberLeaveEvent",
+        "bot.events.messageCreateEvent",
+        "bot.events.autoModerationEvent",
+        "bot.tasks.chatCountFlushTask",
     ]
 
     for ext in extensions:

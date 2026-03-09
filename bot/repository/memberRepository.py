@@ -27,3 +27,51 @@ class MemberRepository:
             return self.create(memberData)
 
         return self.update(member, memberData)
+
+    def upsertOnJoin(self, userId, memberData):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return self.create(memberData)
+
+        member.global_name = memberData["global_name"]
+        member.username = memberData["username"]
+        member.nick = memberData["nick"]
+        member.joined_at = memberData["joined_at"]
+        member.leave_at = None
+        member.is_bot = memberData["is_bot"]
+        member.join_count += 1
+
+        self.session.flush()
+        return member
+
+    def updateLeaveAt(self, userId, leaveAt):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.leave_at = leaveAt
+
+        self.session.flush()
+        return member
+
+    def incrementWarningCount(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.warning_count += 1
+        self.session.flush()
+        return member
+
+    def resetWarningCount(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.warning_count = 0
+        self.session.flush()
+        return member

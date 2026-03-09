@@ -27,6 +27,8 @@ class MemberSyncService:
                     ),
                     "leave_at": None,
                     "is_bot": discordMember.bot,
+                    "join_count": 1,
+                    "warning_count": 0,
                 }
 
                 memberRepository.upsertByUserId(discordMember.id, memberData)

@@ -12,3 +12,31 @@ class ChatRepository:
         self.session.add(chat)
         self.session.flush()
         return chat
+
+    def createIfNotExists(self, userId):
+        chat = self.findByUserId(userId)
+
+        if chat is None:
+            return self.create({
+                "user_id": userId,
+                "total_chat_count": 0,
+                "level_chat_count": 0,
+            })
+
+        return chat
+
+    def incrementChatCount(self, userId, totalIncrement, levelIncrement):
+        chat = self.findByUserId(userId)
+
+        if chat is None:
+            chat = self.create({
+                "user_id": userId,
+                "total_chat_count": 0,
+                "level_chat_count": 0,
+            })
+
+        chat.total_chat_count += totalIncrement
+        chat.level_chat_count += levelIncrement
+
+        self.session.flush()
+        return chat

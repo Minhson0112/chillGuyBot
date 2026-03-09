@@ -45,3 +45,24 @@ CREATE TABLE `tournament_entry` (
     CONSTRAINT `tournament_entry_user_id_foreign`
         FOREIGN KEY (`user_id`) REFERENCES `member` (`user_id`)
 );
+
+# update schema lần 1
+
+ALTER TABLE `member`
+ADD COLUMN `join_count` INT UNSIGNED NOT NULL DEFAULT 1 COMMENT 'number of times the member has joined the server',
+ADD COLUMN `warning_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'number of warnings for rule violations';
+
+CREATE TABLE `member_moderation_history` (
+    `id_member_moderation_history` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `action_by_user_id` BIGINT UNSIGNED NOT NULL COMMENT 'member id who performed the moderation action',
+    `target_user_id` BIGINT UNSIGNED NOT NULL COMMENT 'member id who received the moderation action',
+    `action_type` TINYINT UNSIGNED NOT NULL COMMENT '1: mute, 2: kick, 3: ban',
+    `reason` VARCHAR(500) NULL COMMENT 'reason for moderation action',
+    `duration_minutes` INT UNSIGNED NULL COMMENT 'duration in minutes for temporary moderation actions',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    PRIMARY KEY (`id_member_moderation_history`),
+    CONSTRAINT `member_moderation_history_action_by_user_id_foreign`
+        FOREIGN KEY (`action_by_user_id`) REFERENCES `member` (`user_id`),
+    CONSTRAINT `member_moderation_history_target_user_id_foreign`
+        FOREIGN KEY (`target_user_id`) REFERENCES `member` (`user_id`)
+);
