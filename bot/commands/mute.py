@@ -34,44 +34,38 @@ class Mute(commands.Cog):
         reason: str,
     ):
         if interaction.guild is None:
-            await interaction.response.send_message("Lệnh này chỉ dùng được trong server.", ephemeral=True)
+            await interaction.response.send_message("Lệnh này chỉ dùng được trong server.")
             return
 
         if target.id == interaction.user.id:
-            await interaction.response.send_message("Bạn không thể mute chính mình.", ephemeral=True)
+            await interaction.response.send_message("Bạn không thể mute chính mình.")
             return
 
         if target.id in MOD_ADMIN_USER_IDS:
             await interaction.response.send_message(
-                "Bạn không thể mute member thuộc nhóm quản trị viên được bảo vệ.",
-                ephemeral=True
-            )
+                "Bạn không thể mute member thuộc nhóm quản trị viên được bảo vệ.")
             return
 
         if target == interaction.guild.owner:
-            await interaction.response.send_message("Không thể mute owner của server.", ephemeral=True)
+            await interaction.response.send_message("Không thể mute owner của server.")
             return
 
         if isinstance(interaction.user, discord.Member) and target.top_role >= interaction.user.top_role:
             await interaction.response.send_message(
-                "Bạn không thể mute member có role cao hơn hoặc bằng mình.",
-                ephemeral=True
-            )
+                "Bạn không thể mute member có role cao hơn hoặc bằng mình.")
             return
 
         botMember = interaction.guild.get_member(self.bot.user.id)
         if botMember is None or not botMember.guild_permissions.moderate_members:
-            await interaction.response.send_message("Bot không có quyền mute member.", ephemeral=True)
+            await interaction.response.send_message("Bot không có quyền mute member.")
             return
 
         if target.top_role >= botMember.top_role:
             await interaction.response.send_message(
-                "Bot không thể mute member có role cao hơn hoặc bằng bot.",
-                ephemeral=True
-            )
+                "Bot không thể mute member có role cao hơn hoặc bằng bot.")
             return
 
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
 
         until = discord.utils.utcnow() + timedelta(minutes=duration_minutes)
         await target.timeout(until, reason=reason)
@@ -89,12 +83,12 @@ class Mute(commands.Cog):
         )
         embed.add_field(
             name="Người mute",
-            value=f"{interaction.user.mention}\n`{interaction.user.id}`",
+            value=f"{interaction.user.mention}",
             inline=False,
         )
         embed.add_field(
             name="Người bị mute",
-            value=f"{target.mention}\n`{target.id}`",
+            value=f"{target.mention}",
             inline=False,
         )
         embed.add_field(
@@ -109,10 +103,8 @@ class Mute(commands.Cog):
         )
 
         await interaction.followup.send(
-            embed=embed,
-            ephemeral=True
+            embed=embed
         )
-
 
 async def setup(bot):
     await bot.add_cog(Mute(bot))

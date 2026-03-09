@@ -23,9 +23,7 @@ class MemberInfo(commands.Cog):
 
         if memberInfo is None:
             await interaction.response.send_message(
-                "Không tìm thấy thông tin member trong database.",
-                ephemeral=True
-            )
+                "Không tìm thấy thông tin member trong database.")
             return
 
         member = memberInfo["member"]
@@ -81,8 +79,7 @@ class MemberInfo(commands.Cog):
             embed.set_thumbnail(url=avatarUrl)
 
         await interaction.response.send_message(
-            embed=embed,
-            ephemeral=True
+            embed=embed
         )
 
 

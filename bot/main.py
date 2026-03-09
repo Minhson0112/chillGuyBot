@@ -29,17 +29,17 @@ async def onAppCommandError(interaction: discord.Interaction, error: app_command
         message = str(error)
 
         if interaction.response.is_done():
-            await interaction.followup.send(message, ephemeral=True)
+            await interaction.followup.send(message)
         else:
-            await interaction.response.send_message(message, ephemeral=True)
+            await interaction.response.send_message(message)
         return
 
     print(f"❌ App command error: {error}")
 
     if interaction.response.is_done():
-        await interaction.followup.send("Đã xảy ra lỗi khi thực hiện lệnh.", ephemeral=True)
+        await interaction.followup.send("Đã xảy ra lỗi khi thực hiện lệnh.")
     else:
-        await interaction.response.send_message("Đã xảy ra lỗi khi thực hiện lệnh.", ephemeral=True)
+        await interaction.response.send_message("Đã xảy ra lỗi khi thực hiện lệnh.")
 
 
 @bot.event
@@ -58,6 +58,7 @@ async def on_ready():
 
 async def main():
     extensions = [
+        "bot.commands.memberInfo",
         "bot.commands.loadMember",
         "bot.commands.ban",
         "bot.commands.kick",

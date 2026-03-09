@@ -30,44 +30,38 @@ class Kick(commands.Cog):
         reason: str,
     ):
         if interaction.guild is None:
-            await interaction.response.send_message("Lệnh này chỉ dùng được trong server.", ephemeral=True)
+            await interaction.response.send_message("Lệnh này chỉ dùng được trong server.")
             return
 
         if target.id == interaction.user.id:
-            await interaction.response.send_message("Bạn không thể kick chính mình.", ephemeral=True)
+            await interaction.response.send_message("Bạn không thể kick chính mình.")
             return
 
         if target.id in MOD_ADMIN_USER_IDS:
             await interaction.response.send_message(
-                "Bạn không thể kick member thuộc nhóm quản trị viên được bảo vệ.",
-                ephemeral=True
-            )
+                "Bạn không thể kick member thuộc nhóm quản trị viên được bảo vệ.")
             return
 
         if target == interaction.guild.owner:
-            await interaction.response.send_message("Không thể kick owner của server.", ephemeral=True)
+            await interaction.response.send_message("Không thể kick owner của server.")
             return
 
         if isinstance(interaction.user, discord.Member) and target.top_role >= interaction.user.top_role:
             await interaction.response.send_message(
-                "Bạn không thể kick member có role cao hơn hoặc bằng mình.",
-                ephemeral=True
-            )
+                "Bạn không thể kick member có role cao hơn hoặc bằng mình.")
             return
 
         botMember = interaction.guild.get_member(self.bot.user.id)
         if botMember is None or not botMember.guild_permissions.kick_members:
-            await interaction.response.send_message("Bot không có quyền kick member.", ephemeral=True)
+            await interaction.response.send_message("Bot không có quyền kick member.")
             return
 
         if target.top_role >= botMember.top_role:
             await interaction.response.send_message(
-                "Bot không thể kick member có role cao hơn hoặc bằng bot.",
-                ephemeral=True
-            )
+                "Bot không thể kick member có role cao hơn hoặc bằng bot.")
             return
 
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
 
         await target.kick(reason=reason)
 
@@ -98,8 +92,7 @@ class Kick(commands.Cog):
         )
 
         await interaction.followup.send(
-            embed=embed,
-            ephemeral=True
+            embed=embed
         )
 
 async def setup(bot):
