@@ -6,7 +6,7 @@ class AutoResponderCacheService:
     def loadKeys(self):
         with getDbSession() as session:
             autoResponderRepository = AutoResponderRepository(session)
-            keyRows = autoResponderRepository.getAll()
+            keyRows = autoResponderRepository.getAllKeysForCache()
 
             autoResponderKeyCache.clear()
 
