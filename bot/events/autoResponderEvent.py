@@ -38,3 +38,6 @@ class AutoResponderEvent(commands.Cog):
 
         for attachment in templateMessage.attachments:
             await message.channel.send(attachment.url)
+
+async def setup(bot):
+    await bot.add_cog(AutoResponderEvent(bot))
