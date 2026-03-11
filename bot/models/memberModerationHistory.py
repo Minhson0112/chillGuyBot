@@ -15,5 +15,5 @@ class MemberModerationHistory(Base):
     duration_minutes = Column(Integer, nullable=True, comment="duration in minutes for temporary moderation actions")
     created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"), comment="created at")
 
-    actionByMember = relationship("Member",foreign_keys=[action_by_user_id])
-    targetMember = relationship("Member",foreign_keys=[target_user_id])
+    actionByMember = relationship("Member",foreign_keys=[action_by_user_id], back_populates="moderationActions")
+    targetMember = relationship("Member",foreign_keys=[target_user_id], back_populates="moderationActions")
