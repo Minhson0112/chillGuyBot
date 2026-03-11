@@ -44,11 +44,6 @@ class MemberInfo(commands.Cog):
             inline=False,
         )
         embed.add_field(
-            name="Tên trong server Chill Station",
-            value=nick,
-            inline=False,
-        )
-        embed.add_field(
             name="Ngày sinh",
             value=dateOfBirth,
             inline=False,

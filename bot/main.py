@@ -5,8 +5,9 @@ from discord import app_commands
 from discord.ext import commands, tasks
 
 from bot.config.config import DISCORD_TOKEN
+from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
 
-
+autoResponderCacheService = AutoResponderCacheService()
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
@@ -29,6 +30,7 @@ async def onAppCommandError(interaction: discord.Interaction, error: app_command
         message = str(error)
 
         if interaction.response.is_done():
+
             await interaction.followup.send(message)
         else:
             await interaction.response.send_message(message)
@@ -49,6 +51,8 @@ async def on_ready():
     try:
         synced = await bot.tree.sync()
         print(f"🔧 Slash commands đã sync: {len(synced)} lệnh")
+        autoResponderCacheService.loadKeys()
+        print("✅ Đã load auto responder keys")
     except Exception as e:
         print(f"❌ Lỗi sync commands: {e}")
 
@@ -63,10 +67,12 @@ async def main():
         "bot.commands.ban",
         "bot.commands.kick",
         "bot.commands.mute",
+        "bot.commands.setAutoResponse",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
         "bot.events.autoModerationEvent",
+        "bot.events.autoResponderEvent",
         "bot.tasks.chatCountFlushTask",
     ]
 

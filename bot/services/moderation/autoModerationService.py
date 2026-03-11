@@ -1,4 +1,5 @@
 from datetime import timedelta
+import re
 
 import discord
 
@@ -16,6 +17,10 @@ from bot.repository.memberRepository import MemberRepository
 
 
 class AutoModerationService:
+    def __init__(self):
+        self.bannedWordSet = {word.lower() for word in BANNED_WORDS}
+        self.wordPattern = re.compile(r"\w+", flags=re.UNICODE)
+
     async def handleMessage(self, bot, message: discord.Message):
         if message.author.bot:
             return
@@ -29,8 +34,7 @@ class AutoModerationService:
         if message.author.id in MOD_ADMIN_USER_IDS:
             return
 
-        contentLower = message.content.lower()
-        matchedWord = self.findMatchedBannedWord(contentLower)
+        matchedWord = self.findMatchedBannedWord(message.content)
 
         if matchedWord is None:
             return
@@ -48,7 +52,7 @@ class AutoModerationService:
                 return
 
             warningCount = member.warning_count
-            modChannel = self.getModChannel(bot, message.guild)
+            modChannel = self.getModChannel(message.guild)
 
             if warningCount < AUTO_MUTE_WARNING_THRESHOLD:
                 session.commit()
@@ -106,16 +110,15 @@ class AutoModerationService:
                     embed=embed,
                 )
 
-    def findMatchedBannedWord(self, contentLower):
-        for bannedWord in BANNED_WORDS:
-            if bannedWord.lower() in contentLower:
-                return bannedWord
+    def findMatchedBannedWord(self, content):
+        normalizedContent = content.lower()
+        tokens = self.wordPattern.findall(normalizedContent)
+
+        for token in tokens:
+            if token in self.bannedWordSet:
+                return token
 
         return None
 
-    def getModChannel(self, bot, guild):
-        channel = guild.get_channel(MOD_COMMAND_CHANNEL_ID)
-        if channel is not None:
-            return channel
-
-        return None
+    def getModChannel(self, guild):
+        return guild.get_channel(MOD_COMMAND_CHANNEL_ID)

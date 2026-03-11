@@ -40,11 +40,17 @@ AUTO_MUTE_WARNING_THRESHOLD = 3
 AUTO_MUTE_DURATION_MINUTES = 60
 
 BANNED_WORDS = [
-    "dit me",
-    "dit cu",
-    "dit con cu",
-    "dit con me",
     "lồn",
+    "buồi",
+    "cặc",
+    "địt",
+    "đjt",
+    "dit",
+    "lon",
+    "buoi",
+    "mả",
+    "l*n",
+    "l`n",
 ]
 
 

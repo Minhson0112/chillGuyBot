@@ -66,3 +66,20 @@ CREATE TABLE `member_moderation_history` (
     CONSTRAINT `member_moderation_history_target_user_id_foreign`
         FOREIGN KEY (`target_user_id`) REFERENCES `member` (`user_id`)
 );
+
+# update schema lần 2
+
+CREATE TABLE `auto_responder` (
+    `id_auto_responder` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` BIGINT UNSIGNED NOT NULL COMMENT 'member who created this auto responder',
+    `msg_key` VARCHAR(100) NOT NULL COMMENT 'trigger key',
+    `is_global` BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'whether other members can use this key',
+    `msg_link` VARCHAR(500) NOT NULL COMMENT 'discord message link used as template',
+    `deleted_at` DATETIME NULL COMMENT 'soft delete timestamp',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+    PRIMARY KEY (`id_auto_responder`),
+    UNIQUE KEY `uq_auto_responder_msg_key` (`msg_key`),
+    CONSTRAINT `auto_responder_user_id_foreign`
+        FOREIGN KEY (`user_id`) REFERENCES `member` (`user_id`)
+);
