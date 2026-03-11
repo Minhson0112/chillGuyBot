@@ -68,6 +68,8 @@ async def main():
         "bot.commands.kick",
         "bot.commands.mute",
         "bot.commands.setAutoResponse",
+        "bot.commands.deleteAutoResponse",
+        "bot.commands.showAllAutoResponse",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",

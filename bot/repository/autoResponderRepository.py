@@ -10,13 +10,15 @@ class AutoResponderRepository:
         self.session.flush()
         return autoResponder
 
-    def getAllAvailableKeys(self):
-        return self.session.query(AutoResponder.msg_key).filter(
-            AutoResponder.deleted_at.is_(None)
-        ).all()
-
     def findByMsgKey(self, msgKey):
         return self.session.query(AutoResponder).filter(
             AutoResponder.msg_key == msgKey,
             AutoResponder.deleted_at.is_(None)
         ).first()
+
+    def getAll(self):
+        return self.session.query(AutoResponder).all()
+
+    def delete(self, autoResponder):
+        self.session.delete(autoResponder)
+        self.session.flush()
