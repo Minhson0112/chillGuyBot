@@ -12,6 +12,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 intents.guilds = True
+intents.voice_states = True
 
 bot = commands.Bot(command_prefix="cg ", intents=intents)
 
@@ -71,6 +72,8 @@ async def main():
         "bot.commands.deleteAutoResponse",
         "bot.commands.showAllAutoResponse",
         "bot.commands.avatar",
+        "bot.commands.joinVoice",
+        "bot.commands.leaveVoice",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",

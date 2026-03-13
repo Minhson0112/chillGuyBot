@@ -2,6 +2,9 @@
 discord.py
 PyNaCl
 
+# Text to speech
+edge-tts
+
 # Database
 mysql-connector-python
 SQLAlchemy
@@ -15,6 +18,3 @@ requests==2.31.0
 
 # Scheduler cho các tác vụ định kỳ
 APScheduler==3.10.4
-
-# Google Cloud Text-to-Speech
-google-cloud-texttospeech
