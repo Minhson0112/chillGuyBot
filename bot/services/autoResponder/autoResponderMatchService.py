@@ -1,15 +1,20 @@
 from bot.cache.autoResponderCache import autoResponderKeyCache
 from bot.config.database import getDbSession
 from bot.repository.autoResponderRepository import AutoResponderRepository
+import re
 
 
 class AutoResponderMatchService:
+    def __init__(self):
+        self.wordPattern = re.compile(r"\w+", flags=re.UNICODE)
+
     def findMatchedKey(self, content):
         contentLower = content.lower()
+        tokens = self.wordPattern.findall(contentLower)
 
-        for msgKey in autoResponderKeyCache:
-            if msgKey in contentLower:
-                return msgKey
+        for token in tokens:
+            if token in autoResponderKeyCache:
+                return token
 
         return None
 

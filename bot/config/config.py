@@ -13,7 +13,6 @@ EXCLUDED_LEVEL_CHANNEL_IDS = [
 
 MOD_COMMAND_CHANNEL_ID = 1480404884460409025
 
-
 MOD_ADMIN_USER_IDS = [
     995730123166851102,
     1479763866782142706,
@@ -64,13 +63,10 @@ BANNED_WORDS = [
     "địt",
     "đjt",
     "dit",
-    "lon",
-    "buoi",
-    "mả",
     "l*n",
     "l`n",
+    'đụ',
 ]
-
 
 DB_CONFIG = {
     'host': os.getenv('DB_HOST'),
