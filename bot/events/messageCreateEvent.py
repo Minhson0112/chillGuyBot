@@ -11,7 +11,10 @@ class MessageCreateEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        self.chatCountService.addMessageCount(message)
+        if not message.author.bot:
+            self.chatCountService.addMessageCount(message)
+
+        await self.bot.process_commands(message)
 
 
 async def setup(bot):
