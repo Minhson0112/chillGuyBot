@@ -4,6 +4,11 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg gcc libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy requirements and install dependencies
 COPY requirements.txt .
 
@@ -13,8 +18,8 @@ RUN pip install --upgrade pip \
 # Copy toàn bộ mã nguồn vào container
 COPY . .
 
-# Set biến môi trường (tuỳ chọn)
+# Set biến môi trường
 ENV PYTHONUNBUFFERED=1
 
-# run bot
+# Run bot
 CMD ["python", "-m", "bot.main"]

@@ -1,7 +1,6 @@
-# requirements.txt
-
 # Bot Discord
 discord.py
+PyNaCl
 
 # Database
 mysql-connector-python
@@ -16,3 +15,6 @@ requests==2.31.0
 
 # Scheduler cho các tác vụ định kỳ
 APScheduler==3.10.4
+
+# Google Cloud Text-to-Speech
+google-cloud-texttospeech
