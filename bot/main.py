@@ -74,6 +74,7 @@ async def main():
         "bot.commands.avatar",
         "bot.commands.joinVoice",
         "bot.commands.leaveVoice",
+        "bot.commands.speak",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
