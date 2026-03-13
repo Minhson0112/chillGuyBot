@@ -14,8 +14,5 @@ class MessageCreateEvent(commands.Cog):
         if not message.author.bot:
             self.chatCountService.addMessageCount(message)
 
-        await self.bot.process_commands(message)
-
-
 async def setup(bot):
     await bot.add_cog(MessageCreateEvent(bot))
