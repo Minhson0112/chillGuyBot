@@ -26,9 +26,8 @@ class CheckServerService:
             partner = partnerRepository.findByGuildId(guildId)
 
         resultLines = [
-            f"serverName: {guildName}",
-            f"guildId: {guildId}",
-            f"memberCount: {memberCount}",
+            f"Tên server: {guildName}",
+            f"Tổng thành viên: {memberCount}",
         ]
 
         if memberCount < NUMBER_OF_MEMBER_REQUIRED_FOR_PN:
