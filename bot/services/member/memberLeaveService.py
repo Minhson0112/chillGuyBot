@@ -41,9 +41,13 @@ class MemberLeaveService:
             stayDuration = leaveAtValue - joinedAt
             totalSeconds = int(stayDuration.total_seconds())
             totalMinutes = totalSeconds // 60
-            hours = totalMinutes // 60
-            minutes = totalMinutes % 60
-            stayDurationText = f"{hours} giờ {minutes} phút"
+
+            days = totalMinutes // (24 * 60)
+            remainingMinutes = totalMinutes % (24 * 60)
+            hours = remainingMinutes // 60
+            minutes = remainingMinutes % 60
+
+            stayDurationText = f"{days} ngày {hours} giờ {minutes} phút"
 
         byeChannel = bot.get_channel(BYE_CHANNEL_ID)
         if byeChannel is None:
