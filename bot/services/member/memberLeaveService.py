@@ -17,18 +17,28 @@ class MemberLeaveService:
             partnerRepository = PartnerRepository(session)
 
             member = memberRepository.updateLeaveAt(discordMember.id, leaveAt)
-            partner = None
+            partnerGuildName = None
 
-            if member is not None and member.is_partner:
+            if member is None:
+                session.commit()
+                return
+
+            displayName = member.global_name or member.username
+            joinedAt = member.joined_at
+            leaveAtValue = member.leave_at
+            isPartner = member.is_partner
+
+            if isPartner:
                 partner = partnerRepository.findByRepresentativeUserId(member.user_id)
+                if partner is not None:
+                    partnerGuildName = partner.guild_name
 
             session.commit()
 
-        if member is None:
-            return
-
-        displayName = member.global_name or member.username
-        stayDuration = member.leave_at - member.joined_at
+        if joinedAt is None or leaveAtValue is None:
+            stayDuration = "không rõ"
+        else:
+            stayDuration = leaveAtValue - joinedAt
 
         byeChannel = bot.get_channel(BYE_CHANNEL_ID)
         if byeChannel is None:
@@ -43,7 +53,7 @@ class MemberLeaveService:
                 f"# {LOGO}"
             )
 
-        if member.is_partner and partner is not None:
+        if isPartner and partnerGuildName is not None:
             modChannel = bot.get_channel(MOD_COMMAND_CHANNEL_ID)
             if modChannel is None:
                 try:
@@ -53,5 +63,5 @@ class MemberLeaveService:
 
             if modChannel is not None:
                 await modChannel.send(
-                    f"Người đại diện của server {partner.guild_name} đã rời server, hãy kiểm tra lại."
+                    f"Người đại diện của server {partnerGuildName} đã rời server, hãy kiểm tra lại."
                 )
