@@ -14,3 +14,10 @@ class PartnerRepository:
         self.session.add(partner)
         self.session.flush()
         return partner
+
+    def findByRepresentativeUserId(self, representativeUserId):
+        return (
+            self.session.query(Partner)
+            .filter(Partner.representative_user_id == representativeUserId)
+            .first()
+        )

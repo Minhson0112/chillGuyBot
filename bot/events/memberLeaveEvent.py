@@ -11,7 +11,7 @@ class MemberLeaveEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
-        self.memberLeaveService.handleMemberLeave(member)
+        await self.memberLeaveService.handleMemberLeave(member)
 
 
 async def setup(bot):
