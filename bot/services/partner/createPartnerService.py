@@ -66,7 +66,7 @@ class CreatePartnerService:
                 return "Tạo partner thành công nhưng không tìm thấy kênh thông báo partner."
 
         await partnerChannel.send(
-            f"<a:CS_canhl:1357353968304652491> {guildName} <a:CS_canhr:1357353966341587107>\n"
+            f"# <a:CS_canhl:1357353968304652491> {guildName} <a:CS_canhr:1357353966341587107>\n\n"
             f"<a:CS_decorate:1366268034603417680> link server: {inviteLink}\n"
             f"<a:CS_decorate:1366268034603417680> Người đại diện: {representativeMember.mention}\n"
             f"<a:CS_decorate:1366268034603417680> Người làm: {interaction.user.mention}"
