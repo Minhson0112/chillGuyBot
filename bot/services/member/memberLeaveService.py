@@ -36,9 +36,14 @@ class MemberLeaveService:
             session.commit()
 
         if joinedAt is None or leaveAtValue is None:
-            stayDuration = "không rõ"
+            stayDurationText = "một khoảng thời gian"
         else:
             stayDuration = leaveAtValue - joinedAt
+            totalSeconds = int(stayDuration.total_seconds())
+            totalMinutes = totalSeconds // 60
+            hours = totalMinutes // 60
+            minutes = totalMinutes % 60
+            stayDurationText = f"{hours} giờ {minutes} phút"
 
         byeChannel = bot.get_channel(BYE_CHANNEL_ID)
         if byeChannel is None:
@@ -49,7 +54,7 @@ class MemberLeaveService:
 
         if byeChannel is not None:
             await byeChannel.send(
-                f"Hội ngộ rồi sẽ biệt ly. Tạm biệt {displayName} bạn đã ở trong Chill Station {stayDuration} thời gian, hẹn gặp lại ở những chuyến tàu tới.🚉\n"
+                f"Hội ngộ rồi sẽ biệt ly. Tạm biệt {displayName} bạn đã ở trong Chill Station {stayDurationText}, hẹn gặp lại ở những chuyến tàu tới.🚉\n"
                 f"# {LOGO}"
             )
 
