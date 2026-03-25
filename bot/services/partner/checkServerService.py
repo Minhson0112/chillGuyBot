@@ -6,9 +6,6 @@ from bot.repository.partnerRepository import PartnerRepository
 
 
 class CheckServerService:
-    def __init__(self):
-        self.partnerRepository = PartnerRepository()
-
     async def checkServer(self, bot: discord.Client, inviteLink: str) -> str:
         try:
             invite = await bot.fetch_invite(inviteLink, with_counts=True)
@@ -25,7 +22,8 @@ class CheckServerService:
         memberCount = invite.approximate_member_count or 0
 
         with getDbSession() as dbSession:
-            partner = self.partnerRepository.findByGuildId(dbSession, guildId)
+            partnerRepository = PartnerRepository(dbSession)
+            partner = partnerRepository.findByGuildId(guildId)
 
         resultLines = [
             f"serverName: {guildName}",
