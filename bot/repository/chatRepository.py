@@ -1,4 +1,5 @@
 from bot.models.chat import Chat
+from sqlalchemy.orm import joinedload
 
 class ChatRepository:
     def __init__(self, session):
@@ -40,3 +41,11 @@ class ChatRepository:
 
         self.session.flush()
         return chat
+
+    def findTopChatMember(self) -> Chat | None:
+        return (
+            self.session.query(Chat)
+            .options(joinedload(Chat.member))
+            .order_by(Chat.total_chat_count.desc())
+            .first()
+        )

@@ -83,3 +83,20 @@ CREATE TABLE `auto_responder` (
     CONSTRAINT `auto_responder_user_id_foreign`
         FOREIGN KEY (`user_id`) REFERENCES `member` (`user_id`)
 );
+
+# update lần 3
+ALTER TABLE partner
+    DROP PRIMARY KEY,
+    ADD COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
+    ADD COLUMN guild_name VARCHAR(255) NOT NULL AFTER guild_id,
+    ADD COLUMN representative_user_id BIGINT UNSIGNED NOT NULL AFTER guild_name,
+    ADD COLUMN partnered_by_user_id BIGINT UNSIGNED NOT NULL AFTER representative_user_id,
+    ADD PRIMARY KEY (id),
+    ADD UNIQUE KEY uq_partner_guild_id (guild_id),
+    ADD CONSTRAINT fk_partner_representative_user
+        FOREIGN KEY (representative_user_id) REFERENCES member(user_id),
+    ADD CONSTRAINT fk_partner_partnered_by_user
+        FOREIGN KEY (partnered_by_user_id) REFERENCES member(user_id);
+
+ALTER TABLE `member`
+ADD COLUMN `is_partner` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'is partner guild member?';

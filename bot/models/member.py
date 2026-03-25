@@ -17,6 +17,7 @@ class Member(Base):
     is_bot = Column(Boolean, nullable=False, comment="is bot?")
     join_count = Column(Integer, nullable=False, default=1, comment="number of times the member has joined the server")
     warning_count = Column(Integer, nullable=False, default=0, comment="number of warnings for rule violations")
+    is_partner = Column(Boolean, nullable=False, default=False, comment="is partner member?")
 
     chat = relationship("Chat", back_populates="member", uselist=False)
     tournamentEntries = relationship("TournamentEntry", back_populates="member")

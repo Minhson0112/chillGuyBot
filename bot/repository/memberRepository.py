@@ -1,4 +1,5 @@
 from bot.models.member import Member
+from sqlalchemy import func
 
 class MemberRepository:
     def __init__(self, session):
@@ -73,5 +74,18 @@ class MemberRepository:
             return None
 
         member.warning_count = 0
+        self.session.flush()
+        return member
+
+    def countAllMembers(self) -> int:
+        return self.session.query(func.count(Member.user_id)).scalar() or 0
+
+    def updateIsPartner(self, userId, isPartner):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.is_partner = isPartner
         self.session.flush()
         return member
