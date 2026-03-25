@@ -85,7 +85,6 @@ class SetAutoResponse(commands.Cog):
 
         await interaction.followup.send(
             embed=embed,
-            ephemeral=True
         )
 
     def isValidDiscordMessageLink(self, msgLink):

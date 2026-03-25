@@ -22,7 +22,7 @@ class CreatePartner(commands.Cog):
         representative_member: discord.Member,
     ):
         if interaction.guild is None:
-            await interaction.response.send_message("Lệnh này chỉ dùng được trong server.", ephemeral=True)
+            await interaction.response.send_message("Lệnh này chỉ dùng được trong server.")
             return
 
         result = await self.createPartnerService.createPartner(
@@ -32,7 +32,7 @@ class CreatePartner(commands.Cog):
             representative_member,
         )
 
-        await interaction.response.send_message(result, ephemeral=True)
+        await interaction.response.send_message(result)
 
 async def setup(bot):
     await bot.add_cog(CreatePartner(bot))
