@@ -54,7 +54,7 @@ class MemberLeaveService:
 
         if byeChannel is not None:
             await byeChannel.send(
-                f"Hội ngộ rồi sẽ biệt ly. Tạm biệt {displayName} bạn đã ở trong Chill Station {stayDurationText}, hẹn gặp lại ở những chuyến tàu tới.🚉\n"
+                f"Hội ngộ rồi sẽ biệt ly. Tạm biệt **{displayName}** bạn đã ở trong Chill Station _{stayDurationText}_, hẹn gặp lại ở những chuyến tàu tới.🚉\n"
                 f"# {LOGO}"
             )
 
