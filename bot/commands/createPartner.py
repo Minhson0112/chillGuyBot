@@ -3,6 +3,8 @@ from discord import app_commands
 from discord.ext import commands
 
 from bot.services.partner.createPartnerService import CreatePartnerService
+from bot.enums.moderationActionType import ModerationActionType
+from bot.validation.modPermissionValidation import hasModerationPermission
 
 
 class CreatePartner(commands.Cog):
@@ -15,6 +17,7 @@ class CreatePartner(commands.Cog):
         invite_link="Link mời của server partner",
         representative_member="Người đại diện của server partner",
     )
+    @hasModerationPermission(ModerationActionType.PN)
     async def createpn(
         self,
         interaction: discord.Interaction,
