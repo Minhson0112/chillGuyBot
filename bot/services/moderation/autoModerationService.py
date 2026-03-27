@@ -86,12 +86,12 @@ class AutoModerationService:
                 )
                 embed.add_field(
                     name="Người mute",
-                    value=f"{bot.user.mention}\n`{bot.user.id}`",
+                    value=f"{bot.user.mention}",
                     inline=False,
                 )
                 embed.add_field(
                     name="Người bị mute",
-                    value=f"{message.author.mention}\n`{message.author.id}`",
+                    value=f"{message.author.mention}",
                     inline=False,
                 )
                 embed.add_field(

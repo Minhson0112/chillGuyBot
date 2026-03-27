@@ -8,6 +8,14 @@ class MemberRepository:
     def findByUserId(self, userId):
         return self.session.query(Member).filter(Member.user_id == userId).first()
 
+    def findByUserIdWithChat(self, userId):
+        return (
+            self.session.query(Member)
+            .options(joinedload(Member.chat))
+            .filter(Member.user_id == userId)
+            .first()
+        )
+
     def create(self, memberData):
         member = Member(**memberData)
         self.session.add(member)

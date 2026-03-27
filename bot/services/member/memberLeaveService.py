@@ -27,6 +27,7 @@ class MemberLeaveService:
             joinedAt = member.joined_at
             leaveAtValue = member.leave_at
             isPartner = member.is_partner
+            totalMsgCount = member.chat.total_chat_count if member.chat is not None else 0
 
             if isPartner:
                 partner = partnerRepository.findByRepresentativeUserId(member.user_id)
@@ -58,7 +59,7 @@ class MemberLeaveService:
 
         if byeChannel is not None:
             await byeChannel.send(
-                f"Hội ngộ rồi sẽ biệt ly. Tạm biệt **{displayName}** bạn đã ở trong Chill Station _{stayDurationText}_, hẹn gặp lại ở những chuyến tàu tới.🚉\n"
+                f"Hội ngộ rồi sẽ biệt ly. Tạm biệt **{displayName}** bạn đã ở trong Chill Station _{stayDurationText}_ và để lại **{totalMsgCount}** tin nhắn, hẹn gặp lại ở những chuyến tàu tới.🚉\n"
                 f"# {LOGO}"
             )
 
@@ -72,5 +73,5 @@ class MemberLeaveService:
 
             if modChannel is not None:
                 await modChannel.send(
-                    f"Người đại diện của server {partnerGuildName} đã rời server, hãy kiểm tra lại."
+                    f"Người đại diện của server partner {partnerGuildName} đã rời Chill Station, hãy kiểm tra lại."
                 )
