@@ -18,6 +18,7 @@ class Member(Base):
     join_count = Column(Integer, nullable=False, default=1, comment="number of times the member has joined the server")
     warning_count = Column(Integer, nullable=False, default=0, comment="number of warnings for rule violations")
     is_partner = Column(Boolean, nullable=False, default=False, comment="is partner member?")
+    correct_word_guess_count = Column(Integer, nullable=False, default=0, comment="number of times the member guessed the correct word")
 
     chat = relationship("Chat", back_populates="member", uselist=False)
     tournamentEntries = relationship("TournamentEntry", back_populates="member")

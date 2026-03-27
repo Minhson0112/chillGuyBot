@@ -100,3 +100,27 @@ ALTER TABLE partner
 
 ALTER TABLE `member`
 ADD COLUMN `is_partner` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'is partner guild member?';
+
+# update lần 4
+CREATE TABLE `word` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `key_word` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_word_key_word` (`key_word`)
+);
+
+CREATE TABLE `word_guess_history` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `word_id` BIGINT UNSIGNED NOT NULL,
+    `guessed_by_user_id` BIGINT UNSIGNED NULL,
+    `revealed_pattern` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `fk_word_guess_history_word_id`
+        FOREIGN KEY (`word_id`) REFERENCES `word` (`id`),
+    CONSTRAINT `fk_word_guess_history_guessed_by_user_id`
+        FOREIGN KEY (`guessed_by_user_id`) REFERENCES `member` (`user_id`)
+);
+
+ALTER TABLE `member`
+ADD COLUMN `correct_word_guess_count` INT NOT NULL DEFAULT 0 COMMENT 'number of times the member guessed the full word correctly';
