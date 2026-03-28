@@ -54,15 +54,26 @@ class WordleGameService:
         }
 
     def buildGuessEmojiRow(self, keyWord: str, guessedWord: str) -> str:
-        result = []
+        result = [None] * len(keyWord)
+        remainingLetters = []
 
         for index in range(len(keyWord)):
+            if guessedWord[index] == keyWord[index]:
+                result[index] = WORDLE_LETTER_EMOJI["green"][guessedWord[index]]
+            else:
+                remainingLetters.append(keyWord[index])
+
+        for index in range(len(keyWord)):
+            if result[index] is not None:
+                continue
+
             guessedLetter = guessedWord[index]
 
-            if guessedLetter == keyWord[index]:
-                result.append(WORDLE_LETTER_EMOJI["green"][guessedLetter])
+            if guessedLetter in remainingLetters:
+                result[index] = WORDLE_LETTER_EMOJI["yellow"][guessedLetter]
+                remainingLetters.remove(guessedLetter)
             else:
-                result.append(WORDLE_LETTER_EMOJI["gray"][guessedLetter])
+                result[index] = WORDLE_LETTER_EMOJI["gray"][guessedLetter]
 
         return "".join(result)
 
