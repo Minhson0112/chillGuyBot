@@ -85,12 +85,14 @@ async def main():
         "bot.commands.serverInfo",
         "bot.commands.checkServer",
         "bot.commands.createPartner",
-        "bot.commands.wordle",
+        #"bot.commands.wordle", không dùng lệnh nữa mà sẽ bắt event
+        "bot.commands.wordleTop",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
         "bot.events.autoModerationEvent",
         "bot.events.autoResponderEvent",
+        "bot.events.wordleEvent",
         "bot.tasks.chatCountFlushTask",
     ]
 

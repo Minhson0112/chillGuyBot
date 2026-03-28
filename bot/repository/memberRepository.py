@@ -108,3 +108,12 @@ class MemberRepository:
         self.session.flush()
         return member
     
+    def findTopCorrectWordGuessMembers(self, limit=10):
+        return (
+            self.session.query(Member)
+            .filter(Member.correct_word_guess_count > 0)
+            .order_by(Member.correct_word_guess_count.desc(), Member.user_id.asc())
+            .limit(limit)
+            .all()
+        )
+    
