@@ -1,5 +1,6 @@
 from bot.models.member import Member
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 
 class MemberRepository:
     def __init__(self, session):

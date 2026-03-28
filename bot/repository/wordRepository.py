@@ -22,3 +22,6 @@ class WordRepository:
     def findRandomWord(self):
         return self.session.query(Word).order_by(func.rand()).first()
     
+    def findAllKeyWords(self):
+        rows = self.session.query(Word.key_word).all()
+        return [row[0] for row in rows]

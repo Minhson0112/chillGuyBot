@@ -7,9 +7,12 @@ from discord.ext import commands, tasks
 from bot.config.config import DISCORD_TOKEN
 from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
 from bot.services.wordle.wordleStartupService import WordleStartupService
+from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryStartupService
 
 autoResponderCacheService = AutoResponderCacheService()
 wordleStartupService = WordleStartupService()
+wordleDictionaryStartupService = WordleDictionaryStartupService()
+
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
@@ -61,6 +64,9 @@ async def on_ready():
             print(f"✅ Đã load wordle game hiện tại: {currentWordleGame['keyWord']}")
         else:
             print("⚠️ Không load được wordle game hiện tại")
+
+        loadedWordCount = wordleDictionaryStartupService.loadWordsToCache()
+        print(f"✅ Đã load wordle dictionary: {loadedWordCount} từ")
     except Exception as e:
         print(f"❌ Lỗi sync commands: {e}")
 

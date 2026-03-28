@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from bot.config.config import WORDLE_CHANNEL_ID
+from bot.services.wordle.wordleDictionaryCacheService import wordleDictionaryCacheService
 from bot.services.wordle.wordleGameService import WordleGameService
 
 
@@ -28,6 +29,12 @@ class WordleEvent(commands.Cog):
         if not re.fullmatch(r"[a-zA-Z]{5}", guessedWord):
             return
 
+        if not wordleDictionaryCacheService.hasWord(guessedWord):
+            await message.channel.send(
+                f"Từ **{guessedWord.upper()}** không có nghĩa hoặc không tồn tại trong cơ sở dữ liệu của bot."
+            )
+            return
+
         result = self.wordleGameService.guessWord(guessedWord, message.author.id)
 
         if not result["success"]:
@@ -38,9 +45,10 @@ class WordleEvent(commands.Cog):
 
         if result["isCompleted"]:
             await message.channel.send(
-                f"Chúc mừng **{message.author.mention}** đã hoàn thành từ khóa **{result['completedWord']}**.\n"
+                f"Chúc mừng {message.author.mention} đã hoàn thành từ khóa **{result['completedWord']}**.\n"
                 f"Từ mới đã được bắt đầu, độ dài từ khóa mới là **{result['nextWordLength']}** ký tự."
             )
+
 
 async def setup(bot):
     await bot.add_cog(WordleEvent(bot))

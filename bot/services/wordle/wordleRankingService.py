@@ -34,10 +34,10 @@ class WordleRankingService:
         }
 
         for index, member in enumerate(topMembers, start=1):
-            displayName = member.global_name or member.username
-            prefix = medalMap.get(index, f"`#{index}`")
+            memberId = member.user_id
+            prefix = medalMap.get(index, f"`{index}`")
             rankingLines.append(
-                f"{prefix} **{displayName}** — **{member.correct_word_guess_count}** lần"
+                f"{prefix}: <@{memberId}> — **{member.correct_word_guess_count}** lần"
             )
 
         embed.add_field(
