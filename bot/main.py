@@ -6,8 +6,10 @@ from discord.ext import commands, tasks
 
 from bot.config.config import DISCORD_TOKEN
 from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
+from bot.services.wordle.wordleStartupService import WordleStartupService
 
 autoResponderCacheService = AutoResponderCacheService()
+wordleStartupService = WordleStartupService()
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
@@ -54,6 +56,11 @@ async def on_ready():
         print(f"🔧 Slash commands đã sync: {len(synced)} lệnh")
         autoResponderCacheService.loadKeys()
         print("✅ Đã load auto responder keys")
+        currentWordleGame = wordleStartupService.loadCurrentGameToCache()
+        if currentWordleGame is not None:
+            print(f"✅ Đã load wordle game hiện tại: {currentWordleGame['keyWord']}")
+        else:
+            print("⚠️ Không load được wordle game hiện tại")
     except Exception as e:
         print(f"❌ Lỗi sync commands: {e}")
 
@@ -78,6 +85,7 @@ async def main():
         "bot.commands.serverInfo",
         "bot.commands.checkServer",
         "bot.commands.createPartner",
+        "bot.commands.wordle",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",

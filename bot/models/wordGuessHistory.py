@@ -19,7 +19,6 @@ class WordGuessHistory(Base):
         ForeignKey("member.user_id"),
         nullable=True
     )
-    revealed_pattern = Column(String(255), nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 
     word = relationship("Word")

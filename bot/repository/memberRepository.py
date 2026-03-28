@@ -97,3 +97,14 @@ class MemberRepository:
         member.is_partner = isPartner
         self.session.flush()
         return member
+    
+    def incrementCorrectWordGuessCount(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.correct_word_guess_count += 1
+        self.session.flush()
+        return member
+    
