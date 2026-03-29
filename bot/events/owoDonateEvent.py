@@ -16,13 +16,13 @@ class OwoDonateEvent(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.donateRewardService = DonateRewardService()
-
-    # @commands.Cog.listener()
-    # async def on_message(self, message: discord.Message):
-    #     await self.handleDonateMessage(message)
+        self.processedMessageIds = set()
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        if before.content == after.content:
+            return
+
         await self.handleDonateMessage(after)
 
     async def handleDonateMessage(self, message: discord.Message):
@@ -35,19 +35,37 @@ class OwoDonateEvent(commands.Cog):
         if message.channel.id != DONATE_CHANNEL_ID:
             return
 
-        if not self.isOwoDonateMessage(message):
+        if message.id in self.processedMessageIds:
             return
 
-        senderMember, receiverMember = self.getSenderAndReceiver(message)
-        if senderMember is None or receiverMember is None:
+        donateInfo = self.extractDonateInfo(message.content)
+        if donateInfo is None:
             return
 
-        if receiverMember.id not in TREASURER_MEMBER_ID_LIST:
+        senderUserId = donateInfo["senderUserId"]
+        receiverUserId = donateInfo["receiverUserId"]
+        donatedCowoncy = donateInfo["donatedCowoncy"]
+
+        if receiverUserId not in TREASURER_MEMBER_ID_LIST:
             return
 
-        donatedCowoncy = self.extractCowoncyAmount(message.content)
-        if donatedCowoncy is None:
-            return
+        senderMember = message.guild.get_member(senderUserId)
+        if senderMember is None:
+            try:
+                senderMember = await message.guild.fetch_member(senderUserId)
+            except discord.NotFound:
+                return
+            except discord.HTTPException:
+                return
+
+        receiverMember = message.guild.get_member(receiverUserId)
+        if receiverMember is None:
+            try:
+                receiverMember = await message.guild.fetch_member(receiverUserId)
+            except discord.NotFound:
+                return
+            except discord.HTTPException:
+                return
 
         await self.donateRewardService.processDonateReward(
             guild=message.guild,
@@ -56,6 +74,8 @@ class OwoDonateEvent(commands.Cog):
             cowoncyAmount=donatedCowoncy,
         )
 
+        self.processedMessageIds.add(message.id)
+
         await message.channel.send(
             self.buildThankYouMessage(
                 senderMember=senderMember,
@@ -63,35 +83,26 @@ class OwoDonateEvent(commands.Cog):
             )
         )
 
-    def isOwoDonateMessage(self, message: discord.Message):
-        if len(message.mentions) < 2:
-            return False
+    def extractDonateInfo(self, content: str):
+        normalizedContent = content.strip()
 
-        content = message.content.lower()
-
-        if " sent " not in content:
-            return False
-
-        if " cowoncy to " not in content:
-            return False
-
-        return True
-
-    def getSenderAndReceiver(self, message: discord.Message):
-        if len(message.mentions) < 2:
-            return None, None
-
-        senderMember = message.mentions[0]
-        receiverMember = message.mentions[1]
-
-        return senderMember, receiverMember
-
-    def extractCowoncyAmount(self, content: str):
-        match = re.search(r"sent\s+([\d,]+)\s+cowoncy\s+to", content, re.IGNORECASE)
+        match = re.search(
+            r"<@!?(\d+)>\s*sent\s*\*?([\d,]+)\s*cowoncy\*?\s*to\s*<@!?(\d+)>",
+            normalizedContent,
+            re.IGNORECASE,
+        )
         if match is None:
             return None
 
-        return int(match.group(1).replace(",", ""))
+        senderUserId = int(match.group(1))
+        donatedCowoncy = int(match.group(2).replace(",", ""))
+        receiverUserId = int(match.group(3))
+
+        return {
+            "senderUserId": senderUserId,
+            "receiverUserId": receiverUserId,
+            "donatedCowoncy": donatedCowoncy,
+        }
 
     def buildThankYouMessage(self, senderMember: discord.Member, donatedCowoncy: int):
         return (
