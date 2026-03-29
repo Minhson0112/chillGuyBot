@@ -94,6 +94,7 @@ async def main():
         "bot.commands.createPartner",
         #"bot.commands.wordle", không dùng lệnh nữa mà sẽ bắt event
         "bot.commands.wordleTop",
+        "bot.commands.delMsg",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
