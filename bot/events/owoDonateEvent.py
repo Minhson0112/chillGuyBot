@@ -17,8 +17,15 @@ class OwoDonateEvent(commands.Cog):
         self.bot = bot
         self.donateRewardService = DonateRewardService()
 
+    # @commands.Cog.listener()
+    # async def on_message(self, message: discord.Message):
+    #     await self.handleDonateMessage(message)
+
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
+    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        await self.handleDonateMessage(after)
+
+    async def handleDonateMessage(self, message: discord.Message):
         if message.guild is None:
             return
 
