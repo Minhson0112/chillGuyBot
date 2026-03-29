@@ -164,6 +164,25 @@ WORDLE_LETTER_EMOJI = {
 
 WORDLE_CHANNEL_ID = 1487099135243849821
 
+DONATE_CHANNEL_ID = 1466225320490303652
+
+DONATE_REWARD_ROLES = [
+    {
+        "minimumTotalDonate": 1_000_000,
+        "roleId": 1466226526864281642,
+    },
+    {
+        "minimumTotalDonate": 5_000_000,
+        "roleId": 1466227005342224414,
+    },
+    {
+        "minimumTotalDonate": 10_000_000,
+        "roleId": 1466227607514255431,
+    },
+]
+
+TREASURER_MEMBER_ID_LIST = [1350862103593877614, 995730123166851102]
+
 DB_CONFIG = {
     'host': os.getenv('DB_HOST'),
     'port': os.getenv('DB_PORT'),

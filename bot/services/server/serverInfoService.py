@@ -21,8 +21,8 @@ class ServerInfoService:
         if topChat is None or topChat.member is None:
             topChatMemberDisplay = "Chưa có dữ liệu"
         else:
-            topChatMemberName = topChat.member.global_name or topChat.member.username
-            topChatMemberDisplay = f"{topChatMemberName} ({topChat.total_chat_count})"
+            topChatMemberId = topChat.member.user_id
+            topChatMemberDisplay = f"<@{topChatMemberId}> ({topChat.total_chat_count})"
 
         embed = discord.Embed(
             title="Server Info",

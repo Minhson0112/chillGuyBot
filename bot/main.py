@@ -94,6 +94,8 @@ async def main():
         "bot.commands.createPartner",
         #"bot.commands.wordle", không dùng lệnh nữa mà sẽ bắt event
         "bot.commands.wordleTop",
+        "bot.commands.topDonate",
+        "bot.commands.myDonate",
         "bot.commands.delMsg",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
@@ -101,6 +103,7 @@ async def main():
         "bot.events.autoModerationEvent",
         "bot.events.autoResponderEvent",
         "bot.events.wordleEvent",
+        "bot.events.owoDonateEvent",
         "bot.tasks.chatCountFlushTask",
     ]
 

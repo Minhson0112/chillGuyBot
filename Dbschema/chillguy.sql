@@ -144,3 +144,18 @@ CREATE TABLE `word_guess_input` (
 ALTER TABLE auto_responder
 ADD COLUMN is_exact_match TINYINT(1) NOT NULL DEFAULT 1
 AFTER is_global;
+
+# update 7
+
+CREATE TABLE owo_donate_history (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    sender_user_id BIGINT UNSIGNED NOT NULL,
+    receiver_user_id BIGINT UNSIGNED NOT NULL,
+    cowoncy_amount BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_owo_donate_history_sender
+        FOREIGN KEY (sender_user_id) REFERENCES member(user_id),
+    CONSTRAINT fk_owo_donate_history_receiver
+        FOREIGN KEY (receiver_user_id) REFERENCES member(user_id)
+);
