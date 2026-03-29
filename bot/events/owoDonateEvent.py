@@ -87,7 +87,7 @@ class OwoDonateEvent(commands.Cog):
         normalizedContent = content.strip()
 
         match = re.search(
-            r"\*?💳\s*\|\s*<@!?(\d+)>\*?\s*sent\s*\*?([\d,]+)\s+cowoncy\*?\s*to\s*\*?<@!?(\d+)>\*?!",
+            r"\**💳\s*\|\s*<@!?(\d+)>\**\s*sent\s*\**([\d,]+)\s+cowoncy\**\s*to\s*\**<@!?(\d+)>\**!",
             normalizedContent,
             re.IGNORECASE,
         )
