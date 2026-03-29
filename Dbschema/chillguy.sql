@@ -124,7 +124,7 @@ CREATE TABLE `word_guess_history` (
 ALTER TABLE `member`
 ADD COLUMN `correct_word_guess_count` INT NOT NULL DEFAULT 0 COMMENT 'number of times the member guessed the full word correctly';
 
-# upate 
+# upate 5
 SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE `word_guess_history`;
@@ -139,3 +139,8 @@ CREATE TABLE `word_guess_input` (
     UNIQUE KEY `uq_word_guess_input_guess_word` (`guess_word`)
 );
 
+# update 6
+
+ALTER TABLE auto_responder
+ADD COLUMN is_exact_match TINYINT(1) NOT NULL DEFAULT 1
+AFTER is_global;

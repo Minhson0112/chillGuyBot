@@ -1,14 +1,22 @@
-from bot.cache.autoResponderCache import autoResponderKeyCache
+from bot.cache.autoResponderCache import autoResponderCache
 from bot.config.database import getDbSession
 from bot.repository.autoResponderRepository import AutoResponderRepository
-
 
 
 class AutoResponderMatchService:
     def findMatchedKey(self, content):
         normalizedContent = content.strip().lower()
-        if normalizedContent in autoResponderKeyCache:
-            return normalizedContent
+
+        for item in autoResponderCache:
+            msgKey = item["msg_key"]
+            isExactMatch = item["is_exact_match"]
+
+            if isExactMatch:
+                if normalizedContent == msgKey:
+                    return msgKey
+            else:
+                if msgKey in normalizedContent:
+                    return msgKey
 
         return None
 

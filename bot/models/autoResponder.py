@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 
 from bot.config.database import Base
 
+
 class AutoResponder(Base):
     __tablename__ = "auto_responder"
 
@@ -24,6 +25,12 @@ class AutoResponder(Base):
         nullable=False,
         default=False,
         comment="whether other members can use this key",
+    )
+    is_exact_match = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+        comment="true: exact match, false: contains match",
     )
     msg_link = Column(
         String(500),

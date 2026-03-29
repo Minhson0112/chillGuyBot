@@ -7,7 +7,7 @@ class SetAutoResponseService:
     def __init__(self):
         self.autoResponderCacheService = AutoResponderCacheService()
 
-    def createAutoResponder(self, userId, msgKey, isGlobal, msgLink):
+    def createAutoResponder(self, userId, msgKey, isGlobal, isExactMatch, msgLink):
         with getDbSession() as session:
             autoResponderRepository = AutoResponderRepository(session)
 
@@ -19,6 +19,7 @@ class SetAutoResponseService:
                 "user_id": userId,
                 "msg_key": msgKey,
                 "is_global": isGlobal,
+                "is_exact_match": isExactMatch,
                 "msg_link": msgLink,
             })
 

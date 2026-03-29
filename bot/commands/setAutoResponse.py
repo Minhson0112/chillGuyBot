@@ -6,6 +6,7 @@ from bot.config.config import CAN_CREATE_AUTO_RESPONSE_USER_ID
 from bot.services.autoResponder.setAutoResponseService import SetAutoResponseService
 from bot.validation.guildValidation import chillStationOnly
 
+
 class SetAutoResponse(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -15,6 +16,7 @@ class SetAutoResponse(commands.Cog):
     @app_commands.describe(
         msg_key="Key để kích hoạt auto response",
         is_global="Cho phép mọi người dùng key này hay không",
+        is_exact_match="True: phải giống hệt key, False: chỉ cần key xuất hiện trong tin nhắn",
         msg_link="Link tin nhắn template",
     )
     @chillStationOnly()
@@ -23,6 +25,7 @@ class SetAutoResponse(commands.Cog):
         interaction: discord.Interaction,
         msg_key: str,
         is_global: bool,
+        is_exact_match: bool,
         msg_link: str,
     ):
         if interaction.user.id not in CAN_CREATE_AUTO_RESPONSE_USER_ID:
@@ -49,6 +52,7 @@ class SetAutoResponse(commands.Cog):
             userId=interaction.user.id,
             msgKey=msgKey,
             isGlobal=is_global,
+            isExactMatch=is_exact_match,
             msgLink=msg_link,
         )
 
@@ -78,6 +82,11 @@ class SetAutoResponse(commands.Cog):
             inline=False,
         )
         embed.add_field(
+            name="Match type",
+            value="Exact match" if is_exact_match else "Contains match",
+            inline=False,
+        )
+        embed.add_field(
             name="Template link",
             value=msg_link,
             inline=False,
@@ -103,6 +112,7 @@ class SetAutoResponse(commands.Cog):
             return True
         except ValueError:
             return False
+
 
 async def setup(bot):
     await bot.add_cog(SetAutoResponse(bot))

@@ -1,1 +1,1 @@
-autoResponderKeyCache = set()
+autoResponderCache = []

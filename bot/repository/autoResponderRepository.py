@@ -19,8 +19,12 @@ class AutoResponderRepository:
     def getAll(self):
         return self.session.query(AutoResponder).all()
 
-    def getAllKeysForCache(self):
-        return self.session.query(AutoResponder.msg_key).all()
+    def getAllForCache(self):
+        return (
+            self.session.query(AutoResponder)
+            .filter(AutoResponder.deleted_at.is_(None))
+            .all()
+        )
 
     def delete(self, autoResponder):
         self.session.delete(autoResponder)
