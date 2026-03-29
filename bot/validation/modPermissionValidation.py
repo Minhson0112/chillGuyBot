@@ -31,6 +31,8 @@ def hasModerationPermission(actionType: ModerationActionType):
             allowedRoleIds = {adminRoleId, ownerRoleId}
         elif actionType == ModerationActionType.PN:
             allowedRoleIds = {adminRoleId, ownerRoleId}
+        elif actionType == ModerationActionType.DELMSG:
+            allowedRoleIds = {staffRoleId, modRoleId, adminRoleId, ownerRoleId}
         else:
             raise app_commands.CheckFailure("Loại quyền moderation không hợp lệ.")
 

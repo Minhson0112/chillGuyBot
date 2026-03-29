@@ -6,3 +6,4 @@ class ModerationActionType(IntEnum):
     BAN = 3
     PN = 4
     UNMUTE = 5
+    DELMSG = 6
