@@ -81,6 +81,7 @@ async def main():
         "bot.commands.ban",
         "bot.commands.kick",
         "bot.commands.mute",
+        "bot.commands.unmute",
         "bot.commands.setAutoResponse",
         "bot.commands.deleteAutoResponse",
         "bot.commands.showAllAutoResponse",

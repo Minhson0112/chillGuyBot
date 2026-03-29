@@ -23,6 +23,8 @@ def hasModerationPermission(actionType: ModerationActionType):
 
         if actionType == ModerationActionType.MUTE:
             allowedRoleIds = {staffRoleId, modRoleId, adminRoleId, ownerRoleId}
+        elif actionType == ModerationActionType.UNMUTE:
+            allowedRoleIds = {staffRoleId, modRoleId, adminRoleId, ownerRoleId}
         elif actionType == ModerationActionType.KICK:
             allowedRoleIds = {modRoleId, adminRoleId, ownerRoleId}
         elif actionType == ModerationActionType.BAN:
