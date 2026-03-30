@@ -30,7 +30,7 @@ def hasModerationPermission(actionType: ModerationActionType):
         elif actionType == ModerationActionType.BAN:
             allowedRoleIds = {adminRoleId, ownerRoleId}
         elif actionType == ModerationActionType.PN:
-            allowedRoleIds = {adminRoleId, ownerRoleId}
+            allowedRoleIds = {modRoleId, adminRoleId, ownerRoleId}
         elif actionType == ModerationActionType.DELMSG:
             allowedRoleIds = {staffRoleId, modRoleId, adminRoleId, ownerRoleId}
         else:
