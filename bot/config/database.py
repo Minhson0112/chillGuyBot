@@ -13,7 +13,7 @@ dbUrl = (
 )
 
 engine = create_engine(dbUrl, echo=False)
-sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, expire_on_commit=False)
 
 
 @contextmanager
