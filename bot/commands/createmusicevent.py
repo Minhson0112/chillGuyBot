@@ -20,21 +20,21 @@ class CreateMusicEvent(commands.Cog):
         description="Tạo music event mới",
     )
     @app_commands.describe(
-        eventName="Tên event",
-        expiredAt="Ngày hết hạn đăng ký, format: YYYY-MM-DD HH:MM",
-        roleId="ID role sẽ được cấp khi member đăng kí event",
+        event_name="Tên event",
+        expired_at="Ngày hết hạn đăng ký, format: YYYY-MM-DD HH:MM",
+        role_id="ID role sẽ được cấp khi member đăng kí event",
     )
     @chillStationOnly()
     @hasModerationPermission(ModerationActionType.EVENT)
     async def createMusicEvent(
         self,
         interaction: discord.Interaction,
-        eventName: str,
-        expiredAt: str,
-        roleId: str,
+        event_name: str,
+        expired_at: str,
+        role_id: str,
     ):
         try:
-            expiredAtDatetime = datetime.strptime(expiredAt, "%Y-%m-%d %H:%M")
+            expiredAtDatetime = datetime.strptime(expired_at, "%Y-%m-%d %H:%M")
         except ValueError:
             await interaction.response.send_message(
                 "Ngày hết hạn đăng ký không đúng định dạng. Hãy dùng dạng YYYY-MM-DD HH:MM"
@@ -42,7 +42,7 @@ class CreateMusicEvent(commands.Cog):
             return
 
         try:
-            roleIdInt = int(roleId)
+            roleIdInt = int(role_id)
         except ValueError:
             await interaction.response.send_message(
                 "roleId không hợp lệ."
@@ -52,7 +52,7 @@ class CreateMusicEvent(commands.Cog):
         with getDbSession() as dbSession:
             musicEventRepository = MusicEventRepository(dbSession)
             musicEvent = musicEventRepository.create(
-                eventName=eventName,
+                eventName=event_name,
                 roleId=roleIdInt,
                 expiredAt=expiredAtDatetime,
             )

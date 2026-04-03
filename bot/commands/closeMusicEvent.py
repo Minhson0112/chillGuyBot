@@ -18,14 +18,14 @@ class CloseMusicEvent(commands.Cog):
         description="Đóng music event và xóa role của event",
     )
     @app_commands.describe(
-        eventId="ID của event âm nhạc",
+        event_id="ID của event âm nhạc",
     )
     @chillStationOnly()
     @hasModerationPermission(ModerationActionType.EVENT)
     async def closeMusicEvent(
         self,
         interaction: discord.Interaction,
-        eventId: int,
+        event_id: int,
     ):
         if interaction.guild is None:
             await interaction.response.send_message(
@@ -36,7 +36,7 @@ class CloseMusicEvent(commands.Cog):
 
         with getDbSession() as dbSession:
             musicEventRepository = MusicEventRepository(dbSession)
-            musicEvent = musicEventRepository.findById(eventId)
+            musicEvent = musicEventRepository.findById(event_id)
 
             if musicEvent is None:
                 await interaction.response.send_message(
