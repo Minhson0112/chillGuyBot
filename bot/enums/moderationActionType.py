@@ -7,3 +7,4 @@ class ModerationActionType(IntEnum):
     PN = 4
     UNMUTE = 5
     DELMSG = 6
+    EVENT = 7

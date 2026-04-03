@@ -174,3 +174,28 @@ INSERT INTO owo_donate_history (
     (374116043075092481, 1350862103593877614, 1000000, '2026-03-07 00:00:00'),
     (1110688776126218272, 1350862103593877614, 2000000, '2026-03-14 00:00:00'),
     (1300024791075393596, 1350862103593877614, 1000000, '2026-03-18 00:00:00');
+
+# update 8
+CREATE TABLE music_event (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    event_name VARCHAR(255) NOT NULL,
+    role_id BIGINT UNSIGNED NOT NULL,
+    is_available TINYINT(1) NOT NULL DEFAULT 1,
+    participant_count INT UNSIGNED NOT NULL DEFAULT 0,
+    expired_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE music_event_entry (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    user_id BIGINT UNSIGNED NOT NULL,
+    music_event_id BIGINT UNSIGNED NOT NULL,
+    song_name VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_music_event_entry_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id),
+    CONSTRAINT fk_music_event_entry_music_event_id
+        FOREIGN KEY (music_event_id) REFERENCES music_event(id)
+);

@@ -24,3 +24,4 @@ class Member(Base):
     tournamentEntries = relationship("TournamentEntry", back_populates="member")
     moderationActions = relationship("MemberModerationHistory", foreign_keys="MemberModerationHistory.action_by_user_id", back_populates="actionByMember")
     moderationTargets = relationship("MemberModerationHistory", foreign_keys="MemberModerationHistory.target_user_id", back_populates="targetMember")
+    musicEventEntries = relationship("MusicEventEntry", back_populates="member", cascade="all, delete-orphan")
