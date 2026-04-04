@@ -106,14 +106,14 @@ class ParticipantPaginationView(discord.ui.View):
         endIndex = startIndex + self.pageSize
         pageParticipants = self.participants[startIndex:endIndex]
 
-        for participant in pageParticipants:
+        for index, participant in enumerate(pageParticipants):
             songLines = "\n".join(
                 [f"- {songName}" for songName in participant["songNames"]]
             )
 
             embed.add_field(
-                name=f"<@{participant['userId']}>",
-                value=songLines if songLines else "Chưa có bài hát",
+                name=f"Người tham gia {startIndex + index + 1}",
+                value=f"<@{participant['userId']}>\n{songLines if songLines else 'Chưa có bài hát'}",
                 inline=False,
             )
 
