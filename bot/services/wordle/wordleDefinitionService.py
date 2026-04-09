@@ -9,21 +9,34 @@ class WordleDefinitionService:
         self.translator = Translator()
 
     async def getDefinitionData(self, keyWord: str):
-        definitionEn = self.getEnglishDefinition(keyWord)
-        if not definitionEn:
+        englishEntries = self.getEnglishEntries(keyWord)
+        if not englishEntries:
             return {
-                "definitionEn": None,
-                "definitionVi": None,
+                "entries": [],
             }
 
-        definitionVi = await self.translateToVietnamese(definitionEn)
+        translatedEntries = []
+
+        for entry in englishEntries:
+            definitionVi = await self.translateToVietnamese(entry["definitionEn"])
+            exampleVi = None
+
+            if entry["exampleEn"]:
+                exampleVi = await self.translateToVietnamese(entry["exampleEn"])
+
+            translatedEntries.append({
+                "partOfSpeech": entry["partOfSpeech"],
+                "definitionEn": entry["definitionEn"],
+                "definitionVi": definitionVi,
+                "exampleEn": entry["exampleEn"],
+                "exampleVi": exampleVi,
+            })
 
         return {
-            "definitionEn": definitionEn,
-            "definitionVi": definitionVi,
+            "entries": translatedEntries,
         }
 
-    def getEnglishDefinition(self, keyWord: str):
+    def getEnglishEntries(self, keyWord: str):
         try:
             response = requests.get(
                 f"{self.DICTIONARY_API_URL}/{keyWord}",
@@ -32,12 +45,12 @@ class WordleDefinitionService:
             response.raise_for_status()
             data = response.json()
         except Exception:
-            return None
+            return []
 
         if not isinstance(data, list) or not data:
-            return None
+            return []
 
-        definitions = []
+        entries = []
 
         for entry in data:
             meanings = entry.get("meanings", [])
@@ -52,23 +65,16 @@ class WordleDefinitionService:
                     if not definitionText:
                         continue
 
-                    line = definitionText.strip()
+                    entries.append({
+                        "partOfSpeech": partOfSpeech,
+                        "definitionEn": definitionText.strip(),
+                        "exampleEn": exampleText.strip() if exampleText else None,
+                    })
 
-                    if partOfSpeech:
-                        line = f"({partOfSpeech}) {line}"
+                    if len(entries) >= 3:
+                        return entries
 
-                    if exampleText:
-                        line += f" Example: {exampleText.strip()}"
-
-                    definitions.append(line)
-
-                    if len(definitions) >= 3:
-                        return "\n".join(definitions)
-
-        if not definitions:
-            return None
-
-        return "\n".join(definitions)
+        return entries
 
     async def translateToVietnamese(self, text: str):
         try:

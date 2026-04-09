@@ -2,13 +2,12 @@ class WordleCacheService:
     def __init__(self):
         self.currentGame = None
 
-    def setCurrentGame(self, historyId, wordId, keyWord, definitionEn=None, definitionVi=None):
+    def setCurrentGame(self, historyId, wordId, keyWord, definitionEntries=None):
         self.currentGame = {
             "historyId": historyId,
             "wordId": wordId,
             "keyWord": keyWord,
-            "definitionEn": definitionEn,
-            "definitionVi": definitionVi,
+            "definitionEntries": definitionEntries or [],
         }
 
     def getCurrentGame(self):
@@ -35,15 +34,10 @@ class WordleCacheService:
             return None
         return self.currentGame["keyWord"]
 
-    def getDefinitionEn(self):
+    def getDefinitionEntries(self):
         if self.currentGame is None:
-            return None
-        return self.currentGame["definitionEn"]
-
-    def getDefinitionVi(self):
-        if self.currentGame is None:
-            return None
-        return self.currentGame["definitionVi"]
+            return []
+        return self.currentGame["definitionEntries"]
 
 
 wordleCacheService = WordleCacheService()

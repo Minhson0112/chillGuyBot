@@ -36,8 +36,7 @@ class WordleGameService:
                 "message": None,
             }
 
-        completedDefinitionVi = currentGame.get("definitionVi")
-        completedDefinitionEn = currentGame.get("definitionEn")
+        completedDefinitionEntries = currentGame.get("definitionEntries", [])
 
         nextGame = await self.finishCurrentRoundAndStartNewRound(guessedByUserId)
 
@@ -53,8 +52,7 @@ class WordleGameService:
             "guessEmojiRow": guessEmojiRow,
             "winnerUserId": guessedByUserId,
             "completedWord": keyWord,
-            "completedDefinitionVi": completedDefinitionVi,
-            "completedDefinitionEn": completedDefinitionEn,
+            "completedDefinitionEntries": completedDefinitionEntries,
             "nextWordLength": len(nextGame["keyWord"]),
             "message": "Chúc mừng, bạn đã hoàn thành từ khóa.",
         }
@@ -124,8 +122,7 @@ class WordleGameService:
                 historyId=newHistory.id,
                 wordId=randomWord.id,
                 keyWord=randomWord.key_word,
-                definitionEn=definitionData["definitionEn"],
-                definitionVi=definitionData["definitionVi"],
+                definitionEntries=definitionData["entries"],
             )
 
             return wordleCacheService.getCurrentGame()

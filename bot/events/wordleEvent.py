@@ -44,21 +44,50 @@ class WordleEvent(commands.Cog):
         await message.channel.send(result["guessEmojiRow"])
 
         if result["isCompleted"]:
-            completedDefinitionVi = result.get("completedDefinitionVi")
-            completedDefinitionEn = result.get("completedDefinitionEn")
-
-            definitionText = completedDefinitionVi or completedDefinitionEn or "Không có định nghĩa cho từ này."
+            definitionEntries = result.get("completedDefinitionEntries", [])
 
             embed = discord.Embed(
                 title=f"{message.author.display_name} đã mở được từ {result['completedWord']}",
-                description=definitionText,
+                description=f"Người hoàn thành: {message.author.mention}",
             )
 
-            embed.add_field(
-                name="Người hoàn thành",
-                value=message.author.mention,
-                inline=False,
-            )
+            if not definitionEntries:
+                embed.add_field(
+                    name="Giải thích",
+                    value="Không có định nghĩa cho từ này.",
+                    inline=False,
+                )
+            else:
+                lines = []
+
+                for index, entry in enumerate(definitionEntries, start=1):
+                    partOfSpeech = entry.get("partOfSpeech") or "unknown"
+                    definitionVi = entry.get("definitionVi") or entry.get("definitionEn") or ""
+                    exampleEn = entry.get("exampleEn")
+                    exampleVi = entry.get("exampleVi")
+
+                    block = [
+                        f"**{index}. ({partOfSpeech})** {definitionVi}"
+                    ]
+
+                    if exampleEn:
+                        block.append(f"*Example:* {exampleEn}")
+
+                    if exampleVi:
+                        block.append(f"*Dịch ví dụ:* {exampleVi}")
+
+                    lines.append("\n".join(block))
+
+                definitionText = "\n\n".join(lines)
+
+                if len(definitionText) > 1000:
+                    definitionText = definitionText[:997] + "..."
+
+                embed.add_field(
+                    name="Giải thích",
+                    value=definitionText,
+                    inline=False,
+                )
 
             embed.set_footer(
                 text=f"Từ mới đã được bắt đầu • Độ dài từ mới: {result['nextWordLength']} ký tự"

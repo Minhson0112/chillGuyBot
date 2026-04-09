@@ -25,8 +25,7 @@ class WordleStartupService:
                     historyId=currentGuessingWord.id,
                     wordId=word.id,
                     keyWord=word.key_word,
-                    definitionEn=definitionData["definitionEn"],
-                    definitionVi=definitionData["definitionVi"],
+                    definitionEntries=definitionData["entries"],
                 )
 
                 return wordleCacheService.getCurrentGame()
@@ -48,8 +47,7 @@ class WordleStartupService:
                 historyId=newWordGuessHistory.id,
                 wordId=randomWord.id,
                 keyWord=randomWord.key_word,
-                definitionEn=definitionData["definitionEn"],
-                definitionVi=definitionData["definitionVi"],
+                definitionEntries=definitionData["entries"],
             )
 
             return wordleCacheService.getCurrentGame()
