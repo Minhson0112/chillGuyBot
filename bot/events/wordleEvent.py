@@ -47,8 +47,8 @@ class WordleEvent(commands.Cog):
             definitionEntries = result.get("completedDefinitionEntries", [])
 
             embed = discord.Embed(
-                title=f"{message.author.display_name} đã mở được từ {result['completedWord']}",
-                description=f"Người hoàn thành: {message.author.mention}",
+                title=f"<a:CS_decorate:1366286592758779995> Đã tìm được từ {result['completedWord']} <a:CS_decorate:1366286658260963450>",
+                description=f"<a:CS_yeah:1463089379621998665> Người hoàn thành: {message.author.mention}",
             )
 
             if not definitionEntries:
@@ -67,7 +67,8 @@ class WordleEvent(commands.Cog):
                     exampleVi = entry.get("exampleVi")
 
                     block = [
-                        f"**{index}. ({partOfSpeech})** {definitionVi}"
+                        f"<a:CS_decorate:1366268034603417680> **Từ loại:** {partOfSpeech} \n"
+                        f"<a:CS_decorate:1366268034603417680> **nghĩa:** {definitionVi}"
                     ]
 
                     if exampleEn:
@@ -84,7 +85,7 @@ class WordleEvent(commands.Cog):
                     definitionText = definitionText[:997] + "..."
 
                 embed.add_field(
-                    name="Giải thích",
+                    name="**Giải thích**",
                     value=definitionText,
                     inline=False,
                 )

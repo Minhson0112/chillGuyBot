@@ -9,34 +9,31 @@ class WordleDefinitionService:
         self.translator = Translator()
 
     async def getDefinitionData(self, keyWord: str):
-        englishEntries = self.getEnglishEntries(keyWord)
-        if not englishEntries:
+        englishEntry = self.getEnglishEntry(keyWord)
+        if englishEntry is None:
             return {
                 "entries": [],
             }
 
-        translatedEntries = []
+        definitionVi = await self.translateToVietnamese(englishEntry["definitionEn"])
+        exampleVi = None
 
-        for entry in englishEntries:
-            definitionVi = await self.translateToVietnamese(entry["definitionEn"])
-            exampleVi = None
-
-            if entry["exampleEn"]:
-                exampleVi = await self.translateToVietnamese(entry["exampleEn"])
-
-            translatedEntries.append({
-                "partOfSpeech": entry["partOfSpeech"],
-                "definitionEn": entry["definitionEn"],
-                "definitionVi": definitionVi,
-                "exampleEn": entry["exampleEn"],
-                "exampleVi": exampleVi,
-            })
+        if englishEntry["exampleEn"]:
+            exampleVi = await self.translateToVietnamese(englishEntry["exampleEn"])
 
         return {
-            "entries": translatedEntries,
+            "entries": [
+                {
+                    "partOfSpeech": englishEntry["partOfSpeech"],
+                    "definitionEn": englishEntry["definitionEn"],
+                    "definitionVi": definitionVi,
+                    "exampleEn": englishEntry["exampleEn"],
+                    "exampleVi": exampleVi,
+                }
+            ],
         }
 
-    def getEnglishEntries(self, keyWord: str):
+    def getEnglishEntry(self, keyWord: str):
         try:
             response = requests.get(
                 f"{self.DICTIONARY_API_URL}/{keyWord}",
@@ -45,12 +42,10 @@ class WordleDefinitionService:
             response.raise_for_status()
             data = response.json()
         except Exception:
-            return []
+            return None
 
         if not isinstance(data, list) or not data:
-            return []
-
-        entries = []
+            return None
 
         for entry in data:
             meanings = entry.get("meanings", [])
@@ -65,16 +60,13 @@ class WordleDefinitionService:
                     if not definitionText:
                         continue
 
-                    entries.append({
+                    return {
                         "partOfSpeech": partOfSpeech,
                         "definitionEn": definitionText.strip(),
                         "exampleEn": exampleText.strip() if exampleText else None,
-                    })
+                    }
 
-                    if len(entries) >= 3:
-                        return entries
-
-        return entries
+        return None
 
     async def translateToVietnamese(self, text: str):
         try:
