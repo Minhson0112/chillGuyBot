@@ -47,17 +47,24 @@ class WordleEvent(commands.Cog):
             completedDefinitionVi = result.get("completedDefinitionVi")
             completedDefinitionEn = result.get("completedDefinitionEn")
 
-            definitionMessage = ""
-            if completedDefinitionVi:
-                definitionMessage = f"\nNghĩa tiếng Việt: {completedDefinitionVi}"
-            elif completedDefinitionEn:
-                definitionMessage = f"\nĐịnh nghĩa tiếng Anh: {completedDefinitionEn}"
+            definitionText = completedDefinitionVi or completedDefinitionEn or "Không có định nghĩa cho từ này."
 
-            await message.channel.send(
-                f"Chúc mừng {message.author.mention} đã hoàn thành từ khóa **{result['completedWord']}**."
-                f"{definitionMessage}\n"
-                f"Từ mới đã được bắt đầu, độ dài từ khóa mới là **{result['nextWordLength']}** ký tự."
+            embed = discord.Embed(
+                title=f"{message.author.display_name} đã mở được từ {result['completedWord']}",
+                description=definitionText,
             )
+
+            embed.add_field(
+                name="Người hoàn thành",
+                value=message.author.mention,
+                inline=False,
+            )
+
+            embed.set_footer(
+                text=f"Từ mới đã được bắt đầu • Độ dài từ mới: {result['nextWordLength']} ký tự"
+            )
+
+            await message.channel.send(embed=embed)
 
 
 async def setup(bot):
