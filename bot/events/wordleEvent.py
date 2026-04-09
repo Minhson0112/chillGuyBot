@@ -35,7 +35,7 @@ class WordleEvent(commands.Cog):
             )
             return
 
-        result = self.wordleGameService.guessWord(guessedWord, message.author.id)
+        result = await self.wordleGameService.guessWord(guessedWord, message.author.id)
 
         if not result["success"]:
             await message.channel.send(result["message"])

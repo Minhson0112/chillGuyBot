@@ -6,7 +6,7 @@ from bot.services.wordle.wordleDefinitionService import wordleDefinitionService
 
 
 class WordleStartupService:
-    def loadCurrentGameToCache(self):
+    async def loadCurrentGameToCache(self):
         with getDbSession() as session:
             wordRepository = WordRepository(session)
             wordGuessHistoryRepository = WordGuessHistoryRepository(session)
@@ -19,7 +19,7 @@ class WordleStartupService:
                 if word is None:
                     return None
 
-                definitionData = wordleDefinitionService.getDefinitionData(word.key_word)
+                definitionData = await wordleDefinitionService.getDefinitionData(word.key_word)
 
                 wordleCacheService.setCurrentGame(
                     historyId=currentGuessingWord.id,
@@ -42,7 +42,7 @@ class WordleStartupService:
 
             session.commit()
 
-            definitionData = wordleDefinitionService.getDefinitionData(randomWord.key_word)
+            definitionData = await wordleDefinitionService.getDefinitionData(randomWord.key_word)
 
             wordleCacheService.setCurrentGame(
                 historyId=newWordGuessHistory.id,

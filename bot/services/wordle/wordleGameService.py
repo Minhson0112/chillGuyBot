@@ -1,5 +1,5 @@
-from bot.config.database import getDbSession
 from bot.config.config import WORDLE_LETTER_EMOJI
+from bot.config.database import getDbSession
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.wordGuessHistoryRepository import WordGuessHistoryRepository
 from bot.repository.wordRepository import WordRepository
@@ -8,7 +8,7 @@ from bot.services.wordle.wordleDefinitionService import wordleDefinitionService
 
 
 class WordleGameService:
-    def guessWord(self, guessedWord: str, guessedByUserId: int):
+    async def guessWord(self, guessedWord: str, guessedByUserId: int):
         currentGame = wordleCacheService.getCurrentGame()
         if currentGame is None:
             return {
@@ -39,7 +39,7 @@ class WordleGameService:
         completedDefinitionVi = currentGame.get("definitionVi")
         completedDefinitionEn = currentGame.get("definitionEn")
 
-        nextGame = self.finishCurrentRoundAndStartNewRound(guessedByUserId)
+        nextGame = await self.finishCurrentRoundAndStartNewRound(guessedByUserId)
 
         if nextGame is None:
             return {
@@ -83,7 +83,7 @@ class WordleGameService:
 
         return "".join(result)
 
-    def finishCurrentRoundAndStartNewRound(self, guessedByUserId: int):
+    async def finishCurrentRoundAndStartNewRound(self, guessedByUserId: int):
         currentGame = wordleCacheService.getCurrentGame()
         if currentGame is None:
             return None
@@ -118,7 +118,7 @@ class WordleGameService:
 
             session.commit()
 
-            definitionData = wordleDefinitionService.getDefinitionData(randomWord.key_word)
+            definitionData = await wordleDefinitionService.getDefinitionData(randomWord.key_word)
 
             wordleCacheService.setCurrentGame(
                 historyId=newHistory.id,

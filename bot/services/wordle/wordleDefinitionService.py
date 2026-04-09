@@ -8,7 +8,7 @@ class WordleDefinitionService:
     def __init__(self):
         self.translator = Translator()
 
-    def getDefinitionData(self, keyWord: str):
+    async def getDefinitionData(self, keyWord: str):
         definitionEn = self.getEnglishDefinition(keyWord)
         if not definitionEn:
             return {
@@ -16,7 +16,7 @@ class WordleDefinitionService:
                 "definitionVi": None,
             }
 
-        definitionVi = self.translateToVietnamese(definitionEn)
+        definitionVi = await self.translateToVietnamese(definitionEn)
 
         return {
             "definitionEn": definitionEn,
@@ -70,9 +70,9 @@ class WordleDefinitionService:
 
         return "\n".join(definitions)
 
-    def translateToVietnamese(self, text: str):
+    async def translateToVietnamese(self, text: str):
         try:
-            translated = self.translator.translate(text, src="en", dest="vi")
+            translated = await self.translator.translate(text, src="en", dest="vi")
             return translated.text
         except Exception:
             return None
