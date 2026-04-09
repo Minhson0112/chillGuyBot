@@ -1,9 +1,10 @@
-from bot.config.config import WORDLE_LETTER_EMOJI
 from bot.config.database import getDbSession
+from bot.config.config import WORDLE_LETTER_EMOJI
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.wordGuessHistoryRepository import WordGuessHistoryRepository
 from bot.repository.wordRepository import WordRepository
 from bot.services.wordle.wordleCacheService import wordleCacheService
+from bot.services.wordle.wordleDefinitionService import wordleDefinitionService
 
 
 class WordleGameService:
@@ -35,6 +36,9 @@ class WordleGameService:
                 "message": None,
             }
 
+        completedDefinitionVi = currentGame.get("definitionVi")
+        completedDefinitionEn = currentGame.get("definitionEn")
+
         nextGame = self.finishCurrentRoundAndStartNewRound(guessedByUserId)
 
         if nextGame is None:
@@ -49,6 +53,8 @@ class WordleGameService:
             "guessEmojiRow": guessEmojiRow,
             "winnerUserId": guessedByUserId,
             "completedWord": keyWord,
+            "completedDefinitionVi": completedDefinitionVi,
+            "completedDefinitionEn": completedDefinitionEn,
             "nextWordLength": len(nextGame["keyWord"]),
             "message": "Chúc mừng, bạn đã hoàn thành từ khóa.",
         }
@@ -112,10 +118,14 @@ class WordleGameService:
 
             session.commit()
 
+            definitionData = wordleDefinitionService.getDefinitionData(randomWord.key_word)
+
             wordleCacheService.setCurrentGame(
                 historyId=newHistory.id,
                 wordId=randomWord.id,
                 keyWord=randomWord.key_word,
+                definitionEn=definitionData["definitionEn"],
+                definitionVi=definitionData["definitionVi"],
             )
 
             return wordleCacheService.getCurrentGame()

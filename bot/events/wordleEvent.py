@@ -44,8 +44,18 @@ class WordleEvent(commands.Cog):
         await message.channel.send(result["guessEmojiRow"])
 
         if result["isCompleted"]:
+            completedDefinitionVi = result.get("completedDefinitionVi")
+            completedDefinitionEn = result.get("completedDefinitionEn")
+
+            definitionMessage = ""
+            if completedDefinitionVi:
+                definitionMessage = f"\nNghĩa tiếng Việt: {completedDefinitionVi}"
+            elif completedDefinitionEn:
+                definitionMessage = f"\nĐịnh nghĩa tiếng Anh: {completedDefinitionEn}"
+
             await message.channel.send(
-                f"Chúc mừng {message.author.mention} đã hoàn thành từ khóa **{result['completedWord']}**.\n"
+                f"Chúc mừng {message.author.mention} đã hoàn thành từ khóa **{result['completedWord']}**."
+                f"{definitionMessage}\n"
                 f"Từ mới đã được bắt đầu, độ dài từ khóa mới là **{result['nextWordLength']}** ký tự."
             )
 

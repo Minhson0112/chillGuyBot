@@ -2,6 +2,7 @@ from bot.config.database import getDbSession
 from bot.repository.wordGuessHistoryRepository import WordGuessHistoryRepository
 from bot.repository.wordRepository import WordRepository
 from bot.services.wordle.wordleCacheService import wordleCacheService
+from bot.services.wordle.wordleDefinitionService import wordleDefinitionService
 
 
 class WordleStartupService:
@@ -18,10 +19,14 @@ class WordleStartupService:
                 if word is None:
                     return None
 
+                definitionData = wordleDefinitionService.getDefinitionData(word.key_word)
+
                 wordleCacheService.setCurrentGame(
                     historyId=currentGuessingWord.id,
                     wordId=word.id,
                     keyWord=word.key_word,
+                    definitionEn=definitionData["definitionEn"],
+                    definitionVi=definitionData["definitionVi"],
                 )
 
                 return wordleCacheService.getCurrentGame()
@@ -37,10 +42,14 @@ class WordleStartupService:
 
             session.commit()
 
+            definitionData = wordleDefinitionService.getDefinitionData(randomWord.key_word)
+
             wordleCacheService.setCurrentGame(
                 historyId=newWordGuessHistory.id,
                 wordId=randomWord.id,
                 keyWord=randomWord.key_word,
+                definitionEn=definitionData["definitionEn"],
+                definitionVi=definitionData["definitionVi"],
             )
 
             return wordleCacheService.getCurrentGame()
