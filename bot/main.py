@@ -62,7 +62,7 @@ async def on_ready():
         autoResponderCacheService.loadKeys()
         print("✅ Đã load auto responder keys")
 
-        currentWordleGame = wordleStartupService.loadCurrentGameToCache()
+        currentWordleGame = await wordleStartupService.loadCurrentGameToCache()
         if currentWordleGame is not None:
             print(f"✅ Đã load wordle game hiện tại: {currentWordleGame['keyWord']}")
         else:
