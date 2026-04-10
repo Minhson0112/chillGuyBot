@@ -116,6 +116,7 @@ async def main():
         "bot.commands.openMusicEvent",
         "bot.commands.showallmusicevent",
         "bot.commands.closeMusicEvent",
+        "bot.commands.memberBirthday",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
