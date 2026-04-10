@@ -4,7 +4,7 @@ from bot.config.config import BIRTHDAY_CHANNEL_ID
 from bot.services.member.memberBirthdayService import MemberBirthdayService
 
 
-class MemberBirthdayCommand(commands.Cog):
+class MemberBirthday(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.memberBirthdayService = MemberBirthdayService()
@@ -23,4 +23,4 @@ class MemberBirthdayCommand(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(MemberBirthdayCommand(bot))
+    await bot.add_cog(MemberBirthday(bot))
