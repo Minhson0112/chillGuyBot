@@ -15,11 +15,18 @@ class MemberBirthday(commands.Cog):
             return
 
         if birthdayText is None:
-            await ctx.send("Hãy nhập ngày sinh theo dạng `cg sn 01-12-2000`.")
+            await ctx.reply(
+                "Hãy nhập ngày sinh theo dạng `cg sn 01-12-2000`.",
+                mention_author=False,
+            )
             return
 
         result = self.memberBirthdayService.setBirthday(ctx.author.id, birthdayText)
-        await ctx.send(result["message"])
+
+        await ctx.reply(
+            result["message"],
+            mention_author=False,
+        )
 
 
 async def setup(bot):
