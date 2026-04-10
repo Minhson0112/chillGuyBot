@@ -1,5 +1,5 @@
 from bot.models.member import Member
-from sqlalchemy import func
+from sqlalchemy import func, extract
 from sqlalchemy.orm import joinedload
 from datetime import date
 
@@ -131,4 +131,16 @@ class MemberRepository:
         member.date_of_birth = dateOfBirth
         self.session.flush()
         return member
+    
+    def findMembersByBirthday(self, month: int, day: int):
+        return (
+            self.session.query(Member)
+            .filter(Member.date_of_birth.isnot(None))
+            .filter(extract("month", Member.date_of_birth) == month)
+            .filter(extract("day", Member.date_of_birth) == day)
+            .filter(Member.leave_at.is_(None))
+            .filter(Member.is_bot.is_(False))
+            .order_by(Member.user_id.asc())
+            .all()
+        )
     

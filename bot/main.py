@@ -125,6 +125,7 @@ async def main():
         "bot.events.wordleEvent",
         "bot.events.owoDonateEvent",
         "bot.tasks.chatCountFlushTask",
+        "bot.tasks.memberBirthdayTask",
     ]
 
     for ext in extensions:
