@@ -81,7 +81,7 @@ async def on_ready():
 async def registerPersistentViews():
     with getDbSession() as dbSession:
         musicEventRepository = MusicEventRepository(dbSession)
-        musicEvents = musicEventRepository.findAllOpenEvents()
+        musicEvents = musicEventRepository.findAll()
 
         for musicEvent in musicEvents:
             bot.add_view(JoinMusicEventView(musicEvent.id))
