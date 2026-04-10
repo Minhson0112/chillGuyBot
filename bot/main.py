@@ -18,6 +18,7 @@ wordleDictionaryStartupService = WordleDictionaryStartupService()
 
 intents = discord.Intents.default()
 intents.members = True
+intents.presences = True
 intents.message_content = True
 intents.guilds = True
 intents.voice_states = True
