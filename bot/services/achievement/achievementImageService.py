@@ -8,7 +8,7 @@ class AchievementImageService:
     def __init__(self):
         baseDir = Path(__file__).resolve().parents[2]
         self.imagePath = baseDir / "assets" / "images" / "achievements" / "chillStation.png"
-        self.fontPath = "arial.ttf"
+        self.fontPath = baseDir / "assets" / "fonts" / "arial.ttf"
         self.textColor = (219, 222, 225, 255)
         self.fontSize = 32
         self.onlinePos = (556, 1124)
@@ -21,7 +21,7 @@ class AchievementImageService:
 
     def preload(self):
         self.baseImage = Image.open(self.imagePath).convert("RGBA")
-        self.font = ImageFont.truetype(self.fontPath, self.fontSize)
+        self.font = ImageFont.truetype(str(self.fontPath), self.fontSize)
 
     def buildAchievementImage(self, onlineCount: int, memberCount: int):
         image = self.baseImage.copy()
