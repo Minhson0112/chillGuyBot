@@ -79,7 +79,7 @@ class Ban(commands.Cog):
         )
         embed.add_field(
             name="Người bị ban",
-            value=f"{target.mention}\n`{target.id}`",
+            value=f"{target.mention}",
             inline=False,
         )
         embed.add_field(

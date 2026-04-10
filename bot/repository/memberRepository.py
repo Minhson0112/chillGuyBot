@@ -1,6 +1,7 @@
 from bot.models.member import Member
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
+from datetime import date
 
 class MemberRepository:
     def __init__(self, session):
@@ -117,4 +118,17 @@ class MemberRepository:
             .limit(limit)
             .all()
         )
+
+    def setDateOfBirthIfEmpty(self, userId, dateOfBirth: date):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        if member.date_of_birth is not None:
+            return False
+
+        member.date_of_birth = dateOfBirth
+        self.session.flush()
+        return member
     

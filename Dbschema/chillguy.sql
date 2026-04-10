@@ -199,3 +199,7 @@ CREATE TABLE music_event_entry (
     CONSTRAINT fk_music_event_entry_music_event_id
         FOREIGN KEY (music_event_id) REFERENCES music_event(id)
 );
+
+# update 9 
+ALTER TABLE member
+ADD COLUMN chill_coin INT NOT NULL DEFAULT 0 COMMENT 'server private currency';
