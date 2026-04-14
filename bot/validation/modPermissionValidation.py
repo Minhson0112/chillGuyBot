@@ -1,7 +1,8 @@
 import discord
 from discord import app_commands
 
-from bot.config.config import MOD_ADMIN_USER_IDS, MOD_ROLE_IDS
+from bot.config.roles import MOD_ROLE_IDS
+from bot.config.userId import MOD_ADMIN_USER_IDS
 from bot.enums.moderationActionType import ModerationActionType
 
 

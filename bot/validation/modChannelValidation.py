@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 
-from bot.config.config import MOD_COMMAND_CHANNEL_ID
+from bot.config.channel import MOD_COMMAND_CHANNEL_ID
 
 
 def modChannelOnly():

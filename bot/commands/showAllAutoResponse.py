@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot.config.config import MOD_ADMIN_USER_IDS
+from bot.config.userId import MOD_ADMIN_USER_IDS
 from bot.services.autoResponder.showAllAutoResponseService import ShowAllAutoResponseService
 from bot.validation.guildValidation import chillStationOnly
 from bot.views.autoResponderPaginationView import AutoResponderPaginationView

@@ -2,8 +2,8 @@ from datetime import datetime, timedelta, timezone
 
 import discord
 
-from bot.config.config import ACHIEVEMENTS_CHANNEL_ID
-from bot.config.config import LOGO
+from bot.config.channel import ACHIEVEMENTS_CHANNEL_ID
+from bot.config.emoji import LOGO
 from bot.services.achievement.achievementImageService import AchievementImageService
 
 

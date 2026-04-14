@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.config.config import LOGO
+from bot.config.emoji import LOGO
 from bot.config.database import getDbSession
 from bot.repository.owoDonateHistoryRepository import OwoDonateHistoryRepository
 

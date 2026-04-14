@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from bot.config.config import BIRTHDAY_CHANNEL_ID
+from bot.config.channel import BIRTHDAY_CHANNEL_ID
 from bot.services.member.memberBirthdayService import MemberBirthdayService
 
 

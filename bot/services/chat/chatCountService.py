@@ -1,5 +1,5 @@
 from bot.cache.chatCountCache import chatCountCache
-from bot.config.config import EXCLUDED_LEVEL_CHANNEL_IDS
+from bot.config.channel import EXCLUDED_LEVEL_CHANNEL_IDS
 
 
 class ChatCountService:

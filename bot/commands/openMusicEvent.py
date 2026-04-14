@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot.config.config import NOTIFICATION_CHANNEL_ID
+from bot.config.channel import NOTIFICATION_CHANNEL_ID
 from bot.config.database import getDbSession
 from bot.enums.moderationActionType import ModerationActionType
 from bot.repository.musicEventRepository import MusicEventRepository

@@ -2,7 +2,8 @@ from datetime import date
 
 import discord
 
-from bot.config.config import PARTNER_CHANNEL_ID, PARTNER_ROLE_ID
+from bot.config.channel import PARTNER_CHANNEL_ID
+from bot.config.roles import PARTNER_ROLE_ID
 from bot.config.database import getDbSession
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.partnerRepository import PartnerRepository

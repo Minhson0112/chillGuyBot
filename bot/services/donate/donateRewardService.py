@@ -1,6 +1,6 @@
 import discord
 
-from bot.config.config import DONATE_REWARD_ROLES
+from bot.config.roles import DONATE_REWARD_ROLES
 from bot.config.database import getDbSession
 from bot.repository.owoDonateHistoryRepository import OwoDonateHistoryRepository
 

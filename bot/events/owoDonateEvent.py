@@ -2,13 +2,9 @@ import re
 
 import discord
 from discord.ext import commands
-
-from bot.config.config import (
-    DONATE_CHANNEL_ID,
-    LOGO,
-    OWO_BOT_ID,
-    TREASURER_MEMBER_ID_LIST,
-)
+from bot.config.emoji import LOGO
+from bot.config.channel import DONATE_CHANNEL_ID
+from bot.config.userId import OWO_BOT_ID, TREASURER_MEMBER_ID_LIST
 from bot.services.donate.donateRewardService import DonateRewardService
 
 

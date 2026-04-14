@@ -3,7 +3,7 @@ import re
 import discord
 from discord.ext import commands
 
-from bot.config.config import WORDLE_CHANNEL_ID
+from bot.config.channel import WORDLE_CHANNEL_ID
 from bot.services.wordle.wordleDictionaryCacheService import wordleDictionaryCacheService
 from bot.services.wordle.wordleGameService import WordleGameService
 

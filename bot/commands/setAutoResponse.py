@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot.config.config import CAN_CREATE_AUTO_RESPONSE_USER_ID
+from bot.config.userId import CAN_CREATE_AUTO_RESPONSE_USER_ID
 from bot.services.autoResponder.setAutoResponseService import SetAutoResponseService
 from bot.validation.guildValidation import chillStationOnly
 

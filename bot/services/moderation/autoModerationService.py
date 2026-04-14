@@ -7,9 +7,9 @@ from bot.config.config import (
     AUTO_MUTE_DURATION_MINUTES,
     AUTO_MUTE_WARNING_THRESHOLD,
     BANNED_WORDS,
-    MOD_COMMAND_CHANNEL_ID,
-    MOD_ADMIN_USER_IDS,
 )
+from bot.config.channel import MOD_COMMAND_CHANNEL_ID
+from bot.config.userId import MOD_ADMIN_USER_IDS
 from bot.config.database import getDbSession
 from bot.enums.moderationActionType import ModerationActionType
 from bot.repository.memberModerationHistoryRepository import MemberModerationHistoryRepository

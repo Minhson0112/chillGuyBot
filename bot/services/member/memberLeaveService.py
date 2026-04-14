@@ -2,7 +2,8 @@ from datetime import datetime, timezone
 
 import discord
 
-from bot.config.config import BYE_CHANNEL_ID, LOGO, MOD_COMMAND_CHANNEL_ID
+from bot.config.channel import BYE_CHANNEL_ID, MOD_COMMAND_CHANNEL_ID
+from bot.config.emoji import LOGO
 from bot.config.database import getDbSession
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.partnerRepository import PartnerRepository

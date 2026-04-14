@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot.config.config import MOD_ADMIN_USER_IDS
+from bot.config.userId import MOD_ADMIN_USER_IDS
 from bot.enums.moderationActionType import ModerationActionType
 from bot.services.moderation.kickService import KickService
 from bot.validation.guildValidation import chillStationOnly

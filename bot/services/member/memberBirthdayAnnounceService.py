@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import discord
 
 from bot.config.database import getDbSession
-from bot.config.config import BIRTHDAY_CHANNEL_ID
+from bot.config.channel import BIRTHDAY_CHANNEL_ID
 from bot.repository.memberRepository import MemberRepository
 
 

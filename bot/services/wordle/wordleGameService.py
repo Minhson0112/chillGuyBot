@@ -1,4 +1,4 @@
-from bot.config.config import WORDLE_LETTER_EMOJI
+from bot.config.emoji import WORDLE_LETTER_EMOJI
 from bot.config.database import getDbSession
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.wordGuessHistoryRepository import WordGuessHistoryRepository
