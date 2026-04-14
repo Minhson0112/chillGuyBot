@@ -11,7 +11,6 @@ from bot.config.config import (
 )
 from bot.config.channel import MOD_COMMAND_CHANNEL_ID
 from bot.config.roles import OWNER_ROLE_ID
-from bot.config.userId import MOD_ADMIN_USER_IDS
 from bot.config.database import getDbSession
 from bot.enums.moderationActionType import ModerationActionType
 from bot.repository.memberModerationHistoryRepository import MemberModerationHistoryRepository
@@ -31,9 +30,6 @@ class AutoModerationService:
             return
 
         if not isinstance(message.author, discord.Member):
-            return
-
-        if message.author.id in MOD_ADMIN_USER_IDS:
             return
 
         if self.hasOwnerRole(message.author):
