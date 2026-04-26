@@ -178,7 +178,7 @@ class FarmInventoryRenderService:
     ):
         self.drawText(
             baseImage,
-            text=f"Số lượng: {self.formatNumber(quantity)}",
+            text=f"SL: {self.formatNumber(quantity)}",
             x=slotX + self.QUANTITY_TEXT_OFFSET_X,
             y=y - 2,
             fontSize=self.QUANTITY_FONT_SIZE,
