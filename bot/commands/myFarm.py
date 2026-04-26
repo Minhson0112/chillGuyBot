@@ -3,15 +3,16 @@ from discord.ext import commands
 
 from bot.services.farm.farmRenderService import FarmRenderService
 
+
 class MyFarmCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.farmRenderService = FarmRenderService()
+        self.farmRenderService = FarmRenderService(bot)
 
     @commands.command(name="myfarm")
     async def myFarm(self, ctx):
         try:
-            buffer = self.farmRenderService.renderFarmByMemberId(ctx.author.id)
+            buffer = await self.farmRenderService.renderFarmByMemberId(ctx.author.id)
 
             file = discord.File(buffer, filename="my_farm.png")
 

@@ -2,6 +2,7 @@ from datetime import datetime
 from io import BytesIO
 
 from PIL import Image
+from urllib.request import urlopen
 
 from bot.config.database import getDbSession
 from bot.repository.farmRepository import FarmRepository
@@ -9,6 +10,12 @@ from bot.services.assetImageService import assetImageService
 
 
 class FarmRenderService:
+    def __init__(self, bot):
+        self.bot = bot
+    
+    AVATAR_X = 40
+    AVATAR_Y = 40
+    AVATAR_SIZE = 96
     LAND_WET_IMAGE_KEY = "farm_land_wet"
     LAND_DRY_IMAGE_KEY = "farm_land_dry"
 
@@ -30,7 +37,7 @@ class FarmRenderService:
         (0, 3), (1, 3), (2, 3), (3, 3),
     ]
 
-    def renderFarmByMemberId(self, memberId: int):
+    async def renderFarmByMemberId(self, memberId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farm = farmRepository.findByUserIdWithRenderData(memberId)
@@ -39,6 +46,11 @@ class FarmRenderService:
                 raise ValueError(f"Farm not found for member id: {memberId}")
 
             image = self.renderFarmImage(farm)
+
+            avatarImage = await self.getMemberAvatarImage(memberId)
+
+            if avatarImage is not None:
+                self.pasteMemberAvatar(image, avatarImage)
 
         return self.convertImageToBuffer(image)
 
@@ -240,6 +252,29 @@ class FarmRenderService:
             return
 
         baseImg.paste(spriteImg, (x, y), spriteImg)
+
+    async def getMemberAvatarImage(self, memberId: int):
+        user = self.bot.get_user(memberId)
+
+        if user is None:
+            user = await self.bot.fetch_user(memberId)
+
+        avatarAsset = user.display_avatar.replace(size=256, static_format="png")
+        avatarUrl = str(avatarAsset.url)
+
+        with urlopen(avatarUrl) as response:
+            avatarBytes = response.read()
+
+        return Image.open(BytesIO(avatarBytes)).convert("RGBA")
+    
+    def pasteMemberAvatar(self, baseImage: Image.Image, avatarImage: Image.Image):
+        avatarImage = avatarImage.resize((self.AVATAR_SIZE, self.AVATAR_SIZE), Image.LANCZOS)
+
+        baseImage.paste(
+            avatarImage,
+            (self.AVATAR_X, self.AVATAR_Y),
+            avatarImage,
+        )
 
     def convertImageToBuffer(self, image: Image.Image):
         buffer = BytesIO()
