@@ -23,8 +23,8 @@ class FarmShopRenderService:
     TITLE_X = 760
     TITLE_Y = 70
 
-    PAGE_TEXT_X = 760
-    PAGE_TEXT_Y = 962
+    PAGE_TEXT_X = 765
+    PAGE_TEXT_Y = 955
 
     ITEM_ICON_SIZE = 72
     SMALL_ICON_SIZE = 24
@@ -39,10 +39,10 @@ class FarmShopRenderService:
     STROKE_FILL = (60, 25, 5, 255)
 
     SLOT_POSITIONS = [
-        (70, 185), (350, 185), (630, 185), (910, 185), (1190, 185),
-        (70, 375), (350, 375), (630, 375), (910, 375), (1190, 375),
-        (70, 560), (350, 560), (630, 560), (910, 560), (1190, 560),
-        (70, 745), (350, 745), (630, 745), (910, 745), (1190, 745),
+        (70, 185), (355, 185), (640, 185), (925, 185), (1210, 185),
+        (70, 375), (355, 375), (640, 375), (925, 375), (1210, 375),
+        (70, 560), (355, 560), (640, 560), (925, 560), (1210, 560),
+        (70, 745), (355, 745), (640, 745), (925, 745), (1210, 745),
     ]
 
     SLOT_WIDTH = 245
@@ -50,8 +50,8 @@ class FarmShopRenderService:
 
     ITEM_ICON_OFFSET_Y = 10
     ITEM_ID_OFFSET_Y = 84
-    PRICE_OFFSET_Y = 112
-    LEVEL_OFFSET_Y = 138
+    PRICE_OFFSET_Y = 120
+    LEVEL_OFFSET_Y = 120
 
     PRICE_ICON_OFFSET_X = 55
     PRICE_TEXT_OFFSET_X = 84
