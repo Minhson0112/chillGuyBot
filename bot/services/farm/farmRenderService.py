@@ -12,9 +12,9 @@ class FarmRenderService:
     def __init__(self, bot):
         self.bot = bot
     
-    AVATAR_X = 40
-    AVATAR_Y = 40
-    AVATAR_SIZE = 96
+    AVATAR_X = 10
+    AVATAR_Y = 10
+    AVATAR_SIZE = 130
     LAND_WET_IMAGE_KEY = "farm_land_wet"
     LAND_DRY_IMAGE_KEY = "farm_land_dry"
 
