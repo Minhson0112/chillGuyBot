@@ -123,6 +123,7 @@ async def main():
         "bot.commands.shopFarm",
         "bot.commands.cash",
         "bot.commands.buy",
+        "bot.commands.mySilo",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",

@@ -32,6 +32,58 @@ class UserInventoryRepository:
             .all()
         )
 
+    def findSiloItemsByUserIdAndPage(self, userId: int, page: int, perPage: int):
+        offset = (page - 1) * perPage
+
+        return (
+            self.session.query(UserInventory)
+            .join(UserInventory.item)
+            .options(joinedload(UserInventory.item))
+            .filter(UserInventory.user_id == userId)
+            .filter(UserInventory.quantity > 0)
+            .filter(Item.type_code.in_(["crop", "seed"]))
+            .order_by(asc(UserInventory.id))
+            .offset(offset)
+            .limit(perPage)
+            .all()
+        )
+
+    def countSiloItemsByUserId(self, userId: int):
+        return (
+            self.session.query(UserInventory)
+            .join(UserInventory.item)
+            .filter(UserInventory.user_id == userId)
+            .filter(UserInventory.quantity > 0)
+            .filter(Item.type_code.in_(["crop", "seed"]))
+            .count()
+        )
+
+    def findBarnItemsByUserIdAndPage(self, userId: int, page: int, perPage: int):
+        offset = (page - 1) * perPage
+
+        return (
+            self.session.query(UserInventory)
+            .join(UserInventory.item)
+            .options(joinedload(UserInventory.item))
+            .filter(UserInventory.user_id == userId)
+            .filter(UserInventory.quantity > 0)
+            .filter(~Item.type_code.in_(["crop", "seed"]))
+            .order_by(asc(UserInventory.id))
+            .offset(offset)
+            .limit(perPage)
+            .all()
+        )
+
+    def countBarnItemsByUserId(self, userId: int):
+        return (
+            self.session.query(UserInventory)
+            .join(UserInventory.item)
+            .filter(UserInventory.user_id == userId)
+            .filter(UserInventory.quantity > 0)
+            .filter(~Item.type_code.in_(["crop", "seed"]))
+            .count()
+        )
+
     def create(self, userId: int, itemId: int, quantity: int):
         userInventory = UserInventory(
             user_id=userId,
