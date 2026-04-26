@@ -3,3 +3,14 @@ from bot.models.chat import Chat
 from bot.models.partner import Partner
 from bot.models.tournamentMaster import TournamentMaster
 from bot.models.tournamentEntry import TournamentEntry
+from bot.models.farm import Farm
+from bot.models.items import Item
+from bot.models.crop import Crop
+from bot.models.cropGrowthStage import CropGrowthStage
+from bot.models.farmCropArea import FarmCropArea
+from bot.models.shopItem import ShopItem
+from bot.models.userInventory import UserInventory
+from bot.models.farmChickenCoop import FarmChickenCoop
+from bot.models.farmCowShed import FarmCowShed
+from bot.models.farmFishPond import FarmFishPond
+from bot.models.chillCoinTransaction import ChillCoinTransaction
