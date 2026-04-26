@@ -120,6 +120,7 @@ async def main():
         "bot.commands.closeMusicEvent",
         "bot.commands.memberBirthday",
         "bot.commands.myFarm",
+        "bot.commands.shopFarm",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
