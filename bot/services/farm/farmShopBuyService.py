@@ -92,7 +92,7 @@ class FarmShopBuyService:
                 quantity=quantity,
             )
 
-            session.flush()
+            session.commit()
 
             return {
                 "success": True,
