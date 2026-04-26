@@ -96,4 +96,5 @@ ASSET_IMAGE_PATHS = {
     "exp": "bot/assets/images/common/xp.png",
     "shopScreen" : "bot/assets/images/farm/ui/shop.png",
     "train" : "bot/assets/images/farm/buildings/train.png",
+    "item_bug": "bot/assets/images/farm/animals/bug.png",
 }

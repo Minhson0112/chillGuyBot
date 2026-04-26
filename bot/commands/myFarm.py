@@ -4,6 +4,7 @@ from discord.ext import commands
 from bot.services.farm.farmHarvestService import FarmHarvestService
 from bot.services.farm.farmRenderService import FarmRenderService
 from bot.services.farm.farmWaterService import FarmWaterService
+from bot.services.farm.farmPestRemoveService import FarmPestRemoveService
 
 
 class MyFarmView(discord.ui.View):
@@ -16,6 +17,7 @@ class MyFarmView(discord.ui.View):
         self.farmRenderService = FarmRenderService(bot)
         self.farmHarvestService = FarmHarvestService()
         self.farmWaterService = FarmWaterService()
+        self.farmPestRemoveService = FarmPestRemoveService()
 
     async def interaction_check(self, interaction: discord.Interaction):
         if interaction.user.id != self.authorId:
@@ -52,6 +54,30 @@ class MyFarmView(discord.ui.View):
             print(f"Water farm error: {e}")
             await interaction.response.send_message(
                 "Đã xảy ra lỗi khi tưới nước.",
+                ephemeral=True,
+            )
+
+    @discord.ui.button(label="Bắt sâu", emoji="🐛", style=discord.ButtonStyle.danger)
+    async def removePestButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            pestResult = self.farmPestRemoveService.removePest(self.authorId)
+
+            if not pestResult["success"]:
+                await interaction.response.send_message(
+                    pestResult["message"],
+                    ephemeral=True,
+                )
+                return
+
+            await self.refreshFarmMessage(
+                interaction=interaction,
+                extraMessage=pestResult["message"],
+            )
+
+        except Exception as e:
+            print(f"Remove pest farm error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi bắt sâu.",
                 ephemeral=True,
             )
 

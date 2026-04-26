@@ -163,3 +163,24 @@ class FarmCropAreaRepository:
             )
             .all()
         )
+
+    def findCropAreasNeedPestInfected(self, now: datetime, pestThresholdMinutes: int):
+        thresholdAt = now - timedelta(minutes=pestThresholdMinutes)
+
+        return (
+            self.session.query(FarmCropArea)
+            .filter(FarmCropArea.crop_id.isnot(None))
+            .filter(FarmCropArea.planted_at.isnot(None))
+            .filter(FarmCropArea.harvestable_at > now)
+            .filter(FarmCropArea.is_pest_infected.is_(False))
+            .filter(
+                or_(
+                    FarmCropArea.last_pest_removed_at <= thresholdAt,
+                    and_(
+                        FarmCropArea.last_pest_removed_at.is_(None),
+                        FarmCropArea.planted_at <= thresholdAt,
+                    ),
+                )
+            )
+            .all()
+        )

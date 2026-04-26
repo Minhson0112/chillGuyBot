@@ -358,3 +358,41 @@ WHERE NOT EXISTS (
 );
 
 COMMIT;
+
+# update 1
+INSERT INTO items (
+    code,
+    name,
+    type_code,
+    icon_image_key,
+    description,
+    render_scale,
+    render_offset_y,
+    sell_price,
+    is_sellable,
+    is_usable,
+    is_active
+) VALUES (
+    'bug',
+    'con sâu',
+    'animal',
+    'item_bug',
+    'sâu bệnh bắt từ cây trồng',
+    1.0,
+    0,
+    5,
+    1,
+    1,
+    1
+)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    type_code = VALUES(type_code),
+    icon_image_key = VALUES(icon_image_key),
+    description = VALUES(description),
+    render_scale = VALUES(render_scale),
+    render_offset_y = VALUES(render_offset_y),
+    sell_price = VALUES(sell_price),
+    is_sellable = VALUES(is_sellable),
+    is_usable = VALUES(is_usable),
+    is_active = VALUES(is_active);

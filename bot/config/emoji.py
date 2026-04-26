@@ -89,6 +89,8 @@ WORDLE_LETTER_EMOJI = {
 FARM_GAME_EMOJI = {
     "chill_coin": "<:cs_coin:1495116560191324383>",
 
+    "item_bug": "<:bug:1498089075867914281>",
+
     "item_wheat_seed": "<:Wheat_seed:1495568410220953600>",
     "item_wheat": "<:Wheat:1495568381494038559>",
 

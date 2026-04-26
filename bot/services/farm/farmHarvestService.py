@@ -8,8 +8,8 @@ from bot.repository.userInventoryRepository import UserInventoryRepository
 
 
 class FarmHarvestService:
-    DRY_REDUCTION_SECONDS_PER_QUANTITY = 300
-    PEST_REDUCTION_SECONDS_PER_QUANTITY = 300
+    DRY_REDUCTION_SECONDS_PER_QUANTITY = 1200
+    PEST_REDUCTION_SECONDS_PER_QUANTITY = 5400
 
     def harvestCrop(self, userId: int):
         with getDbSession() as session:

@@ -135,6 +135,7 @@ async def main():
         "bot.tasks.chatCountFlushTask",
         "bot.tasks.memberBirthdayTask",
         "bot.tasks.farmDryCheckTask",
+        "bot.tasks.farmPestCheckTask",
     ]
 
     for ext in extensions:
