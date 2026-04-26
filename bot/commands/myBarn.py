@@ -4,7 +4,7 @@ from discord.ext import commands
 from bot.services.farm.farmInventoryRenderService import FarmInventoryRenderService
 
 
-class MySiloPaginationView(discord.ui.View):
+class MyBarnPaginationView(discord.ui.View):
     def __init__(
         self,
         authorId: int,
@@ -26,8 +26,8 @@ class MySiloPaginationView(discord.ui.View):
         self.previousButton.disabled = self.currentPage <= 1
         self.nextButton.disabled = self.currentPage >= self.totalPage
 
-    async def updateSiloMessage(self, interaction: discord.Interaction):
-        renderResult = self.farmInventoryRenderService.renderSiloPageToBuffer(
+    async def updateBarnMessage(self, interaction: discord.Interaction):
+        renderResult = self.farmInventoryRenderService.renderBarnPageToBuffer(
             userId=self.authorId,
             memberDisplayName=self.memberDisplayName,
             page=self.currentPage,
@@ -40,7 +40,7 @@ class MySiloPaginationView(discord.ui.View):
 
         file = discord.File(
             renderResult["buffer"],
-            filename="my_silo.png",
+            filename="my_barn.png",
         )
 
         await interaction.response.edit_message(
@@ -51,7 +51,7 @@ class MySiloPaginationView(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction):
         if interaction.user.id != self.authorId:
             await interaction.response.send_message(
-                "Bạn không thể điều khiển silo của người khác.",
+                "Bạn không thể điều khiển barn của người khác.",
                 ephemeral=True,
             )
             return False
@@ -61,23 +61,23 @@ class MySiloPaginationView(discord.ui.View):
     @discord.ui.button(label="Trước", emoji="⬅️", style=discord.ButtonStyle.secondary)
     async def previousButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.currentPage -= 1
-        await self.updateSiloMessage(interaction)
+        await self.updateBarnMessage(interaction)
 
     @discord.ui.button(label="Tiếp", emoji="➡️", style=discord.ButtonStyle.secondary)
     async def nextButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.currentPage += 1
-        await self.updateSiloMessage(interaction)
+        await self.updateBarnMessage(interaction)
 
 
-class MySiloCommand(commands.Cog):
+class MyBarnCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.farmInventoryRenderService = FarmInventoryRenderService()
 
-    @commands.command(name="mysilo")
-    async def mySilo(self, ctx, page: int = 1):
+    @commands.command(name="mybarn")
+    async def myBarn(self, ctx, page: int = 1):
         try:
-            renderResult = self.farmInventoryRenderService.renderSiloPageToBuffer(
+            renderResult = self.farmInventoryRenderService.renderBarnPageToBuffer(
                 userId=ctx.author.id,
                 memberDisplayName=ctx.author.display_name,
                 page=page,
@@ -85,10 +85,10 @@ class MySiloCommand(commands.Cog):
 
             file = discord.File(
                 renderResult["buffer"],
-                filename="my_silo.png",
+                filename="my_barn.png",
             )
 
-            view = MySiloPaginationView(
+            view = MyBarnPaginationView(
                 authorId=ctx.author.id,
                 memberDisplayName=ctx.author.display_name,
                 currentPage=renderResult["currentPage"],
@@ -98,13 +98,13 @@ class MySiloCommand(commands.Cog):
             await ctx.reply(file=file, view=view)
 
         except FileNotFoundError as e:
-            print(f"Silo asset file not found: {e}")
-            await ctx.reply("Không tìm thấy ảnh asset để render silo.")
+            print(f"Barn asset file not found: {e}")
+            await ctx.reply("Không tìm thấy ảnh asset để render barn.")
 
         except Exception as e:
-            print(f"Render silo error: {e}")
-            await ctx.reply("Đã xảy ra lỗi khi render silo.")
+            print(f"Render barn error: {e}")
+            await ctx.reply("Đã xảy ra lỗi khi render barn.")
 
 
 async def setup(bot):
-    await bot.add_cog(MySiloCommand(bot))
+    await bot.add_cog(MyBarnCommand(bot))

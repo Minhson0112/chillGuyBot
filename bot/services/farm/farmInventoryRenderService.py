@@ -58,6 +58,7 @@ class FarmInventoryRenderService:
     PRICE_TEXT_OFFSET_X = 178
 
     ITEM_NAME_MAX_LENGTH = 25
+    TITLE_MAX_LENGTH = 24
 
     def renderSiloPageToBuffer(
         self,
@@ -85,10 +86,40 @@ class FarmInventoryRenderService:
                 totalPage=totalPage,
             )
 
-        buffer = self.convertImageToBuffer(image)
+        return {
+            "buffer": self.convertImageToBuffer(image),
+            "currentPage": currentPage,
+            "totalPage": totalPage,
+        }
+
+    def renderBarnPageToBuffer(
+        self,
+        userId: int,
+        memberDisplayName: str,
+        page: int = 1,
+    ):
+        with getDbSession() as session:
+            userInventoryRepository = UserInventoryRepository(session)
+
+            totalItemCount = userInventoryRepository.countBarnItemsByUserId(userId)
+            totalPage = self.calculateTotalPage(totalItemCount)
+            currentPage = self.normalizePage(page, totalPage)
+
+            inventoryItems = userInventoryRepository.findBarnItemsByUserIdAndPage(
+                userId,
+                currentPage,
+                self.PER_PAGE,
+            )
+
+            image = self.renderInventoryImage(
+                title=f"Barn của {memberDisplayName}",
+                inventoryItems=inventoryItems,
+                currentPage=currentPage,
+                totalPage=totalPage,
+            )
 
         return {
-            "buffer": buffer,
+            "buffer": self.convertImageToBuffer(image),
             "currentPage": currentPage,
             "totalPage": totalPage,
         }
@@ -217,7 +248,7 @@ class FarmInventoryRenderService:
     ):
         self.drawCenteredText(
             baseImage,
-            text=self.truncateText(title, 24),
+            text=self.truncateText(title, self.TITLE_MAX_LENGTH),
             centerX=self.TITLE_X,
             y=self.TITLE_Y,
             fontSize=self.TITLE_FONT_SIZE,
