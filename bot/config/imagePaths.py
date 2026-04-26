@@ -92,6 +92,7 @@ ASSET_IMAGE_PATHS = {
     "cow_image_key" : "bot/assets/images/farm/animals/cow/cow_left.png",
 
     "currency_chill_coin": "bot/assets/images/common/cs_coin.png",
+    "level": "bot/assets/images/common/level.png",
     "shopScreen" : "bot/assets/images/farm/ui/shop.png",
     "train" : "bot/assets/images/farm/buildings/train.png",
 }

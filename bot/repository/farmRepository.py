@@ -41,6 +41,7 @@ class FarmRepository:
         return (
             self.session.query(Farm)
             .options(
+                joinedload(Farm.member),
                 joinedload(Farm.cropArea)
                 .joinedload(FarmCropArea.crop)
                 .joinedload(Crop.growthStages),

@@ -1,7 +1,8 @@
 from datetime import datetime
 from io import BytesIO
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
+from pathlib import Path
 
 from bot.config.database import getDbSession
 from bot.repository.farmRepository import FarmRepository
@@ -11,7 +12,20 @@ from bot.services.assetImageService import assetImageService
 class FarmRenderService:
     def __init__(self, bot):
         self.bot = bot
-    
+
+    STATUS_ICON_SIZE = 52
+    STATUS_FONT_SIZE = 42
+
+    COIN_ICON_X = 1320
+    COIN_ICON_Y = 28
+    COIN_TEXT_X = 1385
+    COIN_TEXT_Y = 34
+
+    LEVEL_ICON_X = 1320
+    LEVEL_ICON_Y = 90
+    LEVEL_TEXT_X = 1385
+    LEVEL_TEXT_Y = 96
+    FONT_PATH = Path("bot/assets/fonts/arial.ttf")
     AVATAR_X = 10
     AVATAR_Y = 10
     AVATAR_SIZE = 130
@@ -101,6 +115,8 @@ class FarmRenderService:
             trainImage = assetImageService.getImage("train")
             trainImage = self.resizeByScale(trainImage, self.TRAIN_SCALE)
             self.pasteSprite(baseImage, trainImage, x=self.TRAIN_X, y=self.TRAIN_Y)
+        
+        self.renderFarmStatusInfo(baseImage, farm)
 
         return baseImage
 
@@ -271,6 +287,74 @@ class FarmRenderService:
             (self.AVATAR_X, self.AVATAR_Y),
             avatarImage,
         )
+    
+    def renderFarmStatusInfo(self, baseImage: Image.Image, farm):
+        coinIcon = assetImageService.getImage("currency_chill_coin")
+        coinIcon = coinIcon.resize(
+            (self.STATUS_ICON_SIZE, self.STATUS_ICON_SIZE),
+            Image.LANCZOS,
+        )
+
+        levelIcon = assetImageService.getImage("level")
+        levelIcon = levelIcon.resize(
+            (self.STATUS_ICON_SIZE, self.STATUS_ICON_SIZE),
+            Image.LANCZOS,
+        )
+
+        self.pasteSprite(
+            baseImage,
+            coinIcon,
+            x=self.COIN_ICON_X,
+            y=self.COIN_ICON_Y,
+        )
+
+        self.pasteSprite(
+            baseImage,
+            levelIcon,
+            x=self.LEVEL_ICON_X,
+            y=self.LEVEL_ICON_Y,
+        )
+
+        member = farm.member
+        chillCoin = 0
+
+        if member is not None:
+            chillCoin = member.chill_coin
+
+        self.drawText(
+            baseImage,
+            text=self.formatNumber(chillCoin),
+            x=self.COIN_TEXT_X,
+            y=self.COIN_TEXT_Y,
+        )
+
+        self.drawText(
+            baseImage,
+            text=str(farm.farm_level),
+            x=self.LEVEL_TEXT_X,
+            y=self.LEVEL_TEXT_Y,
+        )
+    def drawText(
+        self,
+        baseImage: Image.Image,
+        text: str,
+        x: int,
+        y: int,
+    ):
+        draw = ImageDraw.Draw(baseImage)
+        font = ImageFont.truetype(str(self.FONT_PATH), self.STATUS_FONT_SIZE)
+
+        draw.text(
+            (x, y),
+            text,
+            font=font,
+            fill=(255, 255, 255, 255),
+            stroke_width=3,
+            stroke_fill=(0, 0, 0, 255),
+        )
+
+    def formatNumber(self, number: int):
+        return f"{number:,}"
 
     def convertImageToBuffer(self, image: Image.Image):
         buffer = BytesIO()
