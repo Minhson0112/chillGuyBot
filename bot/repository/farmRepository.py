@@ -45,6 +45,9 @@ class FarmRepository:
                 joinedload(Farm.cropArea)
                 .joinedload(FarmCropArea.crop)
                 .joinedload(Crop.growthStages),
+                joinedload(Farm.cropArea)
+                .joinedload(FarmCropArea.crop)
+                .joinedload(Crop.cropItem),
                 joinedload(Farm.chickenCoop),
                 joinedload(Farm.cowShed),
                 joinedload(Farm.fishPond),

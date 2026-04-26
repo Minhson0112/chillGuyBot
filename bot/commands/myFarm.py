@@ -5,11 +5,12 @@ from bot.services.farm.farmRenderService import FarmRenderService
 
 
 class MyFarmRefreshView(discord.ui.View):
-    def __init__(self, bot, authorId: int):
+    def __init__(self, bot, authorId: int, memberDisplayName: str):
         super().__init__(timeout=600)
 
         self.bot = bot
         self.authorId = authorId
+        self.memberDisplayName = memberDisplayName
         self.farmRenderService = FarmRenderService(bot)
 
     async def interaction_check(self, interaction: discord.Interaction):
@@ -25,11 +26,18 @@ class MyFarmRefreshView(discord.ui.View):
     @discord.ui.button(label="Làm mới", emoji="🔄", style=discord.ButtonStyle.secondary)
     async def refreshButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
-            buffer = await self.farmRenderService.renderFarmByMemberId(self.authorId)
+            renderResult = await self.farmRenderService.renderFarmByMemberId(self.authorId)
 
-            file = discord.File(buffer, filename="my_farm.png")
+            file = discord.File(
+                renderResult["buffer"],
+                filename="my_farm.png",
+            )
+
+            embed = self.buildFarmEmbed(renderResult["embedData"])
+            embed.set_image(url="attachment://my_farm.png")
 
             await interaction.response.edit_message(
+                embed=embed,
                 attachments=[file],
                 view=self,
             )
@@ -54,6 +62,38 @@ class MyFarmRefreshView(discord.ui.View):
                 ephemeral=True,
             )
 
+    def buildFarmEmbed(self, embedData):
+        embed = discord.Embed(
+            title=f"Farm của {self.memberDisplayName}",
+            color=discord.Color.green(),
+        )
+
+        embed.add_field(
+            name="Cây đang trồng",
+            value=embedData["cropText"],
+            inline=True,
+        )
+
+        embed.add_field(
+            name="Thu hoạch trong",
+            value=embedData["remainingTimeText"],
+            inline=True,
+        )
+
+        embed.add_field(
+            name="Trạng thái đất",
+            value=embedData["landStatusText"],
+            inline=True,
+        )
+
+        embed.add_field(
+            name="Sâu bệnh",
+            value=embedData["pestStatusText"],
+            inline=True,
+        )
+
+        return embed
+
 
 class MyFarmCommand(commands.Cog):
     def __init__(self, bot):
@@ -63,16 +103,27 @@ class MyFarmCommand(commands.Cog):
     @commands.command(name="myfarm")
     async def myFarm(self, ctx):
         try:
-            buffer = await self.farmRenderService.renderFarmByMemberId(ctx.author.id)
+            renderResult = await self.farmRenderService.renderFarmByMemberId(ctx.author.id)
 
-            file = discord.File(buffer, filename="my_farm.png")
+            file = discord.File(
+                renderResult["buffer"],
+                filename="my_farm.png",
+            )
 
             view = MyFarmRefreshView(
                 bot=self.bot,
                 authorId=ctx.author.id,
+                memberDisplayName=ctx.author.display_name,
             )
 
-            await ctx.reply(file=file, view=view)
+            embed = view.buildFarmEmbed(renderResult["embedData"])
+            embed.set_image(url="attachment://my_farm.png")
+
+            await ctx.reply(
+                embed=embed,
+                file=file,
+                view=view,
+            )
 
         except ValueError:
             await ctx.reply("Bạn chưa có nông trại. Hãy liên hệ quản trị viên để khởi tạo farm.")

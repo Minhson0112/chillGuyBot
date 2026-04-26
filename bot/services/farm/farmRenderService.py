@@ -5,6 +5,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 from bot.config.database import getDbSession
+from bot.config.emoji import FARM_GAME_EMOJI
 from bot.config.farmLevel import FARM_MAX_LEVEL, FARM_LEVEL_REQUIRED_EXP
 from bot.repository.farmRepository import FarmRepository
 from bot.services.assetImageService import assetImageService
@@ -80,13 +81,17 @@ class FarmRenderService:
                 raise ValueError(f"Farm not found for member id: {memberId}")
 
             image = self.renderFarmImage(farm)
+            embedData = self.buildFarmEmbedData(farm)
 
         avatarImage = await self.getMemberAvatarImage(memberId)
 
         if avatarImage is not None:
             self.pasteMemberAvatar(image, avatarImage)
 
-        return self.convertImageToBuffer(image)
+        return {
+            "buffer": self.convertImageToBuffer(image),
+            "embedData": embedData,
+        }
 
     def renderFarmImage(self, farm):
         baseImage = assetImageService.getImage(farm.base_image_key)
@@ -140,6 +145,54 @@ class FarmRenderService:
         self.renderFarmStatusInfo(baseImage, farm)
 
         return baseImage
+
+    def buildFarmEmbedData(self, farm):
+        cropArea = farm.cropArea
+
+        if cropArea is None:
+            return {
+                "cropText": "Chưa có khu đất",
+                "remainingTimeText": "-",
+                "landStatusText": "-",
+                "pestStatusText": "-",
+            }
+
+        cropText = "Chưa trồng cây"
+        remainingTimeText = "-"
+        landStatusText = "Khô" if cropArea.is_dry else "Ướt"
+        pestStatusText = "Có" if cropArea.is_pest_infected else "Không"
+
+        if cropArea.crop is not None:
+            crop = cropArea.crop
+            cropEmoji = ""
+
+            if crop.cropItem is not None:
+                cropEmoji = FARM_GAME_EMOJI.get(crop.cropItem.icon_image_key, "")
+
+            cropText = f"{cropEmoji} **{crop.name}**".strip()
+            remainingTimeText = self.buildRemainingHarvestTimeText(cropArea)
+
+        return {
+            "cropText": cropText,
+            "remainingTimeText": remainingTimeText,
+            "landStatusText": landStatusText,
+            "pestStatusText": pestStatusText,
+        }
+
+    def buildRemainingHarvestTimeText(self, cropArea):
+        if cropArea.harvestable_at is None:
+            return "-"
+
+        now = datetime.now()
+        remainingSeconds = int((cropArea.harvestable_at - now).total_seconds())
+
+        if remainingSeconds <= 0:
+            return "Có thể thu hoạch"
+
+        minutes = remainingSeconds // 60
+        seconds = remainingSeconds % 60
+
+        return f"{minutes}:{seconds:02d}"
 
     def resolveLandImageKey(self, cropArea):
         if cropArea is not None and cropArea.is_dry:
