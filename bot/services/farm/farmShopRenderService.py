@@ -20,7 +20,7 @@ class FarmShopRenderService:
 
     TITLE_TEXT = "Chill Shop"
 
-    TITLE_X = 760
+    TITLE_X = 770
     TITLE_Y = 70
 
     PAGE_TEXT_X = 765
@@ -29,7 +29,7 @@ class FarmShopRenderService:
     ITEM_ICON_SIZE = 72
     SMALL_ICON_SIZE = 24
 
-    ITEM_NAME_FONT_SIZE = 20
+    ITEM_NAME_FONT_SIZE = 30
     ITEM_ID_FONT_SIZE = 24
     PRICE_FONT_SIZE = 22
     LEVEL_FONT_SIZE = 22
@@ -49,11 +49,11 @@ class FarmShopRenderService:
     SLOT_WIDTH = 245
     SLOT_HEIGHT = 160
 
-    ITEM_NAME_OFFSET_Y = 5
-    ITEM_ICON_OFFSET_Y = 32
-    ITEM_ID_OFFSET_Y = 92
-    PRICE_OFFSET_Y = 120
-    LEVEL_OFFSET_Y = 120
+    ITEM_NAME_OFFSET_Y = 10
+    ITEM_ICON_OFFSET_Y = 40
+    ITEM_ID_OFFSET_Y = 110
+    PRICE_OFFSET_Y = 140
+    LEVEL_OFFSET_Y = 140
 
     PRICE_ICON_OFFSET_X = 55
     PRICE_TEXT_OFFSET_X = 84
@@ -61,7 +61,7 @@ class FarmShopRenderService:
     LEVEL_ICON_OFFSET_X = 150
     LEVEL_TEXT_OFFSET_X = 178
 
-    ITEM_NAME_MAX_LENGTH = 18
+    ITEM_NAME_MAX_LENGTH = 25
 
     def renderShopPageToBuffer(self, page: int = 1):
         with getDbSession() as session:
