@@ -29,6 +29,7 @@ class FarmShopRenderService:
     ITEM_ICON_SIZE = 72
     SMALL_ICON_SIZE = 24
 
+    ITEM_NAME_FONT_SIZE = 20
     ITEM_ID_FONT_SIZE = 24
     PRICE_FONT_SIZE = 22
     LEVEL_FONT_SIZE = 22
@@ -48,8 +49,9 @@ class FarmShopRenderService:
     SLOT_WIDTH = 245
     SLOT_HEIGHT = 160
 
-    ITEM_ICON_OFFSET_Y = 10
-    ITEM_ID_OFFSET_Y = 84
+    ITEM_NAME_OFFSET_Y = 5
+    ITEM_ICON_OFFSET_Y = 32
+    ITEM_ID_OFFSET_Y = 92
     PRICE_OFFSET_Y = 120
     LEVEL_OFFSET_Y = 120
 
@@ -58,6 +60,8 @@ class FarmShopRenderService:
 
     LEVEL_ICON_OFFSET_X = 150
     LEVEL_TEXT_OFFSET_X = 178
+
+    ITEM_NAME_MAX_LENGTH = 18
 
     def renderShopPageToBuffer(self, page: int = 1):
         with getDbSession() as session:
@@ -108,6 +112,8 @@ class FarmShopRenderService:
         if item is None:
             return
 
+        self.renderItemName(baseImage, item.name, slotX, slotY)
+
         itemIcon = assetImageService.getImage(item.icon_image_key)
         itemIcon = self.resizeItemIcon(itemIcon)
 
@@ -136,6 +142,21 @@ class FarmShopRenderService:
             shopItem.required_farm_level,
             slotX,
             slotY + self.LEVEL_OFFSET_Y,
+        )
+
+    def renderItemName(
+        self,
+        baseImage: Image.Image,
+        itemName: str,
+        slotX: int,
+        slotY: int,
+    ):
+        self.drawCenteredText(
+            baseImage,
+            text=self.truncateText(itemName, self.ITEM_NAME_MAX_LENGTH),
+            centerX=slotX + self.SLOT_WIDTH // 2,
+            y=slotY + self.ITEM_NAME_OFFSET_Y,
+            fontSize=self.ITEM_NAME_FONT_SIZE,
         )
 
     def renderPriceInfo(
@@ -290,6 +311,15 @@ class FarmShopRenderService:
 
     def formatNumber(self, number: int):
         return f"{number:,}"
+
+    def truncateText(self, text: str, maxLength: int):
+        if text is None:
+            return ""
+
+        if len(text) <= maxLength:
+            return text
+
+        return text[:maxLength - 3] + "..."
 
     def convertImageToBuffer(self, image: Image.Image):
         buffer = BytesIO()
