@@ -44,7 +44,10 @@ class UserInventoryRepository:
             .filter(UserInventory.user_id == userId)
             .filter(UserInventory.quantity > 0)
             .filter(Item.type_code.in_(["crop", "seed"]))
-            .order_by(asc(UserInventory.id))
+            .order_by(
+                asc(Item.type_code),
+                asc(UserInventory.id),
+            )
             .offset(offset)
             .limit(perPage)
             .all()
@@ -70,7 +73,10 @@ class UserInventoryRepository:
             .filter(UserInventory.user_id == userId)
             .filter(UserInventory.quantity > 0)
             .filter(~Item.type_code.in_(["crop", "seed"]))
-            .order_by(asc(UserInventory.id))
+            .order_by(
+                asc(Item.type_code),
+                asc(UserInventory.id),
+            )
             .offset(offset)
             .limit(perPage)
             .all()
