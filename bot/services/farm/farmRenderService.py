@@ -2,7 +2,6 @@ from datetime import datetime
 from io import BytesIO
 
 from PIL import Image
-from urllib.request import urlopen
 
 from bot.config.database import getDbSession
 from bot.repository.farmRepository import FarmRepository
@@ -47,10 +46,10 @@ class FarmRenderService:
 
             image = self.renderFarmImage(farm)
 
-            avatarImage = await self.getMemberAvatarImage(memberId)
+        avatarImage = await self.getMemberAvatarImage(memberId)
 
-            if avatarImage is not None:
-                self.pasteMemberAvatar(image, avatarImage)
+        if avatarImage is not None:
+            self.pasteMemberAvatar(image, avatarImage)
 
         return self.convertImageToBuffer(image)
 
@@ -260,13 +259,10 @@ class FarmRenderService:
             user = await self.bot.fetch_user(memberId)
 
         avatarAsset = user.display_avatar.replace(size=256, static_format="png")
-        avatarUrl = str(avatarAsset.url)
-
-        with urlopen(avatarUrl) as response:
-            avatarBytes = response.read()
+        avatarBytes = await avatarAsset.read()
 
         return Image.open(BytesIO(avatarBytes)).convert("RGBA")
-    
+        
     def pasteMemberAvatar(self, baseImage: Image.Image, avatarImage: Image.Image):
         avatarImage = avatarImage.resize((self.AVATAR_SIZE, self.AVATAR_SIZE), Image.LANCZOS)
 
