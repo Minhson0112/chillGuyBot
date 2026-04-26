@@ -16,15 +16,15 @@ class FarmRenderService:
     STATUS_ICON_SIZE = 52
     STATUS_FONT_SIZE = 42
 
-    COIN_ICON_X = 200
-    COIN_ICON_Y = 28
-    COIN_TEXT_X = 265
-    COIN_TEXT_Y = 34
+    COIN_ICON_X = 150
+    COIN_ICON_Y = 20
+    COIN_TEXT_X = 215
+    COIN_TEXT_Y = 26
 
-    LEVEL_ICON_X = 200
-    LEVEL_ICON_Y = 90
-    LEVEL_TEXT_X = 265
-    LEVEL_TEXT_Y = 96
+    LEVEL_ICON_X = 150
+    LEVEL_ICON_Y = 82
+    LEVEL_TEXT_X = 215
+    LEVEL_TEXT_Y = 88
     FONT_PATH = Path("bot/assets/fonts/arial.ttf")
     AVATAR_X = 10
     AVATAR_Y = 10
