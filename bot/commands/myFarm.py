@@ -1,10 +1,11 @@
 import discord
 from discord.ext import commands
 
+from bot.services.farm.farmHarvestService import FarmHarvestService
 from bot.services.farm.farmRenderService import FarmRenderService
 
 
-class MyFarmRefreshView(discord.ui.View):
+class MyFarmView(discord.ui.View):
     def __init__(self, bot, authorId: int, memberDisplayName: str):
         super().__init__(timeout=600)
 
@@ -12,11 +13,12 @@ class MyFarmRefreshView(discord.ui.View):
         self.authorId = authorId
         self.memberDisplayName = memberDisplayName
         self.farmRenderService = FarmRenderService(bot)
+        self.farmHarvestService = FarmHarvestService()
 
     async def interaction_check(self, interaction: discord.Interaction):
         if interaction.user.id != self.authorId:
             await interaction.response.send_message(
-                "Bạn không thể làm mới farm của người khác.",
+                "Bạn không thể thao tác farm của người khác.",
                 ephemeral=True,
             )
             return False
@@ -25,42 +27,56 @@ class MyFarmRefreshView(discord.ui.View):
 
     @discord.ui.button(label="Làm mới", emoji="🔄", style=discord.ButtonStyle.secondary)
     async def refreshButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.refreshFarmMessage(interaction)
+
+    @discord.ui.button(label="Thu hoạch", emoji="🌾", style=discord.ButtonStyle.success)
+    async def harvestButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
-            renderResult = await self.farmRenderService.renderFarmByMemberId(self.authorId)
+            harvestResult = self.farmHarvestService.harvestCrop(self.authorId)
 
-            file = discord.File(
-                renderResult["buffer"],
-                filename="my_farm.png",
-            )
+            if not harvestResult["success"]:
+                await interaction.response.send_message(
+                    harvestResult["message"],
+                    ephemeral=True,
+                )
+                return
 
-            embed = self.buildFarmEmbed(renderResult["embedData"])
-            embed.set_image(url="attachment://my_farm.png")
-
-            await interaction.response.edit_message(
-                embed=embed,
-                attachments=[file],
-                view=self,
-            )
-
-        except ValueError:
-            await interaction.response.send_message(
-                "Bạn chưa có nông trại. Hãy liên hệ quản trị viên để khởi tạo farm.",
-                ephemeral=True,
-            )
-
-        except FileNotFoundError as e:
-            print(f"Farm asset file not found: {e}")
-            await interaction.response.send_message(
-                "Không tìm thấy ảnh asset để render farm.",
-                ephemeral=True,
+            await self.refreshFarmMessage(
+                interaction=interaction,
+                extraMessage=harvestResult["message"],
             )
 
         except Exception as e:
-            print(f"Refresh farm error: {e}")
+            print(f"Harvest farm error: {e}")
             await interaction.response.send_message(
-                "Đã xảy ra lỗi khi làm mới farm.",
+                "Đã xảy ra lỗi khi thu hoạch.",
                 ephemeral=True,
             )
+
+    async def refreshFarmMessage(
+        self,
+        interaction: discord.Interaction,
+        extraMessage: str = None,
+    ):
+        renderResult = await self.farmRenderService.renderFarmByMemberId(self.authorId)
+
+        file = discord.File(
+            renderResult["buffer"],
+            filename="my_farm.png",
+        )
+
+        embed = self.buildFarmEmbed(renderResult["embedData"])
+
+        if extraMessage is not None:
+            embed.description = extraMessage
+
+        embed.set_image(url="attachment://my_farm.png")
+
+        await interaction.response.edit_message(
+            embed=embed,
+            attachments=[file],
+            view=self,
+        )
 
     def buildFarmEmbed(self, embedData):
         embed = discord.Embed(
@@ -110,7 +126,7 @@ class MyFarmCommand(commands.Cog):
                 filename="my_farm.png",
             )
 
-            view = MyFarmRefreshView(
+            view = MyFarmView(
                 bot=self.bot,
                 authorId=ctx.author.id,
                 memberDisplayName=ctx.author.display_name,
