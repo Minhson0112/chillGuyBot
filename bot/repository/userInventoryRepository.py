@@ -1,5 +1,7 @@
 from sqlalchemy import asc
 from sqlalchemy.orm import joinedload
+from bot.models.items import Item
+from bot.models.userInventory import UserInventory
 
 from bot.models.userInventory import UserInventory
 
