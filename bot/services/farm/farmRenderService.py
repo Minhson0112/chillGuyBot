@@ -1,10 +1,11 @@
 from datetime import datetime
 from io import BytesIO
-
-from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
 
+from PIL import Image, ImageDraw, ImageFont
+
 from bot.config.database import getDbSession
+from bot.config.farmLevel import FARM_MAX_LEVEL, FARM_LEVEL_REQUIRED_EXP
 from bot.repository.farmRepository import FarmRepository
 from bot.services.assetImageService import assetImageService
 
@@ -12,6 +13,12 @@ from bot.services.assetImageService import assetImageService
 class FarmRenderService:
     def __init__(self, bot):
         self.bot = bot
+
+    FONT_PATH = Path("bot/assets/fonts/arial.ttf")
+
+    AVATAR_X = 10
+    AVATAR_Y = 10
+    AVATAR_SIZE = 130
 
     STATUS_ICON_SIZE = 52
     STATUS_FONT_SIZE = 42
@@ -25,10 +32,24 @@ class FarmRenderService:
     LEVEL_ICON_Y = 82
     LEVEL_TEXT_X = 215
     LEVEL_TEXT_Y = 88
-    FONT_PATH = Path("bot/assets/fonts/arial.ttf")
-    AVATAR_X = 10
-    AVATAR_Y = 10
-    AVATAR_SIZE = 130
+
+    EXP_ICON_X = 430
+    EXP_ICON_Y = 28
+    EXP_ICON_SIZE = 46
+
+    EXP_BAR_X = 490
+    EXP_BAR_Y = 35
+    EXP_BAR_WIDTH = 360
+    EXP_BAR_HEIGHT = 32
+
+    EXP_TEXT_X = 630
+    EXP_TEXT_Y = 37
+    EXP_FONT_SIZE = 22
+
+    EXP_BAR_BACKGROUND_FILL = (45, 35, 35, 220)
+    EXP_BAR_FILL = (90, 200, 255, 255)
+    EXP_BAR_BORDER_FILL = (255, 255, 255, 255)
+
     LAND_WET_IMAGE_KEY = "farm_land_wet"
     LAND_DRY_IMAGE_KEY = "farm_land_dry"
 
@@ -115,7 +136,7 @@ class FarmRenderService:
             trainImage = assetImageService.getImage("train")
             trainImage = self.resizeByScale(trainImage, self.TRAIN_SCALE)
             self.pasteSprite(baseImage, trainImage, x=self.TRAIN_X, y=self.TRAIN_Y)
-        
+
         self.renderFarmStatusInfo(baseImage, farm)
 
         return baseImage
@@ -212,6 +233,132 @@ class FarmRenderService:
 
         return max(elapsedSeconds, 0)
 
+    def renderFarmStatusInfo(self, baseImage: Image.Image, farm):
+        self.renderChillCoinInfo(baseImage, farm)
+        self.renderFarmLevelInfo(baseImage, farm)
+        self.renderFarmExpInfo(baseImage, farm)
+
+    def renderChillCoinInfo(self, baseImage: Image.Image, farm):
+        coinIcon = assetImageService.getImage("currency_chill_coin")
+        coinIcon = coinIcon.resize(
+            (self.STATUS_ICON_SIZE, self.STATUS_ICON_SIZE),
+            Image.LANCZOS,
+        )
+
+        self.pasteSprite(
+            baseImage,
+            coinIcon,
+            x=self.COIN_ICON_X,
+            y=self.COIN_ICON_Y,
+        )
+
+        chillCoin = 0
+
+        if farm.member is not None:
+            chillCoin = farm.member.chill_coin
+
+        self.drawStatusText(
+            baseImage,
+            text=self.formatNumber(chillCoin),
+            x=self.COIN_TEXT_X,
+            y=self.COIN_TEXT_Y,
+        )
+
+    def renderFarmLevelInfo(self, baseImage: Image.Image, farm):
+        levelIcon = assetImageService.getImage("level")
+        levelIcon = levelIcon.resize(
+            (self.STATUS_ICON_SIZE, self.STATUS_ICON_SIZE),
+            Image.LANCZOS,
+        )
+
+        self.pasteSprite(
+            baseImage,
+            levelIcon,
+            x=self.LEVEL_ICON_X,
+            y=self.LEVEL_ICON_Y,
+        )
+
+        self.drawStatusText(
+            baseImage,
+            text=str(farm.farm_level),
+            x=self.LEVEL_TEXT_X,
+            y=self.LEVEL_TEXT_Y,
+        )
+
+    def renderFarmExpInfo(self, baseImage: Image.Image, farm):
+        expIcon = assetImageService.getImage("exp")
+        expIcon = expIcon.resize(
+            (self.EXP_ICON_SIZE, self.EXP_ICON_SIZE),
+            Image.LANCZOS,
+        )
+
+        self.pasteSprite(
+            baseImage,
+            expIcon,
+            x=self.EXP_ICON_X,
+            y=self.EXP_ICON_Y,
+        )
+
+        currentExp = max(farm.farm_exp, 0)
+        requiredExp = self.getRequiredExpForNextLevel(farm.farm_level)
+
+        if requiredExp is None:
+            progressRate = 1
+            expText = "MAX"
+        else:
+            currentExp = min(currentExp, requiredExp)
+            progressRate = currentExp / requiredExp
+            expText = f"{self.formatNumber(currentExp)}/{self.formatNumber(requiredExp)}"
+
+        self.drawExpBar(baseImage, progressRate)
+
+        self.drawTextWithFontSize(
+            baseImage,
+            text=expText,
+            x=self.EXP_TEXT_X,
+            y=self.EXP_TEXT_Y,
+            fontSize=self.EXP_FONT_SIZE,
+        )
+
+    def drawExpBar(self, baseImage: Image.Image, progressRate: float):
+        draw = ImageDraw.Draw(baseImage)
+
+        progressRate = max(0, min(progressRate, 1))
+        filledWidth = int(self.EXP_BAR_WIDTH * progressRate)
+
+        barLeft = self.EXP_BAR_X
+        barTop = self.EXP_BAR_Y
+        barRight = self.EXP_BAR_X + self.EXP_BAR_WIDTH
+        barBottom = self.EXP_BAR_Y + self.EXP_BAR_HEIGHT
+
+        draw.rounded_rectangle(
+            (barLeft, barTop, barRight, barBottom),
+            radius=8,
+            fill=self.EXP_BAR_BACKGROUND_FILL,
+            outline=self.EXP_BAR_BORDER_FILL,
+            width=2,
+        )
+
+        if filledWidth > 0:
+            draw.rounded_rectangle(
+                (
+                    barLeft,
+                    barTop,
+                    barLeft + filledWidth,
+                    barBottom,
+                ),
+                radius=8,
+                fill=self.EXP_BAR_FILL,
+            )
+
+    def getRequiredExpForNextLevel(self, currentLevel: int):
+        if currentLevel >= FARM_MAX_LEVEL:
+            return None
+
+        nextLevel = currentLevel + 1
+
+        return FARM_LEVEL_REQUIRED_EXP.get(nextLevel)
+
     def resizeByScale(self, image: Image.Image, scale: float):
         width = int(image.width * scale)
         height = int(image.height * scale)
@@ -278,7 +425,7 @@ class FarmRenderService:
         avatarBytes = await avatarAsset.read()
 
         return Image.open(BytesIO(avatarBytes)).convert("RGBA")
-        
+
     def pasteMemberAvatar(self, baseImage: Image.Image, avatarImage: Image.Image):
         avatarImage = avatarImage.resize((self.AVATAR_SIZE, self.AVATAR_SIZE), Image.LANCZOS)
 
@@ -287,69 +434,41 @@ class FarmRenderService:
             (self.AVATAR_X, self.AVATAR_Y),
             avatarImage,
         )
-    
-    def renderFarmStatusInfo(self, baseImage: Image.Image, farm):
-        coinIcon = assetImageService.getImage("currency_chill_coin")
-        coinIcon = coinIcon.resize(
-            (self.STATUS_ICON_SIZE, self.STATUS_ICON_SIZE),
-            Image.LANCZOS,
-        )
 
-        levelIcon = assetImageService.getImage("level")
-        levelIcon = levelIcon.resize(
-            (self.STATUS_ICON_SIZE, self.STATUS_ICON_SIZE),
-            Image.LANCZOS,
-        )
-
-        self.pasteSprite(
-            baseImage,
-            coinIcon,
-            x=self.COIN_ICON_X,
-            y=self.COIN_ICON_Y,
-        )
-
-        self.pasteSprite(
-            baseImage,
-            levelIcon,
-            x=self.LEVEL_ICON_X,
-            y=self.LEVEL_ICON_Y,
-        )
-
-        member = farm.member
-        chillCoin = 0
-
-        if member is not None:
-            chillCoin = member.chill_coin
-
-        self.drawText(
-            baseImage,
-            text=self.formatNumber(chillCoin),
-            x=self.COIN_TEXT_X,
-            y=self.COIN_TEXT_Y,
-        )
-
-        self.drawText(
-            baseImage,
-            text=str(farm.farm_level),
-            x=self.LEVEL_TEXT_X,
-            y=self.LEVEL_TEXT_Y,
-        )
-    def drawText(
+    def drawStatusText(
         self,
         baseImage: Image.Image,
         text: str,
         x: int,
         y: int,
     ):
+        self.drawTextWithFontSize(
+            baseImage,
+            text=text,
+            x=x,
+            y=y,
+            fontSize=self.STATUS_FONT_SIZE,
+            strokeWidth=3,
+        )
+
+    def drawTextWithFontSize(
+        self,
+        baseImage: Image.Image,
+        text: str,
+        x: int,
+        y: int,
+        fontSize: int,
+        strokeWidth: int = 2,
+    ):
         draw = ImageDraw.Draw(baseImage)
-        font = ImageFont.truetype(str(self.FONT_PATH), self.STATUS_FONT_SIZE)
+        font = ImageFont.truetype(str(self.FONT_PATH), fontSize)
 
         draw.text(
             (x, y),
             text,
             font=font,
             fill=(255, 255, 255, 255),
-            stroke_width=3,
+            stroke_width=strokeWidth,
             stroke_fill=(0, 0, 0, 255),
         )
 
