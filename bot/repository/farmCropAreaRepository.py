@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from sqlalchemy import and_, or_
 
 from bot.models.farmCropArea import FarmCropArea
 
@@ -141,3 +142,24 @@ class FarmCropAreaRepository:
         self.session.flush()
 
         return farmCropArea
+
+    def findCropAreasNeedDry(self, now: datetime, dryThresholdMinutes: int):
+        thresholdAt = now - timedelta(minutes=dryThresholdMinutes)
+
+        return (
+            self.session.query(FarmCropArea)
+            .filter(FarmCropArea.crop_id.isnot(None))
+            .filter(FarmCropArea.planted_at.isnot(None))
+            .filter(FarmCropArea.harvestable_at > now)
+            .filter(FarmCropArea.is_dry.is_(False))
+            .filter(
+                or_(
+                    FarmCropArea.last_watered_at <= thresholdAt,
+                    and_(
+                        FarmCropArea.last_watered_at.is_(None),
+                        FarmCropArea.planted_at <= thresholdAt,
+                    ),
+                )
+            )
+            .all()
+        )

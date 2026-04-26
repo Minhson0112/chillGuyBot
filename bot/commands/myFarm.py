@@ -3,6 +3,7 @@ from discord.ext import commands
 
 from bot.services.farm.farmHarvestService import FarmHarvestService
 from bot.services.farm.farmRenderService import FarmRenderService
+from bot.services.farm.farmWaterService import FarmWaterService
 
 
 class MyFarmView(discord.ui.View):
@@ -14,6 +15,7 @@ class MyFarmView(discord.ui.View):
         self.memberDisplayName = memberDisplayName
         self.farmRenderService = FarmRenderService(bot)
         self.farmHarvestService = FarmHarvestService()
+        self.farmWaterService = FarmWaterService()
 
     async def interaction_check(self, interaction: discord.Interaction):
         if interaction.user.id != self.authorId:
@@ -28,6 +30,30 @@ class MyFarmView(discord.ui.View):
     @discord.ui.button(label="Làm mới", emoji="🔄", style=discord.ButtonStyle.secondary)
     async def refreshButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.refreshFarmMessage(interaction)
+
+    @discord.ui.button(label="Tưới nước", emoji="💧", style=discord.ButtonStyle.primary)
+    async def waterButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            waterResult = self.farmWaterService.waterCrop(self.authorId)
+
+            if not waterResult["success"]:
+                await interaction.response.send_message(
+                    waterResult["message"],
+                    ephemeral=True,
+                )
+                return
+
+            await self.refreshFarmMessage(
+                interaction=interaction,
+                extraMessage=waterResult["message"],
+            )
+
+        except Exception as e:
+            print(f"Water farm error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi tưới nước.",
+                ephemeral=True,
+            )
 
     @discord.ui.button(label="Thu hoạch", emoji="🌾", style=discord.ButtonStyle.success)
     async def harvestButton(self, interaction: discord.Interaction, button: discord.ui.Button):
