@@ -11,6 +11,7 @@ from bot.repository.musicEventRepository import MusicEventRepository
 from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
 from bot.services.wordle.wordleStartupService import WordleStartupService
 from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryStartupService
+from bot.services.assetImageService import assetImageService
 
 autoResponderCacheService = AutoResponderCacheService()
 wordleStartupService = WordleStartupService()
@@ -71,6 +72,7 @@ async def on_ready():
 
         loadedWordCount = wordleDictionaryStartupService.loadWordsToCache()
         print(f"✅ Đã load wordle dictionary: {loadedWordCount} từ")
+        assetImageService.preloadAssets()
     except Exception as e:
         print(f"❌ Lỗi sync commands: {e}")
 
