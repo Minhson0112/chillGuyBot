@@ -131,3 +131,11 @@ class UserInventoryRepository:
     def delete(self, userInventory: UserInventory):
         self.session.delete(userInventory)
         self.session.flush()
+
+    def findByIdWithItem(self, userInventoryId: int):
+        return (
+            self.session.query(UserInventory)
+            .options(joinedload(UserInventory.item))
+            .filter(UserInventory.id == userInventoryId)
+            .first()
+        )
