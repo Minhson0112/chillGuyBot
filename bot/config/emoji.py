@@ -85,3 +85,40 @@ WORDLE_LETTER_EMOJI = {
         "Z": "<:Z_green:1487329555214766120>",
     },
 }
+
+FARM_GAME_EMOJI = {
+    "chill_coin": "<:cs_coin:1495116560191324383>",
+
+    "item_wheat_seed": "<:Wheat_seed:1495568410220953600>",
+    "item_wheat": "<:Wheat:1495568381494038559>",
+
+    "item_potato_seed" : "<:Potato_seed:1495567240878231694>",
+    "item_potato" : "<:Potato:1495567150537113691>",
+
+    "item_parsnip_seed" : "<:Parsnip_seed:1495567095360917574>",
+    "item_parsnip" : "<:Parsnip:1495567054067990578>",
+
+    "item_green_bean_seed" : "<:Green_Bean_seed:1495566575108096160>",
+    "item_green_bean" : "<:Green_Bean:1495566506279571506>",
+
+    "item_hops_seed" : "<:Hops_seed:1495566686563078235>",
+    "item_hops" : "<:Hops:1495566648588107826>",
+
+    "item_cauliflower_seed" : "<:Cauliflower_seed:1495565937112383559>",
+    "item_cauliflower" : "<:Cauliflower:1495565887837704304>",
+
+    "item_garlic_seed" : "<:Garlic_seed:1495566339329359972>",
+    "item_garlic" : "<:Garlic:1495566310594314333>",
+
+    "item_kale_seed" : "<:Kale_seed:1495566870206746765>",
+    "item_kale" : "<:Kale:1495566799964471446>",
+
+    "item_rhubarb_seed" : "<:Rhubarb_seed:1495567770534940742>",
+    "item_rhubarb" : "<:Rhubarb:1495567698199969993>",
+
+    "item_tomato_seed" : "<:Tomato_seed:1495568324858220574>",
+    "item_tomato" : "<:Tomato:1495568292297965670>",
+
+    "item_melon_seed" : "<:Melon_seed:1495566990788792384>",
+    "item_melon" : "<:Melon:1495566935604203630>",
+}

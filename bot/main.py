@@ -121,6 +121,7 @@ async def main():
         "bot.commands.memberBirthday",
         "bot.commands.myFarm",
         "bot.commands.shopFarm",
+        "bot.commands.cash",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
