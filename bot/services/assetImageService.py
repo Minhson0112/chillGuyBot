@@ -25,7 +25,7 @@ class AssetImageService:
             missingText = "\n".join(missingAssets)
             raise FileNotFoundError(f"Missing asset images:\n{missingText}")
 
-        print(f"Loaded {len(self.cache)} asset images")
+        print(f"✅ đã load {len(self.cache)} asset images")
 
     def getImage(self, imageKey: str):
         image = self.cache.get(imageKey)

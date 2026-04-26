@@ -1,5 +1,7 @@
 ASSET_IMAGE_PATHS = {
-    "farm_base": "bot/assets/images/farm/base/base.png",
+    "base": "bot/assets/images/farm/base/base.png",
+    "farm_land_wet" : "bot/assets/images/farm/base/farmland_wet.png",
+    "farm_land_dry" : "bot/assets/images/farm/base/farmland_dry.png",
 
     "crop_wheat_stage_1": "bot/assets/images/farm/crops/wheat/stage_1.png",
     "crop_wheat_stage_2": "bot/assets/images/farm/crops/wheat/stage_2.png",
