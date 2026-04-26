@@ -33,17 +33,17 @@ class FarmRenderService:
     LEVEL_TEXT_X = 215
     LEVEL_TEXT_Y = 88
 
-    EXP_ICON_X = 430
-    EXP_ICON_Y = 28
+    EXP_ICON_X = 530
+    EXP_ICON_Y = 18
     EXP_ICON_SIZE = 46
 
-    EXP_BAR_X = 490
-    EXP_BAR_Y = 35
+    EXP_BAR_X = 590
+    EXP_BAR_Y = 25
     EXP_BAR_WIDTH = 360
     EXP_BAR_HEIGHT = 32
 
-    EXP_TEXT_X = 630
-    EXP_TEXT_Y = 37
+    EXP_TEXT_X = 730
+    EXP_TEXT_Y = 27
     EXP_FONT_SIZE = 22
 
     EXP_BAR_BACKGROUND_FILL = (45, 35, 35, 220)
@@ -221,15 +221,6 @@ class FarmRenderService:
     def calculateElapsedGrowthSeconds(self, cropArea):
         now = datetime.now()
         elapsedSeconds = int((now - cropArea.planted_at).total_seconds())
-
-        elapsedSeconds -= cropArea.total_dry_seconds
-        elapsedSeconds -= cropArea.total_pest_seconds
-
-        if cropArea.is_dry and cropArea.dryness_started_at is not None:
-            elapsedSeconds -= int((now - cropArea.dryness_started_at).total_seconds())
-
-        if cropArea.is_pest_infected and cropArea.pest_started_at is not None:
-            elapsedSeconds -= int((now - cropArea.pest_started_at).total_seconds())
 
         return max(elapsedSeconds, 0)
 
