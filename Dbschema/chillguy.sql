@@ -207,7 +207,7 @@ ADD COLUMN chill_coin INT NOT NULL DEFAULT 0 COMMENT 'server private currency';
 #update 10 (farm)
 CREATE TABLE farm (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm id',
-    user_id BIGINT NOT NULL COMMENT 'owner discord user id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'owner discord user id',
     farm_level INT NOT NULL DEFAULT 1 COMMENT 'farm level',
     farm_exp INT NOT NULL DEFAULT 0 COMMENT 'farm experience',
     base_image_key VARCHAR(255) DEFAULT "base" COMMENT 'base image key for farm rendering',
@@ -347,7 +347,7 @@ CREATE TABLE shop_items (
 
 CREATE TABLE user_inventory (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'user inventory id',
-    user_id BIGINT NOT NULL COMMENT 'discord user id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
     item_id BIGINT NOT NULL COMMENT 'item id',
     quantity BIGINT NOT NULL DEFAULT 0 COMMENT 'item quantity',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
@@ -446,8 +446,8 @@ CREATE TABLE farm_fish_pond (
 CREATE TABLE chill_coin_transactions (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'transaction id',
 
-    from_user_id BIGINT NOT NULL COMMENT 'sender user id',
-    to_user_id BIGINT NOT NULL COMMENT 'receiver user id',
+    from_user_id BIGINT UNSIGNED NOT NULL COMMENT 'sender user id',
+    to_user_id BIGINT UNSIGNED NOT NULL COMMENT 'receiver user id',
 
     amount BIGINT NOT NULL COMMENT 'amount of chill coin transferred',
 
