@@ -396,3 +396,127 @@ ON DUPLICATE KEY UPDATE
     is_sellable = VALUES(is_sellable),
     is_usable = VALUES(is_usable),
     is_active = VALUES(is_active);
+
+# update 2
+INSERT INTO items (
+    code,
+    name,
+    type_code,
+    icon_image_key,
+    description,
+    render_scale,
+    render_offset_y,
+    sell_price,
+    is_sellable,
+    is_usable,
+    is_active
+) VALUES
+(
+    'chicken',
+    'con gà',
+    'animal',
+    'item_chicken',
+    NULL,
+    1.0,
+    0,
+    0,
+    0,
+    0,
+    1
+),
+(
+    'cow',
+    'con bò',
+    'animal',
+    'item_cow',
+    NULL,
+    1.0,
+    0,
+    0,
+    0,
+    0,
+    1
+)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    type_code = VALUES(type_code),
+    icon_image_key = VALUES(icon_image_key),
+    description = VALUES(description),
+    render_scale = VALUES(render_scale),
+    render_offset_y = VALUES(render_offset_y),
+    sell_price = VALUES(sell_price),
+    is_sellable = VALUES(is_sellable),
+    is_usable = VALUES(is_usable),
+    is_active = VALUES(is_active);
+
+INSERT INTO shop_items (
+    item_id,
+    buy_price,
+    required_farm_level,
+    is_visible,
+    is_active,
+    sort_order
+)
+SELECT
+    i.id,
+    6,
+    1,
+    1,
+    1,
+    14
+FROM items i
+WHERE i.code = 'bug'
+ON DUPLICATE KEY UPDATE
+    buy_price = VALUES(buy_price),
+    required_farm_level = VALUES(required_farm_level),
+    is_visible = VALUES(is_visible),
+    is_active = VALUES(is_active),
+    sort_order = VALUES(sort_order);
+
+INSERT INTO shop_items (
+    item_id,
+    buy_price,
+    required_farm_level,
+    is_visible,
+    is_active,
+    sort_order
+)
+SELECT
+    i.id,
+    50,
+    1,
+    1,
+    1,
+    15
+FROM items i
+WHERE i.code = 'chicken'
+ON DUPLICATE KEY UPDATE
+    buy_price = VALUES(buy_price),
+    required_farm_level = VALUES(required_farm_level),
+    is_visible = VALUES(is_visible),
+    is_active = VALUES(is_active),
+    sort_order = VALUES(sort_order);
+
+INSERT INTO shop_items (
+    item_id,
+    buy_price,
+    required_farm_level,
+    is_visible,
+    is_active,
+    sort_order
+)
+SELECT
+    i.id,
+    100,
+    1,
+    1,
+    1,
+    16
+FROM items i
+WHERE i.code = 'cow'
+ON DUPLICATE KEY UPDATE
+    buy_price = VALUES(buy_price),
+    required_farm_level = VALUES(required_farm_level),
+    is_visible = VALUES(is_visible),
+    is_active = VALUES(is_active),
+    sort_order = VALUES(sort_order);

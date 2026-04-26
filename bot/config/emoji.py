@@ -91,6 +91,10 @@ FARM_GAME_EMOJI = {
 
     "item_bug": "<:bug:1498089075867914281>",
 
+    "item_chicken": "<:chicken_left:1495565972692537415>",
+
+    "item_cow": "<:cow_left:1495566015164317747>",
+
     "item_wheat_seed": "<:Wheat_seed:1495568410220953600>",
     "item_wheat": "<:Wheat:1495568381494038559>",
 
