@@ -209,8 +209,8 @@ class FarmRenderService:
         return self.LAND_GRID_POSITIONS[:plotCount]
 
     def renderChickens(self, baseImage: Image.Image, chickenCoop):
-        if chickenCoop.chicken_count >= 1 and chickenCoop.chicken_1_image_key is not None:
-            chickenImage = assetImageService.getImage(chickenCoop.chicken_1_image_key)
+        if chickenCoop.chicken_count >= 1:
+            chickenImage = assetImageService.getImage("chicken_1_image_key")
             chickenImage = self.resizeByScale(chickenImage, chickenCoop.render_scale)
 
             self.pasteSprite(
@@ -220,8 +220,8 @@ class FarmRenderService:
                 y=chickenCoop.chicken_1_y,
             )
 
-        if chickenCoop.chicken_count >= 2 and chickenCoop.chicken_2_image_key is not None:
-            chickenImage = assetImageService.getImage(chickenCoop.chicken_2_image_key)
+        if chickenCoop.chicken_count >= 2:
+            chickenImage = assetImageService.getImage("chicken_2_image_key")
             chickenImage = self.resizeByScale(chickenImage, chickenCoop.render_scale)
 
             self.pasteSprite(
@@ -235,10 +235,7 @@ class FarmRenderService:
         if cowShed.cow_count < 1:
             return
 
-        if cowShed.cow_image_key is None:
-            return
-
-        cowImage = assetImageService.getImage(cowShed.cow_image_key)
+        cowImage = assetImageService.getImage("cow_image_key")
         cowImage = self.resizeByScale(cowImage, cowShed.render_scale)
 
         self.pasteSprite(
