@@ -184,3 +184,10 @@ class FarmCropAreaRepository:
             )
             .all()
         )
+    
+    def increaseUnlockedPlotCount(self, farmCropArea):
+        farmCropArea.unlocked_plot_count += 1
+
+        self.session.flush()
+
+        return farmCropArea
