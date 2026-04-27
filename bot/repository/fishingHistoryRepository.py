@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from sqlalchemy import asc, desc
 from sqlalchemy.orm import joinedload
 
 from bot.models.fishingHistory import FishingHistory
@@ -35,9 +34,9 @@ class FishingHistoryRepository:
                 joinedload(FishingHistory.item),
             )
             .order_by(
-                desc(FishingHistory.weight_kg),
-                asc(FishingHistory.caught_at),
-                asc(FishingHistory.id),
+                FishingHistory.weight_kg.desc(),
+                FishingHistory.caught_at.asc(),
+                FishingHistory.id.asc(),
             )
             .limit(10)
             .all()
@@ -64,9 +63,9 @@ class FishingHistoryRepository:
             .filter(FishingHistory.caught_at >= startAt)
             .filter(FishingHistory.caught_at < endAt)
             .order_by(
-                desc(FishingHistory.weight_kg),
-                asc(FishingHistory.caught_at),
-                asc(FishingHistory.id),
+                FishingHistory.weight_kg.desc(),
+                FishingHistory.caught_at.asc(),
+                FishingHistory.id.asc(),
             )
             .limit(10)
             .all()
@@ -80,9 +79,9 @@ class FishingHistoryRepository:
             )
             .filter(FishingHistory.user_id == userId)
             .order_by(
-                desc(FishingHistory.weight_kg),
-                desc(FishingHistory.caught_at),
-                desc(FishingHistory.id),
+                FishingHistory.weight_kg.desc(),
+                FishingHistory.caught_at.desc(),
+                FishingHistory.id.desc(),
             )
             .all()
         )
@@ -95,9 +94,9 @@ class FishingHistoryRepository:
             )
             .filter(FishingHistory.user_id == userId)
             .order_by(
-                desc(FishingHistory.weight_kg),
-                asc(FishingHistory.caught_at),
-                asc(FishingHistory.id),
+                FishingHistory.weight_kg.desc(),
+                FishingHistory.caught_at.asc(),
+                FishingHistory.id.asc(),
             )
             .first()
         )
@@ -114,8 +113,8 @@ class FishingHistoryRepository:
             )
             .filter(FishingHistory.user_id == userId)
             .order_by(
-                desc(FishingHistory.caught_at),
-                desc(FishingHistory.id),
+                FishingHistory.caught_at.desc(),
+                FishingHistory.id.desc(),
             )
             .limit(limit)
             .all()
