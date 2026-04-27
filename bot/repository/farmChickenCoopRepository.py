@@ -23,3 +23,18 @@ class FarmChickenCoopRepository:
         self.session.flush()
 
         return farmChickenCoop
+    
+    def increaseChickenCount(self, farmChickenCoop: FarmChickenCoop):
+        farmChickenCoop.chicken_count += 1
+
+        if farmChickenCoop.chicken_count == 1:
+            farmChickenCoop.chicken_1_x = 300
+            farmChickenCoop.chicken_1_y = 470
+
+        if farmChickenCoop.chicken_count == 2:
+            farmChickenCoop.chicken_2_x = 200
+            farmChickenCoop.chicken_2_y = 520
+
+        self.session.flush()
+
+        return farmChickenCoop

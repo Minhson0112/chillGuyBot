@@ -4,9 +4,13 @@ from bot.repository.farmRepository import FarmRepository
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.shopItemRepository import ShopItemRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.farmAnimalBuyService import FarmAnimalBuyService
 
 
 class FarmShopBuyService:
+    def __init__(self):
+        self.farmAnimalBuyService = FarmAnimalBuyService()
+
     def buyShopItem(
         self,
         userId: int,
@@ -59,7 +63,6 @@ class FarmShopBuyService:
                 }
 
             item = shopItem.item
-
             itemText = self.buildItemText(item)
             chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
@@ -72,6 +75,12 @@ class FarmShopBuyService:
                     ),
                 }
 
+            if self.farmAnimalBuyService.canHandle(item.code) and quantity != 1:
+                return {
+                    "success": False,
+                    "message": f"{itemText} chỉ có thể mua từng con một.",
+                }
+
             totalPrice = shopItem.buy_price * quantity
 
             if member.chill_coin < totalPrice:
@@ -81,6 +90,27 @@ class FarmShopBuyService:
                         f"Mua **{quantity}** {itemText} cần "
                         f"{chillCoinEmoji} **{self.formatNumber(totalPrice)}**, "
                         f"bạn chỉ có {chillCoinEmoji} **{self.formatNumber(member.chill_coin)}**."
+                    ),
+                }
+
+            if self.farmAnimalBuyService.canHandle(item.code):
+                animalBuyResult = self.farmAnimalBuyService.buyAnimal(
+                    session=session,
+                    farm=farm,
+                    itemCode=item.code,
+                )
+
+                if not animalBuyResult["success"]:
+                    return animalBuyResult
+
+                member.chill_coin -= totalPrice
+                session.commit()
+
+                return {
+                    "success": True,
+                    "message": (
+                        f"{animalBuyResult['message']} "
+                        f"Bạn đã trả {chillCoinEmoji} **{self.formatNumber(totalPrice)}**."
                     ),
                 }
 

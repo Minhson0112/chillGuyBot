@@ -23,3 +23,14 @@ class FarmCowShedRepository:
         self.session.flush()
 
         return farmCowShed
+    
+    def increaseCowCount(self, farmCowShed: FarmCowShed):
+        farmCowShed.cow_count += 1
+
+        if farmCowShed.cow_count == 1:
+            farmCowShed.cow_x = 180
+            farmCowShed.cow_y = 220
+
+        self.session.flush()
+
+        return farmCowShed
