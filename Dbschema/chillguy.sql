@@ -509,8 +509,8 @@ CREATE TABLE fishing_history (
 CREATE TABLE farm_market_listings (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'market listing id',
 
-    seller_user_id BIGINT NOT NULL COMMENT 'seller discord user id',
-    buyer_user_id BIGINT DEFAULT NULL COMMENT 'buyer discord user id',
+    seller_user_id BIGINT UNSIGNED NOT NULL COMMENT 'seller discord user id',
+    buyer_user_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'buyer discord user id',
 
     item_id BIGINT NOT NULL COMMENT 'listed item id',
     quantity BIGINT NOT NULL DEFAULT 1 COMMENT 'listed item quantity',
