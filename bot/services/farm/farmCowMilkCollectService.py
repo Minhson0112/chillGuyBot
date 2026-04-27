@@ -12,6 +12,7 @@ class FarmCowMilkCollectService:
     MILK_ITEM_CODE = "milk"
     HUNGRY_INTERVAL_MINUTES = 30
     MILK_COLLECT_INTERVAL_MINUTES = 15
+    MILK_COLLECT_EXP = 1
 
     def collectMilk(self, userId: int):
         with getDbSession() as session:
@@ -75,6 +76,7 @@ class FarmCowMilkCollectService:
             )
 
             farmCowShedRepository.markMilkCollected(cowShed)
+            farmRepository.increaseFarmExp(farm, self.MILK_COLLECT_EXP)
 
             session.commit()
 

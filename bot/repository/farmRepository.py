@@ -3,6 +3,7 @@ from sqlalchemy.orm import joinedload
 from bot.models.farm import Farm
 from bot.models.farmCropArea import FarmCropArea
 from bot.models.crop import Crop
+from bot.config.farmLevel import FARM_MAX_LEVEL, FARM_LEVEL_REQUIRED_EXP
 
 
 class FarmRepository:
@@ -99,3 +100,48 @@ class FarmRepository:
         self.session.flush()
 
         return farm
+    
+    def increaseFarmExp(self, farm, exp: int):
+        if exp <= 0:
+            return farm
+
+        if farm.farm_level >= FARM_MAX_LEVEL:
+            farm.farm_exp = 0
+            self.session.flush()
+            return farm
+
+        farm.farm_exp += exp
+
+        while farm.farm_level < FARM_MAX_LEVEL:
+            requiredExp = self.getRequiredExpToNextLevel(farm.farm_level)
+
+            if requiredExp is None:
+                break
+
+            if farm.farm_exp < requiredExp:
+                break
+
+            farm.farm_exp -= requiredExp
+            farm.farm_level += 1
+
+            if farm.farm_level >= FARM_MAX_LEVEL:
+                farm.farm_exp = 0
+                break
+
+        self.session.flush()
+
+        return farm
+
+    def getRequiredExpToNextLevel(self, currentLevel: int):
+        if currentLevel >= FARM_MAX_LEVEL:
+            return None
+
+        nextLevel = currentLevel + 1
+
+        currentLevelTotalExp = FARM_LEVEL_REQUIRED_EXP.get(currentLevel)
+        nextLevelTotalExp = FARM_LEVEL_REQUIRED_EXP.get(nextLevel)
+
+        if currentLevelTotalExp is None or nextLevelTotalExp is None:
+            return None
+
+        return nextLevelTotalExp - currentLevelTotalExp

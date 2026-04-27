@@ -15,7 +15,7 @@ class FarmFishingService:
     SEAFOOD_TYPE_CODE = "seafood"
 
     BUG_COST_PER_FISHING = 1
-
+    EXP_PER_FISHING = 1
     MIN_WEIGHT_KG = 1
     MAX_WEIGHT_KG = 100
 
@@ -98,6 +98,7 @@ class FarmFishingService:
             )
 
             farmFishPondRepository.markFished(fishPond)
+            farmRepository.increaseFarmExp(farm, self.EXP_PER_FISHING)
 
             session.commit()
 

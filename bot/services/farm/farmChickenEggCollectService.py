@@ -12,6 +12,7 @@ class FarmChickenEggCollectService:
     EGG_ITEM_CODE = "egg"
     HUNGRY_INTERVAL_MINUTES = 30
     EGG_COLLECT_INTERVAL_MINUTES = 10
+    EGG_COLLECT_EXP = 1
 
     def collectEgg(self, userId: int):
         with getDbSession() as session:
@@ -75,6 +76,7 @@ class FarmChickenEggCollectService:
             )
 
             farmChickenCoopRepository.markEggCollected(chickenCoop)
+            farmRepository.increaseFarmExp(farm, self.EGG_COLLECT_EXP)
 
             session.commit()
 

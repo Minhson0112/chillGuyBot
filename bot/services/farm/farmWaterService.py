@@ -6,6 +6,7 @@ from bot.repository.farmRepository import FarmRepository
 
 
 class FarmWaterService:
+    WATER_EXP = 1
     def waterCrop(self, userId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
@@ -46,6 +47,7 @@ class FarmWaterService:
                 }
 
             farmCropAreaRepository.markWatered(farmCropArea)
+            farmRepository.increaseFarmExp(farm, self.WATER_EXP)
 
             session.commit()
 

@@ -6,10 +6,10 @@ from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
 
-
 class FarmHarvestService:
     DRY_REDUCTION_SECONDS_PER_QUANTITY = 1200
     PEST_REDUCTION_SECONDS_PER_QUANTITY = 5400
+    HARVEST_EXP_PER_CROP = 1
 
     def harvestCrop(self, userId: int):
         with getDbSession() as session:
@@ -81,6 +81,7 @@ class FarmHarvestService:
             )
 
             farmCropAreaRepository.clearCrop(farmCropArea)
+            farmRepository.increaseFarmExp(farm, self.HARVEST_EXP_PER_CROP * farmCropArea.unlocked_plot_count)
 
             session.commit()
 

@@ -8,7 +8,7 @@ from bot.repository.userInventoryRepository import UserInventoryRepository
 
 class FarmPestRemoveService:
     BUG_ITEM_CODE = "bug"
-
+    PEST_REMOVE_EXP = 1
     def removePest(self, userId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
@@ -61,6 +61,7 @@ class FarmPestRemoveService:
             )
 
             farmCropAreaRepository.markPestRemoved(farmCropArea)
+            farmRepository.increaseFarmExp(farm, self.PEST_REMOVE_EXP)
 
             session.commit()
 
