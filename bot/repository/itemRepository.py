@@ -1,4 +1,5 @@
 from bot.models.items import Item
+from sqlalchemy import asc
 
 
 class ItemRepository:
