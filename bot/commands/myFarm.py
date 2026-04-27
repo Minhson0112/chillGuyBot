@@ -10,7 +10,79 @@ from bot.services.farm.farmChickenEggCollectService import FarmChickenEggCollect
 from bot.services.farm.farmCowFeedService import FarmCowFeedService
 from bot.services.farm.farmCowMilkCollectService import FarmCowMilkCollectService
 from bot.services.farm.farmFishingService import FarmFishingService
+from bot.services.farm.farmMarketShopRenderService import FarmMarketShopRenderService
 
+
+class MyFarmShopPaginationView(discord.ui.View):
+    def __init__(
+        self,
+        sellerUserId: int,
+        sellerDisplayName: str,
+        currentPage: int,
+        totalPage: int,
+    ):
+        super().__init__(timeout=600)
+
+        self.sellerUserId = sellerUserId
+        self.sellerDisplayName = sellerDisplayName
+        self.currentPage = currentPage
+        self.totalPage = totalPage
+        self.farmMarketShopRenderService = FarmMarketShopRenderService()
+
+        self.updateButtonState()
+
+    def updateButtonState(self):
+        self.previousButton.disabled = self.currentPage <= 1
+        self.nextButton.disabled = self.currentPage >= self.totalPage
+
+    @discord.ui.button(label="Trước", emoji="⬅️", style=discord.ButtonStyle.secondary)
+    async def previousButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.currentPage > 1:
+            self.currentPage -= 1
+
+        await self.refreshShopMessage(interaction)
+
+    @discord.ui.button(label="Tiếp", emoji="➡️", style=discord.ButtonStyle.secondary)
+    async def nextButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.currentPage < self.totalPage:
+            self.currentPage += 1
+
+        await self.refreshShopMessage(interaction)
+
+    async def refreshShopMessage(self, interaction: discord.Interaction):
+        renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
+            sellerUserId=self.sellerUserId,
+            memberDisplayName=self.sellerDisplayName,
+            page=self.currentPage,
+        )
+
+        self.currentPage = renderResult["currentPage"]
+        self.totalPage = renderResult["totalPage"]
+        self.updateButtonState()
+
+        file = discord.File(
+            renderResult["buffer"],
+            filename="my_shop.png",
+        )
+
+        embed = self.buildShopEmbed()
+        embed.set_image(url="attachment://my_shop.png")
+
+        await interaction.response.edit_message(
+            embed=embed,
+            attachments=[file],
+            view=self,
+        )
+
+    def buildShopEmbed(self):
+        return discord.Embed(
+            title=f"Shop của {self.sellerDisplayName}",
+            description=(
+                "Dùng `cg buyshop <id>` để mua món hàng trong shop này.\n"
+                f"Trang **{self.currentPage} / {self.totalPage}**"
+            ),
+            color=discord.Color.gold(),
+        )
 
 class MyFarmView(discord.ui.View):
     def __init__(self, bot, authorId: int, memberDisplayName: str):
@@ -28,6 +100,7 @@ class MyFarmView(discord.ui.View):
         self.farmCowFeedService = FarmCowFeedService()
         self.farmCowMilkCollectService = FarmCowMilkCollectService()
         self.farmFishingService = FarmFishingService()
+        self.farmMarketShopRenderService = FarmMarketShopRenderService()
         
         
 
@@ -234,6 +307,51 @@ class MyFarmView(discord.ui.View):
             print(f"Fishing error: {e}")
             await interaction.response.send_message(
                 "Đã xảy ra lỗi khi câu cá.",
+                ephemeral=True,
+            )
+    
+    @discord.ui.button(label="Xem shop", emoji="🛒", style=discord.ButtonStyle.secondary)
+    async def viewMyShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
+                sellerUserId=self.authorId,
+                memberDisplayName=self.memberDisplayName,
+                page=1,
+            )
+
+            file = discord.File(
+                renderResult["buffer"],
+                filename="my_shop.png",
+            )
+
+            view = MyFarmShopPaginationView(
+                sellerUserId=self.authorId,
+                sellerDisplayName=self.memberDisplayName,
+                currentPage=renderResult["currentPage"],
+                totalPage=renderResult["totalPage"],
+            )
+
+            embed = view.buildShopEmbed()
+            embed.set_image(url="attachment://my_shop.png")
+
+            await interaction.response.send_message(
+                embed=embed,
+                file=file,
+                view=view,
+                ephemeral=True,
+            )
+
+        except FileNotFoundError as e:
+            print(f"My shop asset file not found: {e}")
+            await interaction.response.send_message(
+                "Không tìm thấy ảnh asset để render shop.",
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Render my shop error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi xem shop của bạn.",
                 ephemeral=True,
             )
 
