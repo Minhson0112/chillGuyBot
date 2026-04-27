@@ -502,3 +502,55 @@ CREATE TABLE fishing_history (
     CONSTRAINT chk_fishing_history_weight_kg
         CHECK (weight_kg >= 1.00 AND weight_kg <= 100.00)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='fishing catch history';
+
+
+#next update
+
+CREATE TABLE farm_market_listings (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'market listing id',
+
+    seller_user_id BIGINT NOT NULL COMMENT 'seller discord user id',
+    buyer_user_id BIGINT DEFAULT NULL COMMENT 'buyer discord user id',
+
+    item_id BIGINT NOT NULL COMMENT 'listed item id',
+    quantity BIGINT NOT NULL DEFAULT 1 COMMENT 'listed item quantity',
+
+    price INT NOT NULL COMMENT 'selling price after 10 percent bonus',
+
+    is_sold TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'whether item has been sold',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    sold_at DATETIME DEFAULT NULL COMMENT 'sold at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_farm_market_listings_seller_user_id (seller_user_id),
+    KEY idx_farm_market_listings_buyer_user_id (buyer_user_id),
+    KEY idx_farm_market_listings_item_id (item_id),
+    KEY idx_farm_market_listings_is_sold_created_at (is_sold, created_at),
+
+    CONSTRAINT fk_farm_market_listings_seller_user_id
+        FOREIGN KEY (seller_user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_market_listings_buyer_user_id
+        FOREIGN KEY (buyer_user_id) REFERENCES member(user_id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT fk_farm_market_listings_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_farm_market_listings_quantity
+        CHECK (quantity > 0),
+
+    CONSTRAINT chk_farm_market_listings_price
+        CHECK (price > 0),
+
+    CONSTRAINT chk_farm_market_listings_sold_state
+        CHECK (
+            (is_sold = 0 AND sold_at IS NULL)
+            OR
+            (is_sold = 1 AND sold_at IS NOT NULL)
+        )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm player market listings';

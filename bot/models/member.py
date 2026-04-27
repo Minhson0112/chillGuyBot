@@ -30,3 +30,14 @@ class Member(Base):
     farm = relationship("Farm", back_populates="member", uselist=False, cascade="all, delete-orphan")
     inventories = relationship("UserInventory", back_populates="member", cascade="all, delete-orphan")
     fishingHistories = relationship("FishingHistory", back_populates="member", cascade="all, delete-orphan")
+    marketListings = relationship(
+        "FarmMarketListing",
+        foreign_keys="FarmMarketListing.seller_user_id",
+        back_populates="seller",
+        cascade="all, delete-orphan",
+    )
+    marketPurchases = relationship(
+        "FarmMarketListing",
+        foreign_keys="FarmMarketListing.buyer_user_id",
+        back_populates="buyer",
+    )

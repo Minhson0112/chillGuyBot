@@ -1,7 +1,67 @@
 import discord
 from discord.ext import commands
 
+from bot.services.farm.farmMarketShopRenderService import FarmMarketShopRenderService
 from bot.services.farm.farmRenderService import FarmRenderService
+
+
+class VisitFarmView(discord.ui.View):
+    def __init__(
+        self,
+        bot,
+        visitedUserId: int,
+        visitedDisplayName: str,
+    ):
+        super().__init__(timeout=600)
+
+        self.bot = bot
+        self.visitedUserId = visitedUserId
+        self.visitedDisplayName = visitedDisplayName
+        self.farmMarketShopRenderService = FarmMarketShopRenderService()
+
+    @discord.ui.button(label="Xem shop", emoji="🛒", style=discord.ButtonStyle.primary)
+    async def viewShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
+                sellerUserId=self.visitedUserId,
+                memberDisplayName=self.visitedDisplayName,
+                page=1,
+            )
+
+            file = discord.File(
+                renderResult["buffer"],
+                filename="member_shop.png",
+            )
+
+            embed = discord.Embed(
+                title=f"Shop của {self.visitedDisplayName}",
+                description=(
+                    "Dùng `cg buyshop <id>` để mua món hàng trong shop này.\n"
+                    f"Trang **{renderResult['currentPage']} / {renderResult['totalPage']}**"
+                ),
+                color=discord.Color.gold(),
+            )
+            embed.set_image(url="attachment://member_shop.png")
+
+            await interaction.response.send_message(
+                embed=embed,
+                file=file,
+                ephemeral=True,
+            )
+
+        except FileNotFoundError as e:
+            print(f"Visit shop asset file not found: {e}")
+            await interaction.response.send_message(
+                "Không tìm thấy ảnh asset để render shop.",
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Visit shop render error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi xem shop.",
+                ephemeral=True,
+            )
 
 
 class VisitFarmCommand(commands.Cog):
@@ -34,9 +94,16 @@ class VisitFarmCommand(commands.Cog):
 
             embed.set_image(url="attachment://visit_farm.png")
 
+            view = VisitFarmView(
+                bot=self.bot,
+                visitedUserId=member.id,
+                visitedDisplayName=member.display_name,
+            )
+
             await ctx.reply(
                 embed=embed,
                 file=file,
+                view=view,
             )
 
         except ValueError:

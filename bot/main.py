@@ -128,6 +128,7 @@ async def main():
         "bot.commands.myBarn",
         "bot.commands.visitFarm",
         "bot.commands.sellFarmItem",
+        "bot.commands.sellShopFarmItem",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
@@ -139,6 +140,7 @@ async def main():
         "bot.tasks.memberBirthdayTask",
         "bot.tasks.farmDryCheckTask",
         "bot.tasks.farmPestCheckTask",
+        "bot.tasks.farmMarketAutoBuyTask",
     ]
 
     for ext in extensions:
