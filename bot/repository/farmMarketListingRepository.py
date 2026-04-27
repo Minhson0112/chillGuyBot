@@ -151,3 +151,14 @@ class FarmMarketListingRepository:
             .limit(perPage)
             .all()
         )
+    
+    def findByIdWithItemAndSeller(self, listingId: int):
+        return (
+            self.session.query(FarmMarketListing)
+            .options(
+                joinedload(FarmMarketListing.item),
+                joinedload(FarmMarketListing.seller),
+            )
+            .filter(FarmMarketListing.id == listingId)
+            .first()
+        )

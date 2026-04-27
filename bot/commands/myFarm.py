@@ -310,7 +310,7 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
     
-    @discord.ui.button(label="Xem shop", emoji="🛒", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="Xem shop của bạn", emoji="🛒", style=discord.ButtonStyle.secondary)
     async def viewMyShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
