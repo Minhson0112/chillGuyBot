@@ -18,3 +18,12 @@ class ItemRepository:
             .filter(Item.code == code)
             .first()
         )
+    
+    def findActiveItemsByTypeCode(self, typeCode: str):
+        return (
+            self.session.query(Item)
+            .filter(Item.type_code == typeCode)
+            .filter(Item.is_active.is_(True))
+            .order_by(asc(Item.id))
+            .all()
+        )

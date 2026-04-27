@@ -471,3 +471,34 @@ CREATE TABLE chill_coin_transactions (
         ON DELETE CASCADE
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='chill coin transaction history';
+
+# update cau ca
+
+CREATE TABLE fishing_history (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'fishing history id',
+
+    user_id BIGINT NOT NULL COMMENT 'discord user id',
+    item_id BIGINT NOT NULL COMMENT 'caught seafood item id',
+
+    weight_kg DECIMAL(5,2) NOT NULL COMMENT 'caught seafood weight in kg',
+
+    caught_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'caught at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_fishing_history_user_id (user_id),
+    KEY idx_fishing_history_item_id (item_id),
+    KEY idx_fishing_history_caught_at (caught_at),
+    KEY idx_fishing_history_weight_kg (weight_kg),
+
+    CONSTRAINT fk_fishing_history_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_fishing_history_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_fishing_history_weight_kg
+        CHECK (weight_kg >= 1.00 AND weight_kg <= 100.00)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='fishing catch history';

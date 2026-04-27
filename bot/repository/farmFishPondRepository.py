@@ -1,4 +1,5 @@
 from bot.models.farmFishPond import FarmFishPond
+from datetime import datetime
 
 
 class FarmFishPondRepository:
@@ -18,6 +19,13 @@ class FarmFishPondRepository:
         )
 
         self.session.add(farmFishPond)
+        self.session.flush()
+
+        return farmFishPond
+    
+    def markFished(self, farmFishPond: FarmFishPond):
+        farmFishPond.last_fished_at = datetime.now()
+
         self.session.flush()
 
         return farmFishPond

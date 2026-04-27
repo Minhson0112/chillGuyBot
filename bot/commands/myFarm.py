@@ -9,6 +9,7 @@ from bot.services.farm.farmChickenFeedService import FarmChickenFeedService
 from bot.services.farm.farmChickenEggCollectService import FarmChickenEggCollectService
 from bot.services.farm.farmCowFeedService import FarmCowFeedService
 from bot.services.farm.farmCowMilkCollectService import FarmCowMilkCollectService
+from bot.services.farm.farmFishingService import FarmFishingService
 
 
 class MyFarmView(discord.ui.View):
@@ -26,6 +27,7 @@ class MyFarmView(discord.ui.View):
         self.farmChickenEggCollectService = FarmChickenEggCollectService()
         self.farmCowFeedService = FarmCowFeedService()
         self.farmCowMilkCollectService = FarmCowMilkCollectService()
+        self.farmFishingService = FarmFishingService()
         
         
 
@@ -211,6 +213,30 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
+    @discord.ui.button(label="Câu cá", emoji="🎣", style=discord.ButtonStyle.secondary)
+    async def fishingButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            fishingResult = self.farmFishingService.fish(self.authorId)
+
+            if not fishingResult["success"]:
+                await interaction.response.send_message(
+                    fishingResult["message"],
+                    ephemeral=True,
+                )
+                return
+
+            await self.refreshFarmMessage(
+                interaction=interaction,
+                extraMessage=fishingResult["message"],
+            )
+
+        except Exception as e:
+            print(f"Fishing error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi câu cá.",
+                ephemeral=True,
+            )
+
     async def refreshFarmMessage(
         self,
         interaction: discord.Interaction,
@@ -249,26 +275,26 @@ class MyFarmView(discord.ui.View):
         )
 
         embed.add_field(
-            name="Thu hoạch trong",
+            name="Thu hoạch trong 🌾",
             value=embedData["remainingTimeText"],
             inline=True,
         )
 
         embed.add_field(
-            name="Trạng thái đất",
+            name="Trạng thái đất 💧",
             value=embedData["landStatusText"],
             inline=True,
         )
 
         embed.add_field(
-            name="Sâu bệnh",
+            name="Sâu bệnh <:bug:1498089075867914281>",
             value=embedData["pestStatusText"],
             inline=True,
         )
 
         embed.add_field(
             name="--------------------------------------------------------",
-            value="**Trạng thái chuồng gà**",
+            value="**Trạng thái chuồng gà <:chicken_left:1495565972692537415>**",
             inline=False,
         )
 
@@ -279,14 +305,14 @@ class MyFarmView(discord.ui.View):
         )
 
         embed.add_field(
-            name="Lấy trứng",
+            name="Lấy trứng <:Egg:1495565393463349318>",
             value=embedData["eggCollectText"],
             inline=True,
         )
 
         embed.add_field(
         name="--------------------------------------------------------",
-        value="**Trạng thái chuồng bò**",
+        value="**Trạng thái chuồng bò <:cow_left:1495566015164317747>**",
         inline=False,
     )
 
@@ -297,7 +323,7 @@ class MyFarmView(discord.ui.View):
         )
 
         embed.add_field(
-            name="Vắt sữa",
+            name="Vắt sữa <:Milk:1495567020601774263>",
             value=embedData["milkCollectText"],
             inline=True,
         )
