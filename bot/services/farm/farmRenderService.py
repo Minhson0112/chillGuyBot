@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from pathlib import Path
 
@@ -64,6 +64,9 @@ class FarmRenderService:
     TRAIN_Y = 150
 
     MAX_PLOT_COUNT = 16
+
+    CHICKEN_HUNGRY_INTERVAL_MINUTES = 30
+    EGG_COLLECT_INTERVAL_MINUTES = 10
 
     LAND_GRID_POSITIONS = [
         (0, 0), (1, 0), (2, 0), (3, 0),
@@ -149,34 +152,37 @@ class FarmRenderService:
     def buildFarmEmbedData(self, farm):
         cropArea = farm.cropArea
 
-        if cropArea is None:
-            return {
-                "cropText": "Chưa có khu đất",
-                "remainingTimeText": "-",
-                "landStatusText": "-",
-                "pestStatusText": "-",
-            }
-
-        cropText = "Chưa trồng cây"
+        cropText = "Chưa có khu đất"
         remainingTimeText = "-"
-        landStatusText = "Khô" if cropArea.is_dry else "Ướt"
-        pestStatusText = "Có" if cropArea.is_pest_infected else "Không"
+        landStatusText = "-"
+        pestStatusText = "-"
 
-        if cropArea.crop is not None:
-            crop = cropArea.crop
-            cropEmoji = ""
+        if cropArea is not None:
+            cropText = "Chưa trồng cây"
+            remainingTimeText = "-"
+            landStatusText = "Khô" if cropArea.is_dry else "Ướt"
+            pestStatusText = "Có" if cropArea.is_pest_infected else "Không"
 
-            if crop.cropItem is not None:
-                cropEmoji = FARM_GAME_EMOJI.get(crop.cropItem.icon_image_key, "")
+            if cropArea.crop is not None:
+                crop = cropArea.crop
+                cropEmoji = ""
 
-            cropText = f"{cropEmoji} **{crop.name}**".strip()
-            remainingTimeText = self.buildRemainingHarvestTimeText(cropArea)
+                if crop.cropItem is not None:
+                    cropEmoji = FARM_GAME_EMOJI.get(crop.cropItem.icon_image_key, "")
+
+                cropText = f"{cropEmoji} **{crop.name}**".strip()
+                remainingTimeText = self.buildRemainingHarvestTimeText(cropArea)
+
+        chickenCoopData = self.buildChickenCoopEmbedData(farm.chickenCoop)
 
         return {
             "cropText": cropText,
             "remainingTimeText": remainingTimeText,
             "landStatusText": landStatusText,
             "pestStatusText": pestStatusText,
+            "chickenCountText": chickenCoopData["chickenCountText"],
+            "chickenHungryText": chickenCoopData["chickenHungryText"],
+            "eggCollectText": chickenCoopData["eggCollectText"],
         }
 
     def buildRemainingHarvestTimeText(self, cropArea):
@@ -189,6 +195,56 @@ class FarmRenderService:
         if remainingSeconds <= 0:
             return "Có thể thu hoạch"
 
+        return self.formatRemainingTime(remainingSeconds)
+
+    def buildChickenCoopEmbedData(self, chickenCoop):
+        if chickenCoop is None:
+            return {
+                "chickenCountText": "Chưa có chuồng gà",
+                "chickenHungryText": "-",
+                "eggCollectText": "-",
+            }
+
+        if chickenCoop.chicken_count <= 0:
+            return {
+                "chickenCountText": "Chưa nuôi gà",
+                "chickenHungryText": "-",
+                "eggCollectText": "-",
+            }
+
+        return {
+            "chickenCountText": f"**{chickenCoop.chicken_count}** con",
+            "chickenHungryText": self.buildChickenHungryText(chickenCoop),
+            "eggCollectText": self.buildEggCollectText(chickenCoop),
+        }
+
+    def buildChickenHungryText(self, chickenCoop):
+        if chickenCoop.last_fed_at is None:
+            return "Đang đói"
+
+        now = datetime.now()
+        hungryAt = chickenCoop.last_fed_at + timedelta(minutes=self.CHICKEN_HUNGRY_INTERVAL_MINUTES)
+        remainingSeconds = int((hungryAt - now).total_seconds())
+
+        if remainingSeconds <= 0:
+            return "Đang đói"
+
+        return f"Chưa đói - còn {self.formatRemainingTime(remainingSeconds)}"
+
+    def buildEggCollectText(self, chickenCoop):
+        if chickenCoop.last_collected_egg_at is None:
+            return "Có thể lấy"
+
+        now = datetime.now()
+        collectableAt = chickenCoop.last_collected_egg_at + timedelta(minutes=self.EGG_COLLECT_INTERVAL_MINUTES)
+        remainingSeconds = int((collectableAt - now).total_seconds())
+
+        if remainingSeconds <= 0:
+            return "Có thể lấy"
+
+        return f"Còn {self.formatRemainingTime(remainingSeconds)}"
+
+    def formatRemainingTime(self, remainingSeconds: int):
         minutes = remainingSeconds // 60
         seconds = remainingSeconds % 60
 

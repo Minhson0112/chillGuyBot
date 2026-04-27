@@ -212,6 +212,24 @@ class MyFarmView(discord.ui.View):
             inline=True,
         )
 
+        embed.add_field(
+            name="------------------------",
+            value="**Trạng thái chuồng gà**",
+            inline=False,
+        )
+
+        embed.add_field(
+            name="Gà đói",
+            value=embedData["chickenHungryText"],
+            inline=True,
+        )
+
+        embed.add_field(
+            name="Lấy trứng",
+            value=embedData["eggCollectText"],
+            inline=True,
+        )
+
         return embed
 
 
