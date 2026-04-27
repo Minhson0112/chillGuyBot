@@ -7,6 +7,8 @@ from bot.services.farm.farmWaterService import FarmWaterService
 from bot.services.farm.farmPestRemoveService import FarmPestRemoveService
 from bot.services.farm.farmChickenFeedService import FarmChickenFeedService
 from bot.services.farm.farmChickenEggCollectService import FarmChickenEggCollectService
+from bot.services.farm.farmCowFeedService import FarmCowFeedService
+from bot.services.farm.farmCowMilkCollectService import FarmCowMilkCollectService
 
 
 class MyFarmView(discord.ui.View):
@@ -22,6 +24,10 @@ class MyFarmView(discord.ui.View):
         self.farmPestRemoveService = FarmPestRemoveService()
         self.farmChickenFeedService = FarmChickenFeedService()
         self.farmChickenEggCollectService = FarmChickenEggCollectService()
+        self.farmCowFeedService = FarmCowFeedService()
+        self.farmCowMilkCollectService = FarmCowMilkCollectService()
+        
+        
 
     async def interaction_check(self, interaction: discord.Interaction):
         if interaction.user.id != self.authorId:
@@ -132,6 +138,30 @@ class MyFarmView(discord.ui.View):
                 "Đã xảy ra lỗi khi cho gà ăn.",
                 ephemeral=True,
             )
+
+    @discord.ui.button(label="Cho bò ăn", emoji="🐄", style=discord.ButtonStyle.primary)
+    async def feedCowButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            feedResult = self.farmCowFeedService.feedCow(self.authorId)
+
+            if not feedResult["success"]:
+                await interaction.response.send_message(
+                    feedResult["message"],
+                    ephemeral=True,
+                )
+                return
+
+            await self.refreshFarmMessage(
+                interaction=interaction,
+                extraMessage=feedResult["message"],
+            )
+
+        except Exception as e:
+            print(f"Feed cow error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi cho bò ăn.",
+                ephemeral=True,
+            )
     
     @discord.ui.button(label="Lấy trứng", emoji="🥚", style=discord.ButtonStyle.success)
     async def collectEggButton(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -154,6 +184,30 @@ class MyFarmView(discord.ui.View):
             print(f"Collect egg error: {e}")
             await interaction.response.send_message(
                 "Đã xảy ra lỗi khi lấy trứng.",
+                ephemeral=True,
+            )
+
+    @discord.ui.button(label="Vắt sữa", emoji="🥛", style=discord.ButtonStyle.success)
+    async def collectMilkButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            collectResult = self.farmCowMilkCollectService.collectMilk(self.authorId)
+
+            if not collectResult["success"]:
+                await interaction.response.send_message(
+                    collectResult["message"],
+                    ephemeral=True,
+                )
+                return
+
+            await self.refreshFarmMessage(
+                interaction=interaction,
+                extraMessage=collectResult["message"],
+            )
+
+        except Exception as e:
+            print(f"Collect milk error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi vắt sữa.",
                 ephemeral=True,
             )
 
@@ -213,7 +267,7 @@ class MyFarmView(discord.ui.View):
         )
 
         embed.add_field(
-            name="---------------------------------------------------------------",
+            name="--------------------------------------------------------",
             value="**Trạng thái chuồng gà**",
             inline=False,
         )
@@ -227,6 +281,24 @@ class MyFarmView(discord.ui.View):
         embed.add_field(
             name="Lấy trứng",
             value=embedData["eggCollectText"],
+            inline=True,
+        )
+
+        embed.add_field(
+        name="--------------------------------------------------------",
+        value="**Trạng thái chuồng bò**",
+        inline=False,
+    )
+
+        embed.add_field(
+            name="Bò đói",
+            value=embedData["cowHungryText"],
+            inline=True,
+        )
+
+        embed.add_field(
+            name="Vắt sữa",
+            value=embedData["milkCollectText"],
             inline=True,
         )
 

@@ -68,6 +68,9 @@ class FarmRenderService:
     CHICKEN_HUNGRY_INTERVAL_MINUTES = 30
     EGG_COLLECT_INTERVAL_MINUTES = 10
 
+    COW_HUNGRY_INTERVAL_MINUTES = 30
+    MILK_COLLECT_INTERVAL_MINUTES = 15
+
     LAND_GRID_POSITIONS = [
         (0, 0), (1, 0), (2, 0), (3, 0),
         (0, 1), (1, 1), (2, 1), (3, 1),
@@ -150,39 +153,50 @@ class FarmRenderService:
         return baseImage
 
     def buildFarmEmbedData(self, farm):
-        cropArea = farm.cropArea
-
-        cropText = "Chưa có khu đất"
-        remainingTimeText = "-"
-        landStatusText = "-"
-        pestStatusText = "-"
-
-        if cropArea is not None:
-            cropText = "Chưa trồng cây"
-            remainingTimeText = "-"
-            landStatusText = "Khô" if cropArea.is_dry else "Ướt"
-            pestStatusText = "Có" if cropArea.is_pest_infected else "Không"
-
-            if cropArea.crop is not None:
-                crop = cropArea.crop
-                cropEmoji = ""
-
-                if crop.cropItem is not None:
-                    cropEmoji = FARM_GAME_EMOJI.get(crop.cropItem.icon_image_key, "")
-
-                cropText = f"{cropEmoji} **{crop.name}**".strip()
-                remainingTimeText = self.buildRemainingHarvestTimeText(cropArea)
-
+        cropAreaData = self.buildCropAreaEmbedData(farm.cropArea)
         chickenCoopData = self.buildChickenCoopEmbedData(farm.chickenCoop)
+        cowShedData = self.buildCowShedEmbedData(farm.cowShed)
+
+        return {
+            "cropText": cropAreaData["cropText"],
+            "remainingTimeText": cropAreaData["remainingTimeText"],
+            "landStatusText": cropAreaData["landStatusText"],
+            "pestStatusText": cropAreaData["pestStatusText"],
+            "chickenHungryText": chickenCoopData["chickenHungryText"],
+            "eggCollectText": chickenCoopData["eggCollectText"],
+            "cowHungryText": cowShedData["cowHungryText"],
+            "milkCollectText": cowShedData["milkCollectText"],
+        }
+
+    def buildCropAreaEmbedData(self, cropArea):
+        if cropArea is None:
+            return {
+                "cropText": "Chưa có khu đất",
+                "remainingTimeText": "-",
+                "landStatusText": "-",
+                "pestStatusText": "-",
+            }
+
+        cropText = "Chưa trồng cây"
+        remainingTimeText = "-"
+        landStatusText = "Khô" if cropArea.is_dry else "Ướt"
+        pestStatusText = "Có" if cropArea.is_pest_infected else "Không"
+
+        if cropArea.crop is not None:
+            crop = cropArea.crop
+            cropEmoji = ""
+
+            if crop.cropItem is not None:
+                cropEmoji = FARM_GAME_EMOJI.get(crop.cropItem.icon_image_key, "")
+
+            cropText = f"{cropEmoji} **{crop.name}**".strip()
+            remainingTimeText = self.buildRemainingHarvestTimeText(cropArea)
 
         return {
             "cropText": cropText,
             "remainingTimeText": remainingTimeText,
             "landStatusText": landStatusText,
             "pestStatusText": pestStatusText,
-            "chickenCountText": chickenCoopData["chickenCountText"],
-            "chickenHungryText": chickenCoopData["chickenHungryText"],
-            "eggCollectText": chickenCoopData["eggCollectText"],
         }
 
     def buildRemainingHarvestTimeText(self, cropArea):
@@ -200,20 +214,17 @@ class FarmRenderService:
     def buildChickenCoopEmbedData(self, chickenCoop):
         if chickenCoop is None:
             return {
-                "chickenCountText": "Chưa có chuồng gà",
-                "chickenHungryText": "-",
+                "chickenHungryText": "Chưa có chuồng gà",
                 "eggCollectText": "-",
             }
 
         if chickenCoop.chicken_count <= 0:
             return {
-                "chickenCountText": "Chưa nuôi gà",
-                "chickenHungryText": "-",
+                "chickenHungryText": "Chưa nuôi gà",
                 "eggCollectText": "-",
             }
 
         return {
-            "chickenCountText": f"**{chickenCoop.chicken_count}** con",
             "chickenHungryText": self.buildChickenHungryText(chickenCoop),
             "eggCollectText": self.buildEggCollectText(chickenCoop),
         }
@@ -241,6 +252,50 @@ class FarmRenderService:
 
         if remainingSeconds <= 0:
             return "Có thể lấy"
+
+        return f"Còn {self.formatRemainingTime(remainingSeconds)}"
+
+    def buildCowShedEmbedData(self, cowShed):
+        if cowShed is None:
+            return {
+                "cowHungryText": "Chưa có chuồng bò",
+                "milkCollectText": "-",
+            }
+
+        if cowShed.cow_count <= 0:
+            return {
+                "cowHungryText": "Chưa nuôi bò",
+                "milkCollectText": "-",
+            }
+
+        return {
+            "cowHungryText": self.buildCowHungryText(cowShed),
+            "milkCollectText": self.buildMilkCollectText(cowShed),
+        }
+
+    def buildCowHungryText(self, cowShed):
+        if cowShed.last_fed_at is None:
+            return "Đang đói"
+
+        now = datetime.now()
+        hungryAt = cowShed.last_fed_at + timedelta(minutes=self.COW_HUNGRY_INTERVAL_MINUTES)
+        remainingSeconds = int((hungryAt - now).total_seconds())
+
+        if remainingSeconds <= 0:
+            return "Đang đói"
+
+        return f"Chưa đói - còn {self.formatRemainingTime(remainingSeconds)}"
+
+    def buildMilkCollectText(self, cowShed):
+        if cowShed.last_collected_milk_at is None:
+            return "Có thể vắt"
+
+        now = datetime.now()
+        collectableAt = cowShed.last_collected_milk_at + timedelta(minutes=self.MILK_COLLECT_INTERVAL_MINUTES)
+        remainingSeconds = int((collectableAt - now).total_seconds())
+
+        if remainingSeconds <= 0:
+            return "Có thể vắt"
 
         return f"Còn {self.formatRemainingTime(remainingSeconds)}"
 

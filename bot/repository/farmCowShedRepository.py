@@ -37,3 +37,17 @@ class FarmCowShedRepository:
         self.session.flush()
 
         return farmCowShed
+    
+    def markFed(self, farmCowShed: FarmCowShed):
+        farmCowShed.last_fed_at = datetime.now()
+
+        self.session.flush()
+
+        return farmCowShed
+    
+    def markMilkCollected(self, farmCowShed: FarmCowShed):
+        farmCowShed.last_collected_milk_at = datetime.now()
+
+        self.session.flush()
+
+        return farmCowShed
