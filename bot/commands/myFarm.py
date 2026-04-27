@@ -213,7 +213,7 @@ class MyFarmView(discord.ui.View):
         )
 
         embed.add_field(
-            name="------------------------",
+            name="---------------------------------------------------------------",
             value="**Trạng thái chuồng gà**",
             inline=False,
         )

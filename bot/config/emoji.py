@@ -95,6 +95,9 @@ FARM_GAME_EMOJI = {
 
     "item_cow": "<:cow_left:1495566015164317747>",
 
+    "item_egg": "<:Egg:1495565393463349318>",
+    "item_milk": "<:Milk:1495567020601774263>",
+
     "item_wheat_seed": "<:Wheat_seed:1495568410220953600>",
     "item_wheat": "<:Wheat:1495568381494038559>",
 
