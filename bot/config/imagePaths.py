@@ -91,6 +91,9 @@ ASSET_IMAGE_PATHS = {
     "chicken_2_image_key": "bot/assets/images/farm/animals/chicken/chicken_left.png",
     "cow_image_key" : "bot/assets/images/farm/animals/cow/cow_left.png",
 
+    "item_chicken": "bot/assets/images/farm/animals/chicken/chicken_left.png",
+    "item_cow": "bot/assets/images/farm/animals/cow/cow_left.png",
+
     "currency_chill_coin": "bot/assets/images/common/cs_coin.png",
     "level": "bot/assets/images/common/level.png",
     "exp": "bot/assets/images/common/xp.png",
