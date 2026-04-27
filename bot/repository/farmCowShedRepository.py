@@ -1,4 +1,5 @@
 from bot.models.farmCowShed import FarmCowShed
+from datetime import datetime
 
 
 class FarmCowShedRepository:
@@ -30,6 +31,8 @@ class FarmCowShedRepository:
         if farmCowShed.cow_count == 1:
             farmCowShed.cow_x = 180
             farmCowShed.cow_y = 220
+        
+        farmCowShed.last_collected_milk_at = datetime.now()
 
         self.session.flush()
 

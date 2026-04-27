@@ -1,4 +1,5 @@
 from bot.models.farmChickenCoop import FarmChickenCoop
+from datetime import datetime
 
 
 class FarmChickenCoopRepository:
@@ -34,6 +35,8 @@ class FarmChickenCoopRepository:
         if farmChickenCoop.chicken_count == 2:
             farmChickenCoop.chicken_2_x = 200
             farmChickenCoop.chicken_2_y = 520
+        
+        farmChickenCoop.last_collected_egg_at = datetime.now()
 
         self.session.flush()
 
