@@ -94,6 +94,9 @@ ASSET_IMAGE_PATHS = {
     "item_chicken": "bot/assets/images/farm/animals/chicken/chicken_left.png",
     "item_cow": "bot/assets/images/farm/animals/cow/cow_left.png",
 
+    "item_egg": "bot/assets/images/farm/items/animal_products/Egg.png",
+    "item_milk": "bot/assets/images/farm/items/animal_products/Milk.png",
+
     "currency_chill_coin": "bot/assets/images/common/cs_coin.png",
     "level": "bot/assets/images/common/level.png",
     "exp": "bot/assets/images/common/xp.png",

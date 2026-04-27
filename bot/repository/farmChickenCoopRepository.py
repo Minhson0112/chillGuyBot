@@ -41,3 +41,15 @@ class FarmChickenCoopRepository:
         self.session.flush()
 
         return farmChickenCoop
+    
+    def markFed(self, farmChickenCoop: FarmChickenCoop):
+        farmChickenCoop.last_fed_at = datetime.now()
+        self.session.flush()
+
+        return farmChickenCoop
+    
+    def markEggCollected(self, farmChickenCoop: FarmChickenCoop):
+        farmChickenCoop.last_collected_egg_at = datetime.now()
+        self.session.flush()
+
+        return farmChickenCoop

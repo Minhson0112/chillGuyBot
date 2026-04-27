@@ -5,6 +5,8 @@ from bot.services.farm.farmHarvestService import FarmHarvestService
 from bot.services.farm.farmRenderService import FarmRenderService
 from bot.services.farm.farmWaterService import FarmWaterService
 from bot.services.farm.farmPestRemoveService import FarmPestRemoveService
+from bot.services.farm.farmChickenFeedService import FarmChickenFeedService
+from bot.services.farm.farmChickenEggCollectService import FarmChickenEggCollectService
 
 
 class MyFarmView(discord.ui.View):
@@ -18,6 +20,8 @@ class MyFarmView(discord.ui.View):
         self.farmHarvestService = FarmHarvestService()
         self.farmWaterService = FarmWaterService()
         self.farmPestRemoveService = FarmPestRemoveService()
+        self.farmChickenFeedService = FarmChickenFeedService()
+        self.farmChickenEggCollectService = FarmChickenEggCollectService()
 
     async def interaction_check(self, interaction: discord.Interaction):
         if interaction.user.id != self.authorId:
@@ -102,6 +106,54 @@ class MyFarmView(discord.ui.View):
             print(f"Harvest farm error: {e}")
             await interaction.response.send_message(
                 "Đã xảy ra lỗi khi thu hoạch.",
+                ephemeral=True,
+            )
+
+    @discord.ui.button(label="Cho gà ăn", emoji="🐔", style=discord.ButtonStyle.primary)
+    async def feedChickenButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            feedResult = self.farmChickenFeedService.feedChicken(self.authorId)
+
+            if not feedResult["success"]:
+                await interaction.response.send_message(
+                    feedResult["message"],
+                    ephemeral=True,
+                )
+                return
+
+            await self.refreshFarmMessage(
+                interaction=interaction,
+                extraMessage=feedResult["message"],
+            )
+
+        except Exception as e:
+            print(f"Feed chicken error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi cho gà ăn.",
+                ephemeral=True,
+            )
+    
+    @discord.ui.button(label="Lấy trứng", emoji="🥚", style=discord.ButtonStyle.success)
+    async def collectEggButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            collectResult = self.farmChickenEggCollectService.collectEgg(self.authorId)
+
+            if not collectResult["success"]:
+                await interaction.response.send_message(
+                    collectResult["message"],
+                    ephemeral=True,
+                )
+                return
+
+            await self.refreshFarmMessage(
+                interaction=interaction,
+                extraMessage=collectResult["message"],
+            )
+
+        except Exception as e:
+            print(f"Collect egg error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi lấy trứng.",
                 ephemeral=True,
             )
 

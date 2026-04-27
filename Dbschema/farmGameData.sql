@@ -520,3 +520,55 @@ ON DUPLICATE KEY UPDATE
     is_visible = VALUES(is_visible),
     is_active = VALUES(is_active),
     sort_order = VALUES(sort_order);
+
+# update 3
+INSERT INTO items (
+    code,
+    name,
+    type_code,
+    icon_image_key,
+    description,
+    render_scale,
+    render_offset_y,
+    sell_price,
+    is_sellable,
+    is_usable,
+    is_active
+) VALUES
+(
+    'egg',
+    'trứng gà',
+    'animal_product',
+    'item_egg',
+    NULL,
+    1.0,
+    0,
+    5,
+    1,
+    1,
+    1
+),
+(
+    'milk',
+    'sữa bò',
+    'animal_product',
+    'item_milk',
+    NULL,
+    1.0,
+    0,
+    10,
+    1,
+    1,
+    1
+)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    type_code = VALUES(type_code),
+    icon_image_key = VALUES(icon_image_key),
+    description = VALUES(description),
+    render_scale = VALUES(render_scale),
+    render_offset_y = VALUES(render_offset_y),
+    sell_price = VALUES(sell_price),
+    is_sellable = VALUES(is_sellable),
+    is_usable = VALUES(is_usable),
+    is_active = VALUES(is_active);
