@@ -87,6 +87,20 @@ ASSET_IMAGE_PATHS = {
     "item_melon_seed" : "bot/assets/images/farm/items/seeds/Melon_seed.png",
     "item_melon" : "bot/assets/images/farm/items/crops/Melon.png",
 
+    "crop_sugarcane_stage_1" : "bot/assets/images/farm/crops/sugarcane/sugarcane_1.png",
+    "crop_sugarcane_stage_2" : "bot/assets/images/farm/crops/sugarcane/sugarcane_2.png",
+    "crop_sugarcane_stage_3" : "bot/assets/images/farm/crops/sugarcane/sugarcane_3.png",
+    "crop_sugarcane_stage_4" : "bot/assets/images/farm/crops/sugarcane/sugarcane_4.png",
+    "item_sugarcane_seed" : "bot/assets/images/farm/items/seeds/sugarcane_seed.png",
+    "item_sugarcane" : "bot/assets/images/farm/items/crops/sugarcane.png",
+
+    "crop_sunflower_stage_1" : "bot/assets/images/farm/crops/sunflower/sunflower_1.png",
+    "crop_sunflower_stage_2" : "bot/assets/images/farm/crops/sunflower/sunflower_2.png",
+    "crop_sunflower_stage_3" : "bot/assets/images/farm/crops/sunflower/sunflower_3.png",
+    "crop_sunflower_stage_4" : "bot/assets/images/farm/crops/sunflower/sunflower_4.png",
+    "item_sunflower_seed" : "bot/assets/images/farm/items/seeds/sunflower_seed.png",
+    "item_sunflower" : "bot/assets/images/farm/items/crops/sunflower.png",
+
     "chicken_1_image_key": "bot/assets/images/farm/animals/chicken/chicken_right.png",
     "chicken_2_image_key": "bot/assets/images/farm/animals/chicken/chicken_left.png",
     "cow_image_key" : "bot/assets/images/farm/animals/cow/cow_left.png",

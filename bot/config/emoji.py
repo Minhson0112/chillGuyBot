@@ -134,6 +134,12 @@ FARM_GAME_EMOJI = {
     "item_melon_seed" : "<:Melon_seed:1495566990788792384>",
     "item_melon" : "<:Melon:1495566935604203630>",
 
+    "item_sugarcane_seed" : "<:sugarcane_seed:1498775518819127366>",
+    "item_sugarcane" : "<:sugarcane:1498775668400459927>",
+
+    "item_sunflower_seed" : "<:sunflower_seed:1498775517455978636>",
+    "item_sunflower" : "<:sunflower:1498775607624994967>",
+
     "item_seaweed": "<:Seaweed:1498349087626367128>",
     "item_snail": "<:Snail:1498349084359131321>",
     "item_shrimp": "<:Shrimp:1498349085999235192>",

@@ -961,3 +961,249 @@ ON DUPLICATE KEY UPDATE
     is_sellable = VALUES(is_sellable),
     is_usable = VALUES(is_usable),
     is_active = VALUES(is_active);
+
+# thêm mía và hướng dương
+INSERT INTO items (
+    code,
+    name,
+    type_code,
+    icon_image_key,
+    description,
+    render_scale,
+    render_offset_y,
+    sell_price,
+    is_sellable,
+    is_usable,
+    is_active
+) VALUES
+(
+    'sunflower_seed',
+    'hạt hướng dương',
+    'seed',
+    'item_sunflower_seed',
+    NULL,
+    1.0,
+    0,
+    NULL,
+    0,
+    1,
+    1
+),
+(
+    'sunflower',
+    'hướng dương',
+    'crop',
+    'item_sunflower',
+    NULL,
+    1.0,
+    0,
+    8,
+    1,
+    1,
+    1
+),
+(
+    'sugarcane_seed',
+    'mía giống',
+    'seed',
+    'item_sugarcane_seed',
+    NULL,
+    1.0,
+    0,
+    NULL,
+    0,
+    1,
+    1
+),
+(
+    'sugarcane',
+    'mía',
+    'crop',
+    'item_sugarcane',
+    NULL,
+    1.0,
+    0,
+    35,
+    1,
+    1,
+    1
+)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    type_code = VALUES(type_code),
+    icon_image_key = VALUES(icon_image_key),
+    description = VALUES(description),
+    render_scale = VALUES(render_scale),
+    render_offset_y = VALUES(render_offset_y),
+    sell_price = VALUES(sell_price),
+    is_sellable = VALUES(is_sellable),
+    is_usable = VALUES(is_usable),
+    is_active = VALUES(is_active);
+
+
+INSERT INTO crops (
+    code,
+    name,
+    seed_item_id,
+    crop_item_id,
+    harvest_quantity_per_plot,
+    total_growth_seconds
+)
+SELECT
+    'sunflower',
+    'hướng dương',
+    seedItem.id,
+    cropItem.id,
+    2,
+    420
+FROM items seedItem
+JOIN items cropItem ON cropItem.code = 'sunflower'
+WHERE seedItem.code = 'sunflower_seed'
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    seed_item_id = VALUES(seed_item_id),
+    crop_item_id = VALUES(crop_item_id),
+    harvest_quantity_per_plot = VALUES(harvest_quantity_per_plot),
+    total_growth_seconds = VALUES(total_growth_seconds);
+
+
+INSERT INTO crops (
+    code,
+    name,
+    seed_item_id,
+    crop_item_id,
+    harvest_quantity_per_plot,
+    total_growth_seconds
+)
+SELECT
+    'sugarcane',
+    'mía',
+    seedItem.id,
+    cropItem.id,
+    2,
+    900
+FROM items seedItem
+JOIN items cropItem ON cropItem.code = 'sugarcane'
+WHERE seedItem.code = 'sugarcane_seed'
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    seed_item_id = VALUES(seed_item_id),
+    crop_item_id = VALUES(crop_item_id),
+    harvest_quantity_per_plot = VALUES(harvest_quantity_per_plot),
+    total_growth_seconds = VALUES(total_growth_seconds);
+
+
+INSERT INTO crop_growth_stages (
+    crop_id,
+    stage_no,
+    stage_start_seconds,
+    image_key,
+    render_scale,
+    render_offset_y
+)
+SELECT
+    c.id,
+    stageData.stage_no,
+    stageData.stage_start_seconds,
+    stageData.image_key,
+    stageData.render_scale,
+    stageData.render_offset_y
+FROM crops c
+JOIN (
+    SELECT 1 AS stage_no, 0 AS stage_start_seconds, 'crop_sunflower_stage_1' AS image_key, 5 AS render_scale, 0 AS render_offset_y
+    UNION ALL
+    SELECT 2, 100, 'crop_sunflower_stage_2', 5, -20
+    UNION ALL
+    SELECT 3, 250, 'crop_sunflower_stage_3', 5, -40
+    UNION ALL
+    SELECT 4, 420, 'crop_sunflower_stage_4', 5, -40
+) stageData
+WHERE c.code = 'sunflower'
+ON DUPLICATE KEY UPDATE
+    stage_start_seconds = VALUES(stage_start_seconds),
+    image_key = VALUES(image_key),
+    render_scale = VALUES(render_scale),
+    render_offset_y = VALUES(render_offset_y);
+
+
+INSERT INTO crop_growth_stages (
+    crop_id,
+    stage_no,
+    stage_start_seconds,
+    image_key,
+    render_scale,
+    render_offset_y
+)
+SELECT
+    c.id,
+    stageData.stage_no,
+    stageData.stage_start_seconds,
+    stageData.image_key,
+    stageData.render_scale,
+    stageData.render_offset_y
+FROM crops c
+JOIN (
+    SELECT 1 AS stage_no, 0 AS stage_start_seconds, 'crop_sugarcane_stage_1' AS image_key, 5 AS render_scale, 0 AS render_offset_y
+    UNION ALL
+    SELECT 2, 300, 'crop_sugarcane_stage_2', 5, 0
+    UNION ALL
+    SELECT 3, 600, 'crop_sugarcane_stage_3', 5, -20
+    UNION ALL
+    SELECT 4, 900, 'crop_sugarcane_stage_4', 5, -40
+) stageData
+WHERE c.code = 'sugarcane'
+ON DUPLICATE KEY UPDATE
+    stage_start_seconds = VALUES(stage_start_seconds),
+    image_key = VALUES(image_key),
+    render_scale = VALUES(render_scale),
+    render_offset_y = VALUES(render_offset_y);
+
+
+INSERT INTO shop_items (
+    item_id,
+    buy_price,
+    required_farm_level,
+    is_visible,
+    is_active,
+    sort_order
+)
+SELECT
+    i.id,
+    2,
+    1,
+    1,
+    1,
+    1
+FROM items i
+WHERE i.code = 'sunflower_seed'
+ON DUPLICATE KEY UPDATE
+    buy_price = VALUES(buy_price),
+    required_farm_level = VALUES(required_farm_level),
+    is_visible = VALUES(is_visible),
+    is_active = VALUES(is_active),
+    sort_order = VALUES(sort_order);
+
+
+INSERT INTO shop_items (
+    item_id,
+    buy_price,
+    required_farm_level,
+    is_visible,
+    is_active,
+    sort_order
+)
+SELECT
+    i.id,
+    7,
+    1,
+    1,
+    1,
+    1
+FROM items i
+WHERE i.code = 'sugarcane_seed'
+ON DUPLICATE KEY UPDATE
+    buy_price = VALUES(buy_price),
+    required_farm_level = VALUES(required_farm_level),
+    is_visible = VALUES(is_visible),
+    is_active = VALUES(is_active),
+    sort_order = VALUES(sort_order);
