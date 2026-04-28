@@ -101,6 +101,9 @@ FARM_GAME_EMOJI = {
     "item_wheat_seed": "<:Wheat_seed:1495568410220953600>",
     "item_wheat": "<:Wheat:1495568381494038559>",
 
+    "item_corn_seed" : "<:Corn_seed:1495566111674994698>",
+    "item_corn" : "<:Corn:1495566066926227497>",
+
     "item_potato_seed" : "<:Potato_seed:1495567240878231694>",
     "item_potato" : "<:Potato:1495567150537113691>",
 
