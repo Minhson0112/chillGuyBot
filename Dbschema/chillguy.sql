@@ -554,3 +554,121 @@ CREATE TABLE farm_market_listings (
             (is_sold = 1 AND sold_at IS NOT NULL)
         )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm player market listings';
+
+#new update 
+CREATE TABLE food_recipes (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'food recipe id',
+
+    result_item_id BIGINT NOT NULL COMMENT 'crafted food item id',
+    result_quantity INT NOT NULL DEFAULT 1 COMMENT 'crafted food quantity',
+
+    cooking_seconds INT NOT NULL COMMENT 'cooking duration in seconds',
+    required_farm_level INT NOT NULL DEFAULT 1 COMMENT 'required farm level to cook',
+
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'whether recipe is active',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_food_recipes_result_item_id (result_item_id),
+
+    KEY idx_food_recipes_required_farm_level (required_farm_level),
+    KEY idx_food_recipes_is_active (is_active),
+
+    CONSTRAINT fk_food_recipes_result_item_id
+        FOREIGN KEY (result_item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_food_recipes_result_quantity
+        CHECK (result_quantity > 0),
+
+    CONSTRAINT chk_food_recipes_cooking_seconds
+        CHECK (cooking_seconds > 0),
+
+    CONSTRAINT chk_food_recipes_required_farm_level
+        CHECK (required_farm_level >= 1)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='food crafting recipes';
+
+CREATE TABLE food_recipe_ingredients (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'food recipe ingredient id',
+
+    recipe_id BIGINT NOT NULL COMMENT 'food recipe id',
+    item_id BIGINT NOT NULL COMMENT 'ingredient item id',
+    quantity INT NOT NULL COMMENT 'required ingredient quantity',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_food_recipe_ingredients_recipe_item (recipe_id, item_id),
+
+    KEY idx_food_recipe_ingredients_recipe_id (recipe_id),
+    KEY idx_food_recipe_ingredients_item_id (item_id),
+
+    CONSTRAINT fk_food_recipe_ingredients_recipe_id
+        FOREIGN KEY (recipe_id) REFERENCES food_recipes(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_food_recipe_ingredients_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_food_recipe_ingredients_quantity
+        CHECK (quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ingredients required for food recipes';
+
+CREATE TABLE farm_kitchen (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm kitchen id',
+
+    farm_id BIGINT NOT NULL COMMENT 'farm id',
+
+    current_recipe_id BIGINT DEFAULT NULL COMMENT 'current cooking recipe id',
+    cooking_quantity INT NOT NULL DEFAULT 0 COMMENT 'cooking quantity',
+
+    started_at DATETIME DEFAULT NULL COMMENT 'cooking started at',
+    finished_at DATETIME DEFAULT NULL COMMENT 'cooking finished at',
+    total_cooking_seconds INT NOT NULL DEFAULT 0 COMMENT 'total cooking duration in seconds',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'idle' COMMENT 'kitchen status',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_farm_kitchen_farm_id (farm_id),
+
+    KEY idx_farm_kitchen_current_recipe_id (current_recipe_id),
+    KEY idx_farm_kitchen_status (status),
+
+    CONSTRAINT fk_farm_kitchen_farm_id
+        FOREIGN KEY (farm_id) REFERENCES farm(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_kitchen_current_recipe_id
+        FOREIGN KEY (current_recipe_id) REFERENCES food_recipes(id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT chk_farm_kitchen_cooking_quantity
+        CHECK (cooking_quantity >= 0),
+
+    CONSTRAINT chk_farm_kitchen_total_cooking_seconds
+        CHECK (total_cooking_seconds >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm kitchen cooking state';
+
+INSERT INTO farm_kitchen (
+    farm_id,
+    status
+)
+SELECT
+    f.id,
+    'idle'
+FROM farm f
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM farm_kitchen fk
+    WHERE fk.farm_id = f.id
+);

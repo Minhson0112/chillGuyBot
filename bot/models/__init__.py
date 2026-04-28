@@ -14,3 +14,6 @@ from bot.models.farmChickenCoop import FarmChickenCoop
 from bot.models.farmCowShed import FarmCowShed
 from bot.models.farmFishPond import FarmFishPond
 from bot.models.chillCoinTransaction import ChillCoinTransaction
+from bot.models.farmKitchen import FarmKitchen
+from bot.models.foodRecipe import FoodRecipe
+from bot.models.foodRecipeIngredient import FoodRecipeIngredient

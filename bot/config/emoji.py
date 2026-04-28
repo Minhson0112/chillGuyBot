@@ -89,6 +89,9 @@ WORDLE_LETTER_EMOJI = {
 FARM_GAME_EMOJI = {
     "chill_coin": "<:cs_coin:1495116560191324383>",
 
+    "exp": "<:xp:1498827483749945354>",
+    "level": "<:level:1498827539911544933>",
+
     "item_bug": "<:bug:1498089075867914281>",
 
     "item_chicken": "<:chicken_left:1495565972692537415>",
@@ -139,6 +142,35 @@ FARM_GAME_EMOJI = {
 
     "item_sunflower_seed" : "<:sunflower_seed:1498775517455978636>",
     "item_sunflower" : "<:sunflower:1498775607624994967>",
+
+    "item_cheese": "<:Cheese:1498466831181021194>",
+    "item_wheat_flour": "<:Wheat_Flour:1498466829440516278>",
+    "item_oil": "<:Oil:1498466827251224627>",
+    "item_sugar": "<:Sugar:1498466825082765423>",
+    "item_fried_egg": "<:Fried_Egg:1498466822780092517>",
+    "item_omelet": "<:Omelet:1498466821278269512>",
+    "item_salad": "<:Salad:1498466820053532682>",
+    "item_cheese_cauliflower": "<:Cheese_Cauliflower:1498466818136871013>",
+    "item_parsnip_soup": "<:Parsnip_Soup:1498466816698355713>",
+    "item_fried_calamari": "<:Fried_Calamari:1498466814064066631>",
+    "item_pizza": "<:Pizza:1498466812201795614>",
+    "item_bean_hotpot": "<:Bean_Hotpot:1498466810792509480>",
+    "item_carp_surprise": "<:Carp_Surprise:1498466807768547408>",
+    "item_hashbrowns": "<:Hashbrowns:1498466806187298876>",
+    "item_pancakes": "<:Pancakes:1498466804773683371>",
+    "item_salmon_dinner": "<:Salmon_Dinner:1498466803347886161>",
+    "item_bread": "<:Bread:1498466800675979384>",
+    "item_pink_cake": "<:Pink_Cake:1498466799476277408>",
+    "item_rhubarb_pie": "<:Rhubarb_Pie:1498466798226636810>",
+    "item_cookie": "<:Cookie:1498466796423086300>",
+    "item_spaghetti": "<:Spaghetti:1498466794648899584>",
+    "item_fried_eel": "<:Fried_Eel:1498466793268711514>",
+    "item_sashimi": "<:Sashimi:1498466791217692763>",
+    "item_maki_roll": "<:Maki_Roll:1498466789972250745>",
+    "item_ice_cream": "<:Ice_Cream:1498466788013379685>",
+    "item_crab_cakes": "<:Crab_Cakes:1498466780983595108>",
+    "item_beer": "<:Beer:1498466779649806447>",
+
 
     "item_seaweed": "<:Seaweed:1498349087626367128>",
     "item_snail": "<:Snail:1498349084359131321>",

@@ -1207,3 +1207,182 @@ ON DUPLICATE KEY UPDATE
     is_visible = VALUES(is_visible),
     is_active = VALUES(is_active),
     sort_order = VALUES(sort_order);
+
+
+
+# update food
+    INSERT INTO items (
+    code,
+    name,
+    type_code,
+    icon_image_key,
+    description,
+    render_scale,
+    render_offset_y,
+    sell_price,
+    is_sellable,
+    is_usable,
+    is_active
+) VALUES
+('cheese', 'phô mai', 'food', 'item_cheese', NULL, 1.0, 0, 15, 1, 1, 1),
+('wheat_flour', 'bột mì', 'food', 'item_wheat_flour', NULL, 1.0, 0, 10, 1, 1, 1),
+('oil', 'dầu ăn', 'food', 'item_oil', NULL, 1.0, 0, 15, 1, 1, 1),
+('sugar', 'đường', 'food', 'item_sugar', NULL, 1.0, 0, 45, 1, 1, 1),
+('fried_egg', 'trứng chiên', 'food', 'item_fried_egg', NULL, 1.0, 0, 15, 1, 1, 1),
+('omelet', 'trứng ốp la', 'food', 'item_omelet', NULL, 1.0, 0, 25, 1, 1, 1),
+('salad', 'salad', 'food', 'item_salad', NULL, 1.0, 0, 200, 1, 1, 1),
+('cheese_cauliflower', 'súp lơ trộn phô mai', 'food', 'item_cheese_cauliflower', NULL, 1.0, 0, 100, 1, 1, 1),
+('parsnip_soup', 'súp củ cải vàng', 'food', 'item_parsnip_soup', NULL, 1.0, 0, 120, 1, 1, 1),
+('fried_calamari', 'mực chiên ròn', 'food', 'item_fried_calamari', NULL, 1.0, 0, 70, 1, 1, 1),
+('pizza', 'pizza', 'food', 'item_pizza', NULL, 1.0, 0, 300, 1, 1, 1),
+('bean_hotpot', 'đậu xanh hầm', 'food', 'item_bean_hotpot', NULL, 1.0, 0, 200, 1, 1, 1),
+('carp_surprise', 'cá chép hấp', 'food', 'item_carp_surprise', NULL, 1.0, 0, 110, 1, 1, 1),
+('hashbrowns', 'khoai tây chiên', 'food', 'item_hashbrowns', NULL, 1.0, 0, 125, 1, 1, 1),
+('pancakes', 'pancakes', 'food', 'item_pancakes', NULL, 1.0, 0, 195, 1, 1, 1),
+('salmon_dinner', 'cá hồi kiểu nhật', 'food', 'item_salmon_dinner', NULL, 1.0, 0, 235, 1, 1, 1),
+('bread', 'bánh mì', 'food', 'item_bread', NULL, 1.0, 0, 52, 1, 1, 1),
+('pink_cake', 'bánh kem hồng', 'food', 'item_pink_cake', NULL, 1.0, 0, 300, 1, 1, 1),
+('rhubarb_pie', 'bánh đại hoàng', 'food', 'item_rhubarb_pie', NULL, 1.0, 0, 220, 1, 1, 1),
+('cookie', 'bánh quy', 'food', 'item_cookie', NULL, 1.0, 0, 99, 1, 1, 1),
+('spaghetti', 'spaghetti', 'food', 'item_spaghetti', NULL, 1.0, 0, 236, 1, 1, 1),
+('fried_eel', 'lươn chiên tỏi', 'food', 'item_fried_eel', NULL, 1.0, 0, 147, 1, 1, 1),
+('sashimi', 'sashimi', 'food', 'item_sashimi', NULL, 1.0, 0, 120, 1, 1, 1),
+('maki_roll', 'cơm cuộn', 'food', 'item_maki_roll', NULL, 1.0, 0, 98, 1, 1, 1),
+('ice_cream', 'kem', 'food', 'item_ice_cream', NULL, 1.0, 0, 56, 1, 1, 1),
+('crab_cakes', 'bánh cua', 'food', 'item_crab_cakes', NULL, 1.0, 0, 43, 1, 1, 1),
+('beer', 'bia', 'food', 'item_beer', NULL, 1.0, 0, 75, 1, 1, 1)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    type_code = VALUES(type_code),
+    icon_image_key = VALUES(icon_image_key),
+    description = VALUES(description),
+    render_scale = VALUES(render_scale),
+    render_offset_y = VALUES(render_offset_y),
+    sell_price = VALUES(sell_price),
+    is_sellable = VALUES(is_sellable),
+    is_usable = VALUES(is_usable),
+    is_active = VALUES(is_active);
+
+
+INSERT INTO food_recipes (
+    result_item_id,
+    result_quantity,
+    cooking_seconds,
+    required_farm_level,
+    is_active
+)
+SELECT
+    resultItem.id,
+    recipeData.result_quantity,
+    recipeData.cooking_seconds,
+    recipeData.required_farm_level,
+    recipeData.is_active
+FROM (
+    SELECT 'cheese' AS result_item_code, 1 AS result_quantity, 180 AS cooking_seconds, 1 AS required_farm_level, 1 AS is_active
+    UNION ALL SELECT 'wheat_flour', 1, 120, 1, 1
+    UNION ALL SELECT 'oil', 1, 160, 1, 1
+    UNION ALL SELECT 'sugar', 1, 240, 1, 1
+    UNION ALL SELECT 'fried_egg', 1, 120, 1, 1
+    UNION ALL SELECT 'omelet', 1, 180, 1, 1
+    UNION ALL SELECT 'salad', 1, 160, 2, 1
+    UNION ALL SELECT 'cheese_cauliflower', 1, 600, 2, 1
+    UNION ALL SELECT 'parsnip_soup', 1, 780, 1, 1
+    UNION ALL SELECT 'fried_calamari', 1, 1200, 1, 1
+    UNION ALL SELECT 'pizza', 1, 1800, 2, 1
+    UNION ALL SELECT 'bean_hotpot', 1, 1500, 1, 1
+    UNION ALL SELECT 'carp_surprise', 1, 1440, 1, 1
+    UNION ALL SELECT 'hashbrowns', 1, 1920, 1, 1
+    UNION ALL SELECT 'pancakes', 1, 2160, 1, 1
+    UNION ALL SELECT 'salmon_dinner', 1, 2040, 2, 1
+    UNION ALL SELECT 'bread', 1, 240, 1, 1
+    UNION ALL SELECT 'pink_cake', 1, 2400, 2, 1
+    UNION ALL SELECT 'rhubarb_pie', 1, 2520, 2, 1
+    UNION ALL SELECT 'cookie', 1, 420, 1, 1
+    UNION ALL SELECT 'spaghetti', 1, 2700, 2, 1
+    UNION ALL SELECT 'fried_eel', 1, 2160, 2, 1
+    UNION ALL SELECT 'sashimi', 1, 840, 1, 1
+    UNION ALL SELECT 'maki_roll', 1, 120, 1, 1
+    UNION ALL SELECT 'ice_cream', 1, 180, 1, 1
+    UNION ALL SELECT 'crab_cakes', 1, 540, 1, 1
+    UNION ALL SELECT 'beer', 1, 420, 1, 1
+) recipeData
+JOIN items resultItem ON resultItem.code = recipeData.result_item_code
+ON DUPLICATE KEY UPDATE
+    result_quantity = VALUES(result_quantity),
+    cooking_seconds = VALUES(cooking_seconds),
+    required_farm_level = VALUES(required_farm_level),
+    is_active = VALUES(is_active);
+
+
+INSERT INTO food_recipe_ingredients (
+    recipe_id,
+    item_id,
+    quantity
+)
+SELECT
+    recipe.id,
+    ingredientItem.id,
+    ingredientData.quantity
+FROM (
+    SELECT 'cheese' AS result_item_code, 'milk' AS ingredient_item_code, 1 AS quantity
+    UNION ALL SELECT 'wheat_flour', 'wheat', 2
+    UNION ALL SELECT 'oil', 'sunflower', 1
+    UNION ALL SELECT 'sugar', 'sugarcane', 1
+    UNION ALL SELECT 'fried_egg', 'egg', 1
+    UNION ALL SELECT 'omelet', 'egg', 1
+    UNION ALL SELECT 'omelet', 'milk', 1
+    UNION ALL SELECT 'salad', 'tomato', 1
+    UNION ALL SELECT 'salad', 'cauliflower', 1
+    UNION ALL SELECT 'salad', 'green_bean', 1
+    UNION ALL SELECT 'cheese_cauliflower', 'cauliflower', 1
+    UNION ALL SELECT 'cheese_cauliflower', 'cheese', 1
+    UNION ALL SELECT 'parsnip_soup', 'parsnip', 2
+    UNION ALL SELECT 'parsnip_soup', 'milk', 2
+    UNION ALL SELECT 'fried_calamari', 'squid', 1
+    UNION ALL SELECT 'fried_calamari', 'wheat_flour', 1
+    UNION ALL SELECT 'fried_calamari', 'oil', 1
+    UNION ALL SELECT 'pizza', 'tomato', 2
+    UNION ALL SELECT 'pizza', 'wheat_flour', 2
+    UNION ALL SELECT 'pizza', 'cheese', 2
+    UNION ALL SELECT 'bean_hotpot', 'green_bean', 4
+    UNION ALL SELECT 'carp_surprise', 'carp', 2
+    UNION ALL SELECT 'hashbrowns', 'oil', 1
+    UNION ALL SELECT 'hashbrowns', 'potato', 4
+    UNION ALL SELECT 'pancakes', 'milk', 1
+    UNION ALL SELECT 'pancakes', 'wheat_flour', 4
+    UNION ALL SELECT 'pancakes', 'egg', 2
+    UNION ALL SELECT 'salmon_dinner', 'salmon', 1
+    UNION ALL SELECT 'salmon_dinner', 'kale', 4
+    UNION ALL SELECT 'bread', 'wheat_flour', 4
+    UNION ALL SELECT 'pink_cake', 'melon', 1
+    UNION ALL SELECT 'pink_cake', 'wheat_flour', 1
+    UNION ALL SELECT 'pink_cake', 'sugar', 1
+    UNION ALL SELECT 'pink_cake', 'egg', 2
+    UNION ALL SELECT 'rhubarb_pie', 'rhubarb', 2
+    UNION ALL SELECT 'rhubarb_pie', 'wheat_flour', 1
+    UNION ALL SELECT 'rhubarb_pie', 'sugar', 1
+    UNION ALL SELECT 'cookie', 'wheat_flour', 2
+    UNION ALL SELECT 'cookie', 'sugar', 1
+    UNION ALL SELECT 'cookie', 'egg', 1
+    UNION ALL SELECT 'spaghetti', 'tomato', 2
+    UNION ALL SELECT 'spaghetti', 'wheat_flour', 2
+    UNION ALL SELECT 'fried_eel', 'eel', 1
+    UNION ALL SELECT 'fried_eel', 'garlic', 1
+    UNION ALL SELECT 'fried_eel', 'oil', 1
+    UNION ALL SELECT 'sashimi', 'salmon', 2
+    UNION ALL SELECT 'maki_roll', 'tuna', 1
+    UNION ALL SELECT 'maki_roll', 'seaweed', 1
+    UNION ALL SELECT 'maki_roll', 'wheat', 2
+    UNION ALL SELECT 'ice_cream', 'milk', 1
+    UNION ALL SELECT 'ice_cream', 'sugar', 1
+    UNION ALL SELECT 'crab_cakes', 'crab', 1
+    UNION ALL SELECT 'crab_cakes', 'wheat_flour', 1
+    UNION ALL SELECT 'crab_cakes', 'oil', 1
+    UNION ALL SELECT 'beer', 'wheat', 2
+    UNION ALL SELECT 'beer', 'hops', 1
+) ingredientData
+JOIN items resultItem ON resultItem.code = ingredientData.result_item_code
+JOIN food_recipes recipe ON recipe.result_item_id = resultItem.id
+JOIN items ingredientItem ON ingredientItem.code = ingredientData.ingredient_item_code
+ON DUPLICATE KEY UPDATE
+    quantity = VALUES(quantity);

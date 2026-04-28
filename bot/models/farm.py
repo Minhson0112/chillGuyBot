@@ -28,3 +28,4 @@ class Farm(Base):
     chickenCoop = relationship("FarmChickenCoop", back_populates="farm", uselist=False, cascade="all, delete-orphan")
     cowShed = relationship("FarmCowShed", back_populates="farm", uselist=False, cascade="all, delete-orphan")
     fishPond = relationship("FarmFishPond", back_populates="farm", uselist=False, cascade="all, delete-orphan")
+    kitchen = relationship("FarmKitchen", back_populates="farm", uselist=False, cascade="all, delete-orphan")

@@ -3,6 +3,7 @@ from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 from bot.repository.farmChickenCoopRepository import FarmChickenCoopRepository
 from bot.repository.farmCowShedRepository import FarmCowShedRepository
 from bot.repository.farmFishPondRepository import FarmFishPondRepository
+from bot.repository.farmKitchenRepository import FarmKitchenRepository
 
 
 class FarmInitializeService:
@@ -17,6 +18,7 @@ class FarmInitializeService:
         farmChickenCoopRepository = FarmChickenCoopRepository(session)
         farmCowShedRepository = FarmCowShedRepository(session)
         farmFishPondRepository = FarmFishPondRepository(session)
+        farmKitchenRepository = FarmKitchenRepository(session)
 
         farm = farmRepository.findByUserId(userId)
 
@@ -45,5 +47,10 @@ class FarmInitializeService:
 
         if fishPond is None:
             farmFishPondRepository.createDefaultFishPond(farm.id)
+
+        kitchen = farmKitchenRepository.findByFarmId(farm.id)
+
+        if kitchen is None:
+            farmKitchenRepository.createDefaultKitchen(farm.id)
 
         return farm
