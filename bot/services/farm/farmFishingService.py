@@ -1,4 +1,5 @@
 import random
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from bot.config.database import getDbSession
@@ -16,6 +17,9 @@ class FarmFishingService:
 
     BUG_COST_PER_FISHING = 1
     EXP_PER_FISHING = 1
+
+    FISHING_COOLDOWN_MINUTES = 5
+
     MIN_WEIGHT_KG = 1
     MAX_WEIGHT_KG = 100
 
@@ -41,6 +45,17 @@ class FarmFishingService:
                 return {
                     "success": False,
                     "message": "Nông trại của bạn chưa có hồ câu cá.",
+                }
+
+            cooldownResult = self.checkFishingCooldown(fishPond)
+
+            if not cooldownResult["canFish"]:
+                return {
+                    "success": False,
+                    "message": (
+                        f"Bạn vừa câu cá gần đây. "
+                        f"Hãy chờ thêm **{cooldownResult['remainingTimeText']}** nữa."
+                    ),
                 }
 
             bugItem = itemRepository.findByCode(self.BUG_ITEM_CODE)
@@ -108,9 +123,32 @@ class FarmFishingService:
                 "success": True,
                 "message": (
                     f"Bạn đã câu được {caughtItemText} nặng **{weightKg}kg**. "
-                    f"Đã dùng **{self.BUG_COST_PER_FISHING}** {bugText}."
+                    f"Đã dùng **{self.BUG_COST_PER_FISHING}** {bugText}. "
+                    f"Farm EXP +{self.EXP_PER_FISHING}."
                 ),
             }
+
+    def checkFishingCooldown(self, fishPond):
+        if fishPond.last_fished_at is None:
+            return {
+                "canFish": True,
+                "remainingTimeText": None,
+            }
+
+        now = datetime.now()
+        nextFishAt = fishPond.last_fished_at + timedelta(minutes=self.FISHING_COOLDOWN_MINUTES)
+        remainingSeconds = int((nextFishAt - now).total_seconds())
+
+        if remainingSeconds <= 0:
+            return {
+                "canFish": True,
+                "remainingTimeText": None,
+            }
+
+        return {
+            "canFish": False,
+            "remainingTimeText": self.formatRemainingTime(remainingSeconds),
+        }
 
     def randomSeafoodItem(self, seafoodItems):
         return random.choice(seafoodItems)
@@ -133,3 +171,9 @@ class FarmFishingService:
             return f"**{item.name}**"
 
         return f"{itemEmoji} **{item.name}**"
+
+    def formatRemainingTime(self, remainingSeconds: int):
+        minutes = remainingSeconds // 60
+        seconds = remainingSeconds % 60
+
+        return f"{minutes}:{seconds:02d}"
