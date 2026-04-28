@@ -3,6 +3,8 @@ from sqlalchemy.orm import joinedload
 from bot.models.farm import Farm
 from bot.models.farmCropArea import FarmCropArea
 from bot.models.crop import Crop
+from bot.models.farmKitchen import FarmKitchen
+from bot.models.foodRecipe import FoodRecipe
 from bot.config.farmLevel import FARM_MAX_LEVEL, FARM_LEVEL_REQUIRED_EXP
 
 
@@ -52,6 +54,9 @@ class FarmRepository:
                 joinedload(Farm.chickenCoop),
                 joinedload(Farm.cowShed),
                 joinedload(Farm.fishPond),
+                joinedload(Farm.kitchen)
+                .joinedload(FarmKitchen.currentRecipe)
+                .joinedload(FoodRecipe.resultItem),
             )
             .filter(Farm.user_id == userId)
             .first()

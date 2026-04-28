@@ -156,6 +156,7 @@ class FarmRenderService:
         cropAreaData = self.buildCropAreaEmbedData(farm.cropArea)
         chickenCoopData = self.buildChickenCoopEmbedData(farm.chickenCoop)
         cowShedData = self.buildCowShedEmbedData(farm.cowShed)
+        kitchenData = self.buildKitchenEmbedData(farm.kitchen)
 
         return {
             "cropText": cropAreaData["cropText"],
@@ -166,6 +167,9 @@ class FarmRenderService:
             "eggCollectText": chickenCoopData["eggCollectText"],
             "cowHungryText": cowShedData["cowHungryText"],
             "milkCollectText": cowShedData["milkCollectText"],
+            "kitchenFoodText": kitchenData["kitchenFoodText"],
+            "kitchenQuantityText": kitchenData["kitchenQuantityText"],
+            "kitchenRemainingTimeText": kitchenData["kitchenRemainingTimeText"],
         }
 
     def buildCropAreaEmbedData(self, cropArea):
@@ -384,6 +388,52 @@ class FarmRenderService:
         elapsedSeconds = int((now - cropArea.planted_at).total_seconds())
 
         return max(elapsedSeconds, 0)
+    
+    def buildKitchenEmbedData(self, kitchen):
+        if kitchen is None:
+            return {
+                "kitchenFoodText": "Chưa có nhà bếp",
+                "kitchenQuantityText": "-",
+                "kitchenRemainingTimeText": "-",
+            }
+
+        if kitchen.status == "idle" or kitchen.current_recipe_id is None:
+            return {
+                "kitchenFoodText": "Đang trống",
+                "kitchenQuantityText": "-",
+                "kitchenRemainingTimeText": "-",
+            }
+
+        currentRecipe = kitchen.currentRecipe
+
+        if currentRecipe is None or currentRecipe.resultItem is None:
+            return {
+                "kitchenFoodText": "Dữ liệu món ăn không hợp lệ",
+                "kitchenQuantityText": "-",
+                "kitchenRemainingTimeText": "-",
+            }
+
+        resultItem = currentRecipe.resultItem
+        itemEmoji = FARM_GAME_EMOJI.get(resultItem.icon_image_key, "")
+        kitchenFoodText = f"{itemEmoji} **{resultItem.name}**".strip()
+
+        return {
+            "kitchenFoodText": kitchenFoodText,
+            "kitchenQuantityText": self.formatNumber(kitchen.cooking_quantity),
+            "kitchenRemainingTimeText": self.buildKitchenRemainingTimeText(kitchen),
+        }
+
+    def buildKitchenRemainingTimeText(self, kitchen):
+        if kitchen.finished_at is None:
+            return "-"
+
+        now = datetime.now()
+        remainingSeconds = int((kitchen.finished_at - now).total_seconds())
+
+        if remainingSeconds <= 0:
+            return "Có thể nhận món"
+
+        return self.formatRemainingTime(remainingSeconds)
 
     def renderFarmStatusInfo(self, baseImage: Image.Image, farm):
         self.renderChillCoinInfo(baseImage, farm)

@@ -419,7 +419,7 @@ class MyFarmView(discord.ui.View):
         )
 
         embed.add_field(
-            name="Thu hoạch trong 🌾",
+            name="Thu hoạch trong ⏱️",
             value=embedData["remainingTimeText"],
             inline=True,
         )
@@ -469,6 +469,30 @@ class MyFarmView(discord.ui.View):
         embed.add_field(
             name="Vắt sữa <:Milk:1495567020601774263>",
             value=embedData["milkCollectText"],
+            inline=True,
+        )
+
+        embed.add_field(
+            name="--------------------------------------------------------",
+            value="**Trạng thái nhà bếp 🍳**",
+            inline=False,
+        )
+
+        embed.add_field(
+            name="Món đang nấu",
+            value=embedData["kitchenFoodText"],
+            inline=True,
+        )
+
+        embed.add_field(
+            name="Số lượng",
+            value=embedData["kitchenQuantityText"],
+            inline=True,
+        )
+
+        embed.add_field(
+            name="Thời gian còn lại ⏱️",
+            value=embedData["kitchenRemainingTimeText"],
             inline=True,
         )
 
