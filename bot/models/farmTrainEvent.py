@@ -10,8 +10,6 @@ class FarmTrainEvent(Base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True, comment="farm train event id")
 
-    guild_id = Column(BigInteger, nullable=False, comment="discord guild id")
-
     required_item_id = Column(
         BigInteger,
         ForeignKey("items.id", ondelete="RESTRICT"),
