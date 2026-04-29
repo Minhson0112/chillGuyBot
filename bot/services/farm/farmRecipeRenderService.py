@@ -36,21 +36,23 @@ class FarmRecipeRenderService:
         850,
     ]
 
-    ITEM_ICON_SIZE = 44
-    INFO_ICON_SIZE = 36
+    INFO_RIGHT_X = 1425
 
-    TITLE_FONT_SIZE = 48
-    PAGE_FONT_SIZE = 28
-    LINE_FONT_SIZE = 28
+    ITEM_ICON_SIZE = 42
+    INFO_ICON_SIZE = 34
+
+    TITLE_FONT_SIZE = 46
+    PAGE_FONT_SIZE = 26
+    LINE_FONT_SIZE = 26
 
     TEXT_FILL = (255, 235, 180, 255)
     STROKE_FILL = (60, 25, 5, 255)
 
-    INLINE_GAP = 16
+    INLINE_GAP = 14
     ICON_TEXT_GAP = 8
 
-    ITEM_ICON_OFFSET_Y = -8
-    INFO_ICON_OFFSET_Y = -5
+    ITEM_ICON_OFFSET_Y = -7
+    INFO_ICON_OFFSET_Y = -4
 
     def renderRecipePageToBuffer(self, page: int = 1):
         with getDbSession() as session:
@@ -114,6 +116,32 @@ class FarmRecipeRenderService:
         draw = ImageDraw.Draw(baseImage)
         font = ImageFont.truetype(str(self.FONT_PATH), self.LINE_FONT_SIZE)
 
+        self.renderRecipeFormula(
+            baseImage=baseImage,
+            draw=draw,
+            font=font,
+            recipe=recipe,
+            y=y,
+        )
+
+        self.renderRecipeInfoRight(
+            baseImage=baseImage,
+            draw=draw,
+            font=font,
+            recipe=recipe,
+            resultItem=resultItem,
+            y=y,
+        )
+
+    def renderRecipeFormula(
+        self,
+        baseImage: Image.Image,
+        draw: ImageDraw.ImageDraw,
+        font: ImageFont.FreeTypeFont,
+        recipe,
+        y: int,
+    ):
+        resultItem = recipe.resultItem
         x = self.ROW_START_X
 
         x = self.drawInlineText(
@@ -149,7 +177,7 @@ class FarmRecipeRenderService:
             font=font,
         )
 
-        x = self.renderIngredientsInline(
+        self.renderIngredientsInline(
             baseImage=baseImage,
             draw=draw,
             font=font,
@@ -157,6 +185,25 @@ class FarmRecipeRenderService:
             x=x,
             y=y,
         )
+
+    def renderRecipeInfoRight(
+        self,
+        baseImage: Image.Image,
+        draw: ImageDraw.ImageDraw,
+        font: ImageFont.FreeTypeFont,
+        recipe,
+        resultItem,
+        y: int,
+    ):
+        infoWidth = self.calculateRecipeInfoWidth(
+            draw=draw,
+            font=font,
+            priceText=self.formatPrice(resultItem.sell_price),
+            levelText=str(recipe.required_farm_level),
+            timeText=self.formatCookingTime(recipe.cooking_seconds),
+        )
+
+        x = self.INFO_RIGHT_X - infoWidth
 
         x = self.drawInlineIcon(
             baseImage=baseImage,
@@ -207,6 +254,28 @@ class FarmRecipeRenderService:
             x=x,
             y=y,
             font=font,
+        )
+
+    def calculateRecipeInfoWidth(
+        self,
+        draw: ImageDraw.ImageDraw,
+        font: ImageFont.FreeTypeFont,
+        priceText: str,
+        levelText: str,
+        timeText: str,
+    ):
+        return (
+            self.INFO_ICON_SIZE
+            + self.ICON_TEXT_GAP
+            + self.getTextWidth(draw, priceText, font)
+            + self.INLINE_GAP
+            + self.INFO_ICON_SIZE
+            + self.ICON_TEXT_GAP
+            + self.getTextWidth(draw, levelText, font)
+            + self.INLINE_GAP
+            + self.INFO_ICON_SIZE
+            + self.ICON_TEXT_GAP
+            + self.getTextWidth(draw, timeText, font)
         )
 
     def renderIngredientsInline(
@@ -274,10 +343,7 @@ class FarmRecipeRenderService:
             stroke_fill=self.STROKE_FILL,
         )
 
-        bbox = draw.textbbox((0, 0), text, font=font)
-        textWidth = bbox[2] - bbox[0]
-
-        return x + textWidth + self.INLINE_GAP
+        return x + self.getTextWidth(draw, text, font) + self.INLINE_GAP
 
     def drawInlineIcon(
         self,
@@ -299,6 +365,16 @@ class FarmRecipeRenderService:
         )
 
         return x + size + self.ICON_TEXT_GAP
+
+    def getTextWidth(
+        self,
+        draw: ImageDraw.ImageDraw,
+        text: str,
+        font: ImageFont.FreeTypeFont,
+    ):
+        bbox = draw.textbbox((0, 0), text, font=font)
+
+        return bbox[2] - bbox[0]
 
     def renderTitle(self, baseImage: Image.Image):
         self.drawCenteredText(
@@ -343,9 +419,7 @@ class FarmRecipeRenderService:
         draw = ImageDraw.Draw(baseImage)
         font = ImageFont.truetype(str(self.FONT_PATH), fontSize)
 
-        bbox = draw.textbbox((0, 0), text, font=font)
-        textWidth = bbox[2] - bbox[0]
-
+        textWidth = self.getTextWidth(draw, text, font)
         x = centerX - textWidth // 2
 
         draw.text(
