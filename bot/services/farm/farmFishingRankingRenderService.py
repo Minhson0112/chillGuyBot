@@ -24,26 +24,26 @@ class FarmFishingRankingRenderService:
     FISH_ICON_SIZE = 52
 
     ROW_Y_LIST = [
-        715,
-        855,
-        995,
-        1135,
-        1275,
-        1415,
-        1555,
-        1695,
-        1835,
-        1975,
+        500,
+        600,
+        695,
+        795,
+        890,
+        980,
+        1072,
+        1163,
+        1257,
+        1347,
     ]
 
-    NAME_X = 300
+    NAME_X = 260
     NAME_MAX_WIDTH = 460
 
-    FISH_ICON_X = 825
-    FISH_TEXT_X = 890
+    FISH_ICON_X = 590
+    FISH_TEXT_X = 655
     FISH_MAX_WIDTH = 260
 
-    WEIGHT_RIGHT_X = 1430
+    WEIGHT_RIGHT_X = 970
     WEIGHT_MAX_WIDTH = 220
 
     def __init__(self, bot):
