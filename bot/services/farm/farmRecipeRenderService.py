@@ -17,7 +17,7 @@ class FarmRecipeRenderService:
 
     FONT_PATH = Path("bot/assets/fonts/arial.ttf")
 
-    PER_PAGE = 4
+    PER_PAGE = 5
 
     TITLE_TEXT = "Công thức nấu ăn"
 
@@ -29,29 +29,25 @@ class FarmRecipeRenderService:
 
     ROW_START_X = 95
     ROW_TEXT_Y_LIST = [
-        220,
-        370,
-        520,
-        670,
+        270,
+        420,
+        570,
+        720,
+        870,
     ]
 
-    LINE_MAX_X = 1430
-
-    ITEM_ICON_SIZE = 34
-    INFO_ICON_SIZE = 26
+    ITEM_ICON_SIZE = 36
+    INFO_ICON_SIZE = 28
 
     TITLE_FONT_SIZE = 44
     PAGE_FONT_SIZE = 26
-    LINE_FONT_SIZE = 22
+    LINE_FONT_SIZE = 24
 
     TEXT_FILL = (255, 235, 180, 255)
     STROKE_FILL = (60, 25, 5, 255)
 
-    FOOD_NAME_MAX_LENGTH = 16
-    INGREDIENT_NAME_MAX_LENGTH = 12
-
-    INLINE_GAP = 6
-    ICON_TEXT_GAP = 4
+    INLINE_GAP = 8
+    ICON_TEXT_GAP = 6
 
     def renderRecipePageToBuffer(self, page: int = 1):
         with getDbSession() as session:
@@ -119,7 +115,7 @@ class FarmRecipeRenderService:
 
         x = self.drawInlineText(
             draw=draw,
-            text=f"id:{resultItem.id} ",
+            text=f"id:{resultItem.id}",
             x=x,
             y=y,
             font=font,
@@ -127,7 +123,7 @@ class FarmRecipeRenderService:
 
         x = self.drawInlineText(
             draw=draw,
-            text=f"{self.truncateText(resultItem.name, self.FOOD_NAME_MAX_LENGTH)} ",
+            text=resultItem.name,
             x=x,
             y=y,
             font=font,
@@ -137,14 +133,14 @@ class FarmRecipeRenderService:
             baseImage=baseImage,
             imageKey=resultItem.icon_image_key,
             x=x,
-            y=y - 5,
+            y=y - 6,
             size=self.ITEM_ICON_SIZE,
             resizeType=Image.NEAREST,
         )
 
         x = self.drawInlineText(
             draw=draw,
-            text=" = ",
+            text="=",
             x=x,
             y=y,
             font=font,
@@ -159,26 +155,18 @@ class FarmRecipeRenderService:
             y=y,
         )
 
-        x = self.drawInlineText(
-            draw=draw,
-            text=" ",
-            x=x,
-            y=y,
-            font=font,
-        )
-
         x = self.drawInlineIcon(
             baseImage=baseImage,
             imageKey=self.COIN_ICON_KEY,
             x=x,
-            y=y - 2,
+            y=y - 3,
             size=self.INFO_ICON_SIZE,
             resizeType=Image.LANCZOS,
         )
 
         x = self.drawInlineText(
             draw=draw,
-            text=f"{self.formatPrice(resultItem.sell_price)} ",
+            text=self.formatPrice(resultItem.sell_price),
             x=x,
             y=y,
             font=font,
@@ -188,14 +176,14 @@ class FarmRecipeRenderService:
             baseImage=baseImage,
             imageKey=self.LEVEL_ICON_KEY,
             x=x,
-            y=y - 2,
+            y=y - 3,
             size=self.INFO_ICON_SIZE,
             resizeType=Image.LANCZOS,
         )
 
         x = self.drawInlineText(
             draw=draw,
-            text=f"{recipe.required_farm_level} ",
+            text=str(recipe.required_farm_level),
             x=x,
             y=y,
             font=font,
@@ -205,7 +193,7 @@ class FarmRecipeRenderService:
             baseImage=baseImage,
             imageKey=self.CLOCK_ICON_KEY,
             x=x,
-            y=y - 2,
+            y=y - 3,
             size=self.INFO_ICON_SIZE,
             resizeType=Image.LANCZOS,
         )
@@ -241,7 +229,7 @@ class FarmRecipeRenderService:
             if index > 0:
                 x = self.drawInlineText(
                     draw=draw,
-                    text=" + ",
+                    text="+",
                     x=x,
                     y=y,
                     font=font,
@@ -249,7 +237,7 @@ class FarmRecipeRenderService:
 
             x = self.drawInlineText(
                 draw=draw,
-                text=f"{ingredient.quantity}{self.truncateText(item.name, self.INGREDIENT_NAME_MAX_LENGTH)} ",
+                text=f"{ingredient.quantity} {item.name}",
                 x=x,
                 y=y,
                 font=font,
@@ -259,20 +247,10 @@ class FarmRecipeRenderService:
                 baseImage=baseImage,
                 imageKey=item.icon_image_key,
                 x=x,
-                y=y - 5,
+                y=y - 6,
                 size=self.ITEM_ICON_SIZE,
                 resizeType=Image.NEAREST,
             )
-
-            if x >= self.LINE_MAX_X:
-                x = self.drawInlineText(
-                    draw=draw,
-                    text=" ...",
-                    x=x,
-                    y=y,
-                    font=font,
-                )
-                break
 
         return x
 
@@ -390,15 +368,6 @@ class FarmRecipeRenderService:
             return totalPage
 
         return page
-
-    def truncateText(self, text: str, maxLength: int):
-        if text is None:
-            return ""
-
-        if len(text) <= maxLength:
-            return text
-
-        return text[:maxLength - 3] + "..."
 
     def formatPrice(self, price):
         if price is None:
