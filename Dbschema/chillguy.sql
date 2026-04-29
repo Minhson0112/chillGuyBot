@@ -686,9 +686,9 @@ CREATE TABLE farm_train_events (
 
     is_completed TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'whether train event is completed',
 
-    created_by_user_id BIGINT DEFAULT NULL COMMENT 'admin user id who created event',
+    created_by_user_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'admin user id who created event',
     completed_by_farm_id BIGINT DEFAULT NULL COMMENT 'farm id that completed event',
-    completed_by_user_id BIGINT DEFAULT NULL COMMENT 'user id that completed event',
+    completed_by_user_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'user id that completed event',
 
     completed_at DATETIME DEFAULT NULL COMMENT 'completed at',
     closed_at DATETIME DEFAULT NULL COMMENT 'closed at',
