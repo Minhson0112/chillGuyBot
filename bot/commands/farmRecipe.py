@@ -5,6 +5,12 @@ from bot.services.farm.farmRecipeRenderService import FarmRecipeRenderService
 
 
 class FarmRecipePaginationView(discord.ui.View):
+    COOK_GUIDE_TEXT = (
+        "Để nấu ăn hãy dùng lệnh:\n"
+        "`cg cook {id món ăn} {số lượng muốn nấu}`\n"
+        "Nếu không nhập số lượng thì mặc định là **1**."
+    )
+
     def __init__(
         self,
         currentPage: int,
@@ -52,12 +58,19 @@ class FarmRecipePaginationView(discord.ui.View):
         )
 
         await interaction.response.edit_message(
+            content=self.COOK_GUIDE_TEXT,
             attachments=[file],
             view=self,
         )
 
 
 class FarmRecipeCommand(commands.Cog):
+    COOK_GUIDE_TEXT = (
+        "Để nấu ăn hãy dùng lệnh:\n"
+        "`cg cook {id món ăn} {số lượng muốn nấu}`\n"
+        "Nếu không nhập số lượng thì mặc định là **1**."
+    )
+
     def __init__(self, bot):
         self.bot = bot
         self.farmRecipeRenderService = FarmRecipeRenderService()
@@ -78,6 +91,7 @@ class FarmRecipeCommand(commands.Cog):
             )
 
             await ctx.reply(
+                content=self.COOK_GUIDE_TEXT,
                 file=file,
                 view=view,
             )

@@ -146,7 +146,7 @@ class FarmRecipeRenderService:
 
         x = self.drawInlineText(
             draw=draw,
-            text=f"id:{resultItem.id}",
+            text=f"ID:{resultItem.id}",
             x=x,
             y=y,
             font=font,
