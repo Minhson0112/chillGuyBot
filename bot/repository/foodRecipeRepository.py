@@ -45,3 +45,14 @@ class FoodRecipeRepository:
             .filter(FoodRecipe.id == recipeId)
             .first()
         )
+    
+    def findByResultItemIdWithIngredients(self, resultItemId: int):
+        return (
+            self.session.query(FoodRecipe)
+            .options(
+                joinedload(FoodRecipe.resultItem),
+                joinedload(FoodRecipe.ingredients).joinedload(FoodRecipeIngredient.item),
+            )
+            .filter(FoodRecipe.result_item_id == resultItemId)
+            .first()
+        )

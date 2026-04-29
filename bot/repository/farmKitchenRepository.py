@@ -1,4 +1,6 @@
 from bot.models.farmKitchen import FarmKitchen
+from sqlalchemy.orm import joinedload
+from bot.models.foodRecipe import FoodRecipe
 
 
 class FarmKitchenRepository:
@@ -47,3 +49,34 @@ class FarmKitchenRepository:
         self.session.flush()
 
         return farmKitchen
+    
+    def startCooking(
+        self,
+        farmKitchen,
+        recipeId: int,
+        cookingQuantity: int,
+        startedAt,
+        finishedAt,
+        totalCookingSeconds: int,
+    ):
+        farmKitchen.current_recipe_id = recipeId
+        farmKitchen.cooking_quantity = cookingQuantity
+        farmKitchen.started_at = startedAt
+        farmKitchen.finished_at = finishedAt
+        farmKitchen.total_cooking_seconds = totalCookingSeconds
+        farmKitchen.status = "cooking"
+
+        self.session.flush()
+
+        return farmKitchen
+    
+    def findByFarmIdWithCurrentRecipe(self, farmId: int):
+        return (
+            self.session.query(FarmKitchen)
+            .options(
+                joinedload(FarmKitchen.currentRecipe)
+                .joinedload(FoodRecipe.resultItem)
+            )
+            .filter(FarmKitchen.farm_id == farmId)
+            .first()
+        )

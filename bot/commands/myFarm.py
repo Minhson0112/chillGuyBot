@@ -12,6 +12,7 @@ from bot.services.farm.farmCowMilkCollectService import FarmCowMilkCollectServic
 from bot.services.farm.farmFishingService import FarmFishingService
 from bot.services.farm.farmMarketShopRenderService import FarmMarketShopRenderService
 from bot.services.farm.farmPlotUnlockService import FarmPlotUnlockService
+from bot.services.farm.farmKitchenCollectService import FarmKitchenCollectService
 
 
 class MyFarmShopPaginationView(discord.ui.View):
@@ -103,6 +104,7 @@ class MyFarmView(discord.ui.View):
         self.farmFishingService = FarmFishingService()
         self.farmMarketShopRenderService = FarmMarketShopRenderService()
         self.farmPlotUnlockService = FarmPlotUnlockService()
+        self.farmKitchenCollectService = FarmKitchenCollectService()
         
         
 
@@ -354,6 +356,30 @@ class MyFarmView(discord.ui.View):
             print(f"Render my shop error: {e}")
             await interaction.response.send_message(
                 "Đã xảy ra lỗi khi xem shop của bạn.",
+                ephemeral=True,
+            )
+
+    @discord.ui.button(label="Nhận đồ ăn", emoji="🍱", style=discord.ButtonStyle.success)
+    async def collectFoodButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            collectResult = self.farmKitchenCollectService.collectFood(self.authorId)
+
+            if not collectResult["success"]:
+                await interaction.response.send_message(
+                    collectResult["message"],
+                    ephemeral=True,
+                )
+                return
+
+            await self.refreshFarmMessage(
+                interaction=interaction,
+                extraMessage=collectResult["message"],
+            )
+
+        except Exception as e:
+            print(f"Collect food error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi nhận đồ ăn.",
                 ephemeral=True,
             )
 
