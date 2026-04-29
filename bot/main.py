@@ -131,6 +131,7 @@ async def main():
         "bot.commands.sellShopFarmItem",
         "bot.commands.buyShopFarmItem",
         "bot.commands.giveChillCoin",
+        "bot.commands.farmRecipe",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",

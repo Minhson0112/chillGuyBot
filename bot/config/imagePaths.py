@@ -169,7 +169,9 @@ ASSET_IMAGE_PATHS = {
     "currency_chill_coin": "bot/assets/images/common/cs_coin.png",
     "level": "bot/assets/images/common/level.png",
     "exp": "bot/assets/images/common/xp.png",
+    "clock": "bot/assets/images/common/clock.png",
     "shopScreen" : "bot/assets/images/farm/ui/shop.png",
+    "recipesScreen": "bot/assets/images/farm/ui/recipes_table.png",
     "train" : "bot/assets/images/farm/buildings/train.png",
     "item_bug": "bot/assets/images/farm/animals/bug.png",
 }
