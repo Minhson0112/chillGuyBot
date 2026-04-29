@@ -29,25 +29,28 @@ class FarmRecipeRenderService:
 
     ROW_START_X = 95
     ROW_TEXT_Y_LIST = [
-        270,
-        420,
-        570,
-        720,
-        870,
+        250,
+        400,
+        550,
+        700,
+        850,
     ]
 
-    ITEM_ICON_SIZE = 36
-    INFO_ICON_SIZE = 28
+    ITEM_ICON_SIZE = 44
+    INFO_ICON_SIZE = 36
 
-    TITLE_FONT_SIZE = 44
-    PAGE_FONT_SIZE = 26
-    LINE_FONT_SIZE = 24
+    TITLE_FONT_SIZE = 48
+    PAGE_FONT_SIZE = 28
+    LINE_FONT_SIZE = 28
 
     TEXT_FILL = (255, 235, 180, 255)
     STROKE_FILL = (60, 25, 5, 255)
 
-    INLINE_GAP = 8
-    ICON_TEXT_GAP = 6
+    INLINE_GAP = 16
+    ICON_TEXT_GAP = 8
+
+    ITEM_ICON_OFFSET_Y = -8
+    INFO_ICON_OFFSET_Y = -5
 
     def renderRecipePageToBuffer(self, page: int = 1):
         with getDbSession() as session:
@@ -133,7 +136,7 @@ class FarmRecipeRenderService:
             baseImage=baseImage,
             imageKey=resultItem.icon_image_key,
             x=x,
-            y=y - 6,
+            y=y + self.ITEM_ICON_OFFSET_Y,
             size=self.ITEM_ICON_SIZE,
             resizeType=Image.NEAREST,
         )
@@ -159,7 +162,7 @@ class FarmRecipeRenderService:
             baseImage=baseImage,
             imageKey=self.COIN_ICON_KEY,
             x=x,
-            y=y - 3,
+            y=y + self.INFO_ICON_OFFSET_Y,
             size=self.INFO_ICON_SIZE,
             resizeType=Image.LANCZOS,
         )
@@ -176,7 +179,7 @@ class FarmRecipeRenderService:
             baseImage=baseImage,
             imageKey=self.LEVEL_ICON_KEY,
             x=x,
-            y=y - 3,
+            y=y + self.INFO_ICON_OFFSET_Y,
             size=self.INFO_ICON_SIZE,
             resizeType=Image.LANCZOS,
         )
@@ -193,7 +196,7 @@ class FarmRecipeRenderService:
             baseImage=baseImage,
             imageKey=self.CLOCK_ICON_KEY,
             x=x,
-            y=y - 3,
+            y=y + self.INFO_ICON_OFFSET_Y,
             size=self.INFO_ICON_SIZE,
             resizeType=Image.LANCZOS,
         )
@@ -247,7 +250,7 @@ class FarmRecipeRenderService:
                 baseImage=baseImage,
                 imageKey=item.icon_image_key,
                 x=x,
-                y=y - 6,
+                y=y + self.ITEM_ICON_OFFSET_Y,
                 size=self.ITEM_ICON_SIZE,
                 resizeType=Image.NEAREST,
             )
