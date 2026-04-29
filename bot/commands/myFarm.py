@@ -13,6 +13,7 @@ from bot.services.farm.farmFishingService import FarmFishingService
 from bot.services.farm.farmMarketShopRenderService import FarmMarketShopRenderService
 from bot.services.farm.farmPlotUnlockService import FarmPlotUnlockService
 from bot.services.farm.farmKitchenCollectService import FarmKitchenCollectService
+from bot.services.farm.farmTrainEventQueueService import FarmTrainEventQueueService
 
 
 class MyFarmShopPaginationView(discord.ui.View):
@@ -105,6 +106,7 @@ class MyFarmView(discord.ui.View):
         self.farmMarketShopRenderService = FarmMarketShopRenderService()
         self.farmPlotUnlockService = FarmPlotUnlockService()
         self.farmKitchenCollectService = FarmKitchenCollectService()
+        self.farmTrainEventQueueService = FarmTrainEventQueueService()
         
         
 
@@ -383,6 +385,30 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
+    @discord.ui.button(label="Xếp hàng", emoji="🚂", style=discord.ButtonStyle.primary)
+    async def trainEventQueueButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            trainResult = self.farmTrainEventQueueService.queueTrain(self.authorId)
+
+            if not trainResult["success"]:
+                await interaction.response.send_message(
+                    trainResult["message"],
+                    ephemeral=True,
+                )
+                return
+
+            await self.refreshFarmMessage(
+                interaction=interaction,
+                extraMessage=trainResult["message"],
+            )
+
+        except Exception as e:
+            print(f"Train event queue error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi xếp hàng lên tàu hỏa.",
+                ephemeral=True,
+            )
+
     @discord.ui.button(label="+ Ô đất", emoji="🧱", style=discord.ButtonStyle.secondary)
     async def unlockPlotButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
@@ -520,6 +546,18 @@ class MyFarmView(discord.ui.View):
             name="Thời gian còn lại ⏱️",
             value=embedData["kitchenRemainingTimeText"],
             inline=True,
+        )
+
+        embed.add_field(
+            name="--------------------------------------------------------",
+            value="**Sự kiện tàu hỏa 🚂**",
+            inline=False,
+        )
+
+        embed.add_field(
+            name="Trạng thái",
+            value=embedData["trainEventText"],
+            inline=False,
         )
 
         return embed

@@ -672,3 +672,110 @@ WHERE NOT EXISTS (
     FROM farm_kitchen fk
     WHERE fk.farm_id = f.id
 );
+
+# update event tàu
+
+CREATE TABLE farm_train_events (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm train event id',
+
+    required_item_id BIGINT NOT NULL COMMENT 'requested item id',
+    required_quantity BIGINT NOT NULL COMMENT 'requested item quantity',
+
+    reward_chill_coin BIGINT NOT NULL DEFAULT 0 COMMENT 'reward chill coin',
+    reward_exp INT NOT NULL DEFAULT 0 COMMENT 'reward farm exp',
+
+    is_completed TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'whether train event is completed',
+
+    created_by_user_id BIGINT DEFAULT NULL COMMENT 'admin user id who created event',
+    completed_by_farm_id BIGINT DEFAULT NULL COMMENT 'farm id that completed event',
+    completed_by_user_id BIGINT DEFAULT NULL COMMENT 'user id that completed event',
+
+    completed_at DATETIME DEFAULT NULL COMMENT 'completed at',
+    closed_at DATETIME DEFAULT NULL COMMENT 'closed at',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_farm_train_events_required_item_id (required_item_id),
+    KEY idx_farm_train_events_is_completed (is_completed),
+    KEY idx_farm_train_events_created_at (created_at),
+    KEY idx_farm_train_events_completed_at (completed_at),
+
+    CONSTRAINT fk_farm_train_events_required_item_id
+        FOREIGN KEY (required_item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_farm_train_events_created_by_user_id
+        FOREIGN KEY (created_by_user_id) REFERENCES member(user_id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT fk_farm_train_events_completed_by_farm_id
+        FOREIGN KEY (completed_by_farm_id) REFERENCES farm(id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT fk_farm_train_events_completed_by_user_id
+        FOREIGN KEY (completed_by_user_id) REFERENCES member(user_id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT chk_farm_train_events_required_quantity
+        CHECK (required_quantity > 0),
+
+    CONSTRAINT chk_farm_train_events_reward_chill_coin
+        CHECK (reward_chill_coin >= 0),
+
+    CONSTRAINT chk_farm_train_events_reward_exp
+        CHECK (reward_exp >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm train events';
+
+
+CREATE TABLE farm_train_event_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm train event history id',
+
+    train_event_id BIGINT NOT NULL COMMENT 'farm train event id',
+    farm_id BIGINT NOT NULL COMMENT 'farm id that loaded item',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id that loaded item',
+
+    delivered_item_id BIGINT NOT NULL COMMENT 'delivered item id',
+    delivered_quantity BIGINT NOT NULL COMMENT 'delivered item quantity',
+
+    reward_chill_coin BIGINT NOT NULL DEFAULT 0 COMMENT 'reward chill coin snapshot',
+    reward_exp INT NOT NULL DEFAULT 0 COMMENT 'reward farm exp snapshot',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_farm_train_event_histories_train_event_id (train_event_id),
+    KEY idx_farm_train_event_histories_farm_id (farm_id),
+    KEY idx_farm_train_event_histories_user_id (user_id),
+    KEY idx_farm_train_event_histories_created_at (created_at),
+    KEY idx_farm_train_event_histories_reward_chill_coin (reward_chill_coin),
+    KEY idx_farm_train_event_histories_reward_exp (reward_exp),
+
+    CONSTRAINT fk_farm_train_event_histories_train_event_id
+        FOREIGN KEY (train_event_id) REFERENCES farm_train_events(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_train_event_histories_farm_id
+        FOREIGN KEY (farm_id) REFERENCES farm(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_train_event_histories_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_train_event_histories_delivered_item_id
+        FOREIGN KEY (delivered_item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_farm_train_event_histories_delivered_quantity
+        CHECK (delivered_quantity > 0),
+
+    CONSTRAINT chk_farm_train_event_histories_reward_chill_coin
+        CHECK (reward_chill_coin >= 0),
+
+    CONSTRAINT chk_farm_train_event_histories_reward_exp
+        CHECK (reward_exp >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm train event completion histories';

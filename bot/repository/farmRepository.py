@@ -150,3 +150,13 @@ class FarmRepository:
             return None
 
         return nextLevelTotalExp - currentLevelTotalExp
+    
+    def updateAllTrainEventFlag(self, isTrainEvent: bool):
+        self.session.query(Farm).update(
+            {
+                Farm.is_train_event: isTrainEvent,
+            },
+            synchronize_session=False,
+        )
+
+        self.session.flush()

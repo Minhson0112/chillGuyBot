@@ -133,6 +133,8 @@ async def main():
         "bot.commands.giveChillCoin",
         "bot.commands.farmRecipe",
         "bot.commands.farmCook",
+        "bot.commands.createTrainEvent",
+        "bot.commands.closeTrainEvent",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",

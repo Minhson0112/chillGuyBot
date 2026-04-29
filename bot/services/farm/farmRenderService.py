@@ -8,6 +8,7 @@ from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.config.farmLevel import FARM_MAX_LEVEL, FARM_LEVEL_REQUIRED_EXP
 from bot.repository.farmRepository import FarmRepository
+from bot.repository.farmTrainEventRepository import FarmTrainEventRepository
 from bot.services.assetImageService import assetImageService
 
 
@@ -81,13 +82,20 @@ class FarmRenderService:
     async def renderFarmByMemberId(self, memberId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
+            farmTrainEventRepository = FarmTrainEventRepository(session)
+
             farm = farmRepository.findByUserIdWithRenderData(memberId)
 
             if farm is None:
                 raise ValueError(f"Farm not found for member id: {memberId}")
 
+            trainEvent = None
+
+            if farm.is_train_event:
+                trainEvent = farmTrainEventRepository.findOpeningEventWithItem()
+
             image = self.renderFarmImage(farm)
-            embedData = self.buildFarmEmbedData(farm)
+            embedData = self.buildFarmEmbedData(farm, trainEvent)
 
         avatarImage = await self.getMemberAvatarImage(memberId)
 
@@ -152,11 +160,12 @@ class FarmRenderService:
 
         return baseImage
 
-    def buildFarmEmbedData(self, farm):
+    def buildFarmEmbedData(self, farm, trainEvent=None):
         cropAreaData = self.buildCropAreaEmbedData(farm.cropArea)
         chickenCoopData = self.buildChickenCoopEmbedData(farm.chickenCoop)
         cowShedData = self.buildCowShedEmbedData(farm.cowShed)
         kitchenData = self.buildKitchenEmbedData(farm.kitchen)
+        trainEventData = self.buildTrainEventEmbedData(farm, trainEvent)
 
         return {
             "cropText": cropAreaData["cropText"],
@@ -170,6 +179,7 @@ class FarmRenderService:
             "kitchenFoodText": kitchenData["kitchenFoodText"],
             "kitchenQuantityText": kitchenData["kitchenQuantityText"],
             "kitchenRemainingTimeText": kitchenData["kitchenRemainingTimeText"],
+            "trainEventText": trainEventData["trainEventText"],
         }
 
     def buildCropAreaEmbedData(self, cropArea):
@@ -521,6 +531,31 @@ class FarmRenderService:
             y=self.EXP_TEXT_Y,
             fontSize=self.EXP_FONT_SIZE,
         )
+
+    def buildTrainEventEmbedData(self, farm, trainEvent):
+        if not farm.is_train_event:
+            return {
+                "trainEventText": "Tàu đang ở ga Chill Station, sẽ cập bến farm của bạn sớm thôi.",
+            }
+
+        if trainEvent is None or trainEvent.requiredItem is None:
+            return {
+                "trainEventText": "Tàu hỏa đang cập bến, nhưng chưa tìm thấy dữ liệu yêu cầu.",
+            }
+
+        requiredItem = trainEvent.requiredItem
+        itemEmoji = FARM_GAME_EMOJI.get(requiredItem.icon_image_key, "")
+        chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
+        expEmoji = FARM_GAME_EMOJI["exp"]
+
+        return {
+            "trainEventText": (
+                f"Tàu hỏa yêu cầu **{self.formatNumber(trainEvent.required_quantity)}** "
+                f"{itemEmoji} **{requiredItem.name}**, "
+                f"phần thưởng {chillCoinEmoji} **{self.formatNumber(trainEvent.reward_chill_coin)}** "
+                f"{expEmoji} **{self.formatNumber(trainEvent.reward_exp)}**"
+            ),
+        }
 
     def drawExpBar(self, baseImage: Image.Image, progressRate: float):
         draw = ImageDraw.Draw(baseImage)
