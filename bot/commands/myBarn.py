@@ -58,6 +58,10 @@ class MyBarnPaginationView(discord.ui.View):
 
         return True
 
+    @discord.ui.button(label="Làm mới", emoji="🔄", style=discord.ButtonStyle.primary)
+    async def refreshButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.updateBarnMessage(interaction)
+
     @discord.ui.button(label="Trước", emoji="⬅️", style=discord.ButtonStyle.secondary)
     async def previousButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.currentPage -= 1
@@ -67,7 +71,6 @@ class MyBarnPaginationView(discord.ui.View):
     async def nextButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.currentPage += 1
         await self.updateBarnMessage(interaction)
-
 
 class MyBarnCommand(commands.Cog):
     def __init__(self, bot):

@@ -58,6 +58,10 @@ class MySiloPaginationView(discord.ui.View):
 
         return True
 
+    @discord.ui.button(label="Làm mới", emoji="🔄", style=discord.ButtonStyle.primary)
+    async def refreshButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.updateSiloMessage(interaction)
+
     @discord.ui.button(label="Trước", emoji="⬅️", style=discord.ButtonStyle.secondary)
     async def previousButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.currentPage -= 1
