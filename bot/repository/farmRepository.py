@@ -160,3 +160,10 @@ class FarmRepository:
         )
 
         self.session.flush()
+
+    def updateTrainEventFlag(self, farm, isTrainEvent: bool):
+        farm.is_train_event = isTrainEvent
+
+        self.session.flush()
+
+        return farm
