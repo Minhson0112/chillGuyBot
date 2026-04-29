@@ -172,6 +172,7 @@ ASSET_IMAGE_PATHS = {
     "clock": "bot/assets/images/common/clock.png",
     "shopScreen" : "bot/assets/images/farm/ui/shop.png",
     "recipesScreen": "bot/assets/images/farm/ui/recipes_table.png",
+    "fishingRankingsScreen": "bot/assets/images/farm/ui/fishing_rankings.png",
     "train" : "bot/assets/images/farm/buildings/train.png",
     "item_bug": "bot/assets/images/farm/animals/bug.png",
 }

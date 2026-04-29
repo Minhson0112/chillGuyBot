@@ -135,6 +135,7 @@ async def main():
         "bot.commands.farmCook",
         "bot.commands.createTrainEvent",
         "bot.commands.closeTrainEvent",
+        "bot.commands.topFishing",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
