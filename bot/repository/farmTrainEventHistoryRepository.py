@@ -1,4 +1,7 @@
 from bot.models.farmTrainEventHistory import FarmTrainEventHistory
+from datetime import datetime
+
+from sqlalchemy import asc, desc, func
 
 
 class FarmTrainEventHistoryRepository:
@@ -40,4 +43,34 @@ class FarmTrainEventHistoryRepository:
             .filter(FarmTrainEventHistory.train_event_id == trainEventId)
             .filter(FarmTrainEventHistory.farm_id == farmId)
             .first()
+        )
+    
+    def findTop10CompletedByMonth(
+        self,
+        year: int,
+        month: int,
+    ):
+        startAt = datetime(year, month, 1)
+
+        if month == 12:
+            endAt = datetime(year + 1, 1, 1)
+        else:
+            endAt = datetime(year, month + 1, 1)
+
+        completedCount = func.count(FarmTrainEventHistory.id).label("completed_count")
+
+        return (
+            self.session.query(
+                FarmTrainEventHistory.user_id,
+                completedCount,
+            )
+            .filter(FarmTrainEventHistory.created_at >= startAt)
+            .filter(FarmTrainEventHistory.created_at < endAt)
+            .group_by(FarmTrainEventHistory.user_id)
+            .order_by(
+                desc(completedCount),
+                asc(FarmTrainEventHistory.user_id),
+            )
+            .limit(10)
+            .all()
         )
