@@ -30,14 +30,19 @@ class MemberChatRankingImageService:
     TEXT_COLOR = (255, 221, 130, 255)
     STROKE_COLOR = (58, 31, 10, 255)
 
-    def buildRankingImage(self, topMembers):
+    def __init__(self, bot):
+        self.bot = bot
+
+    async def buildRankingImage(self, topMembers, guild):
         image = assetImageService.getImage("chatRankingsScreen")
         draw = ImageDraw.Draw(image)
 
         for index, member in enumerate(topMembers):
             rowCenterY = self.ROW_CENTER_Y_LIST[index]
 
-            displayName = self.getDisplayName(member)
+            displayName = await self.resolveMemberDisplayName(guild, member.user_id)
+            displayName = self.truncateText(displayName, 24)
+
             chatCount = self.formatNumber(member.level_chat_count)
 
             nameBox = (
@@ -77,13 +82,31 @@ class MemberChatRankingImageService:
 
         return buffer
 
-    def getDisplayName(self, member):
-        displayName = member.nick or member.global_name or member.username or str(member.user_id)
+    async def resolveMemberDisplayName(self, guild, userId: int):
+        if guild is not None:
+            guildMember = guild.get_member(userId)
 
-        if len(displayName) > 24:
-            return f"{displayName[:21]}..."
+            if guildMember is not None:
+                return guildMember.display_name
 
-        return displayName
+        user = self.bot.get_user(userId)
+
+        if user is None:
+            try:
+                user = await self.bot.fetch_user(userId)
+            except Exception:
+                user = None
+
+        if user is not None:
+            return user.display_name
+
+        return str(userId)
+
+    def truncateText(self, text, maxLength):
+        if len(text) > maxLength:
+            return f"{text[:maxLength - 3]}..."
+
+        return text
 
     def formatNumber(self, value):
         return f"{int(value):,}".replace(",", ".")
