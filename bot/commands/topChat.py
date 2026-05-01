@@ -12,7 +12,7 @@ class TopChat(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.gmt7 = timezone(timedelta(hours=7))
-        self.memberChatRankingImageService = MemberChatRankingImageService()
+        self.memberChatRankingImageService = MemberChatRankingImageService(bot)
 
     @commands.command(name="topc")
     async def topChat(self, ctx, month: int | None = None):
@@ -33,7 +33,10 @@ class TopChat(commands.Cog):
                 10,
             )
 
-        imageBuffer = self.memberChatRankingImageService.buildRankingImage(topMembers)
+        imageBuffer = await self.memberChatRankingImageService.buildRankingImage(
+            topMembers,
+            ctx.guild,
+        )
 
         file = discord.File(
             fp=imageBuffer,
