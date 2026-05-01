@@ -127,3 +127,43 @@ class MemberDailyActivityRepository:
             endDate = date(year, month + 1, 1)
 
         return startDate, endDate
+    
+    def findTopLevelChatMembersByMonth(self, year, month, limit=10):
+        startDate, endDate = self.getMonthRange(year, month)
+
+        levelChatCount = func.sum(MemberDailyActivity.level_chat_count).label("level_chat_count")
+
+        return (
+            self.session.query(
+                Member.user_id,
+                Member.global_name,
+                Member.username,
+                Member.nick,
+                levelChatCount,
+            )
+            .join(Member, Member.user_id == MemberDailyActivity.user_id)
+            .filter(
+                MemberDailyActivity.activity_date >= startDate,
+                MemberDailyActivity.activity_date < endDate,
+            )
+            .group_by(
+                Member.user_id,
+                Member.global_name,
+                Member.username,
+                Member.nick,
+            )
+            .having(levelChatCount > 0)
+            .order_by(desc(levelChatCount))
+            .limit(limit)
+            .all()
+        )
+
+def getMonthRange(self, year, month):
+    startDate = date(year, month, 1)
+
+    if month == 12:
+        endDate = date(year + 1, 1, 1)
+    else:
+        endDate = date(year, month + 1, 1)
+
+    return startDate, endDate
