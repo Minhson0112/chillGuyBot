@@ -137,6 +137,7 @@ async def main():
         "bot.commands.closeTrainEvent",
         "bot.commands.topFishing",
         "bot.commands.topTrain",
+        "bot.commands.topChat",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
