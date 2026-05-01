@@ -41,3 +41,8 @@ class Member(Base):
         foreign_keys="FarmMarketListing.buyer_user_id",
         back_populates="buyer",
     )
+    dailyActivities = relationship(
+        "MemberDailyActivity",
+        back_populates="member",
+        cascade="all, delete-orphan",
+    )

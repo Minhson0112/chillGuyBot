@@ -779,3 +779,39 @@ CREATE TABLE farm_train_event_histories (
     CONSTRAINT chk_farm_train_event_histories_reward_exp
         CHECK (reward_exp >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm train event completion histories';
+
+# member activ update
+CREATE TABLE member_daily_activity (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'member daily activity id',
+
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+
+    activity_date DATE NOT NULL COMMENT 'activity date',
+
+    total_chat_count BIGINT NOT NULL DEFAULT 0 COMMENT 'total chat count in this day',
+
+    level_chat_count BIGINT NOT NULL DEFAULT 0 COMMENT 'level chat count in this day',
+
+    voice_seconds BIGINT NOT NULL DEFAULT 0 COMMENT 'total voice connected seconds in this day',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_member_daily_activity_user_date (user_id, activity_date),
+
+    KEY idx_member_daily_activity_activity_date (activity_date),
+
+    KEY idx_member_daily_activity_user_id (user_id),
+
+    CONSTRAINT fk_member_daily_activity_user_id
+        FOREIGN KEY (user_id)
+        REFERENCES member (user_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+COMMENT='daily member activity statistics';

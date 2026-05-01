@@ -24,7 +24,7 @@ intents.message_content = True
 intents.guilds = True
 intents.voice_states = True
 
-bot = commands.Bot(command_prefix="cg ", intents=intents)
+bot = commands.Bot(command_prefix="cg ", intents=intents, help_command=None)
 
 
 @tasks.loop(minutes=10)
@@ -144,11 +144,13 @@ async def main():
         "bot.events.autoResponderEvent",
         "bot.events.wordleEvent",
         "bot.events.owoDonateEvent",
+        "bot.events.voiceStateUpdateEvent",
         "bot.tasks.chatCountFlushTask",
         "bot.tasks.memberBirthdayTask",
         "bot.tasks.farmDryCheckTask",
         "bot.tasks.farmPestCheckTask",
         "bot.tasks.farmMarketAutoBuyTask",
+        "bot.tasks.memberDailyActivityFlushTask",
     ]
 
     for ext in extensions:
