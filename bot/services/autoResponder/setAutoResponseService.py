@@ -1,11 +1,18 @@
 from bot.config.database import getDbSession
 from bot.repository.autoResponderRepository import AutoResponderRepository
 from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
+from bot.repository.memberRepository import MemberRepository
 
 
 class SetAutoResponseService:
     def __init__(self):
         self.autoResponderCacheService = AutoResponderCacheService()
+
+    def canCreateAutoResponse(self, userId):
+        with getDbSession() as session:
+            memberRepository = MemberRepository(session)
+
+            return memberRepository.canCreateAutoResponse(userId)
 
     def createAutoResponder(self, userId, msgKey, isGlobal, isExactMatch, msgLink):
         with getDbSession() as session:

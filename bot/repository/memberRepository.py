@@ -144,3 +144,106 @@ class MemberRepository:
             .all()
         )
     
+    def setStaffPermission(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.is_staff = True
+        member.can_create_auto_res = True
+
+        self.session.flush()
+        return member
+    
+    def removeStaffPermission(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.is_staff = False
+        member.can_create_auto_res = False
+
+        self.session.flush()
+        return member
+    
+    def setModPermission(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.is_mod = True
+        member.can_create_auto_res = True
+
+        self.session.flush()
+        return member
+
+    def removeModPermission(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.is_mod = False
+        member.can_create_auto_res = member.is_staff or member.is_admin
+
+        self.session.flush()
+        return member
+    
+
+    def setAdminPermission(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.is_admin = True
+        member.can_create_auto_res = True
+
+        self.session.flush()
+        return member
+
+    def removeAdminPermission(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.is_admin = False
+        member.can_create_auto_res = member.is_staff or member.is_mod
+
+        self.session.flush()
+        return member
+    
+
+    def setAutoResponderPermission(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.can_create_auto_res = True
+
+        self.session.flush()
+        return member
+
+    def removeAutoResponderPermission(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.can_create_auto_res = False
+
+        self.session.flush()
+        return member
+    
+    def canCreateAutoResponse(self, userId):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return False
+
+        return member.can_create_auto_res
