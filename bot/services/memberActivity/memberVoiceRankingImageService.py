@@ -9,22 +9,22 @@ class MemberVoiceRankingImageService:
     FONT_PATH = "bot/assets/fonts/arial.ttf"
 
     ROW_CENTER_Y_LIST = [
-        510,
+        525,
         615,
         717,
-        798,
-        888,
-        972,
-        1060,
-        1145,
-        1232,
-        1318,
+        800,
+        895,
+        978,
+        1065,
+        1163,
+        1255,
+        1342,
     ]
 
     NAME_BOX_LEFT = 350
     NAME_BOX_RIGHT = 600
 
-    TIME_BOX_LEFT = 780
+    TIME_BOX_LEFT = 850
     TIME_BOX_RIGHT = 960
 
     TEXT_COLOR = (255, 221, 130, 255)
