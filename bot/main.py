@@ -147,6 +147,7 @@ async def main():
         "bot.commands.setAutoRes",
         "bot.commands.removeAutoRes",
         "bot.commands.topVoice",
+        "bot.commands.topChatStaff",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
