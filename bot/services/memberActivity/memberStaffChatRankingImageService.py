@@ -8,23 +8,23 @@ class MemberStaffChatRankingImageService:
     FONT_PATH = "bot/assets/fonts/arial.ttf"
 
     ROW_CENTER_Y_LIST = [
-        510,
-        615,
+        535,
+        625,
         717,
-        798,
-        888,
-        972,
-        1060,
-        1145,
-        1232,
-        1318,
+        810,
+        900,
+        995,
+        1080,
+        1175,
+        1258,
+        1245,
     ]
 
     NAME_BOX_LEFT = 350
     NAME_BOX_RIGHT = 600
 
-    COUNT_BOX_LEFT = 800
-    COUNT_BOX_RIGHT = 900
+    COUNT_BOX_LEFT = 825
+    COUNT_BOX_RIGHT = 980
 
     TEXT_COLOR = (255, 221, 130, 255)
     STROKE_COLOR = (58, 31, 10, 255)
