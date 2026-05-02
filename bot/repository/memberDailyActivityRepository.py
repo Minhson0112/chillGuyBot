@@ -145,6 +145,7 @@ class MemberDailyActivityRepository:
             .filter(
                 MemberDailyActivity.activity_date >= startDate,
                 MemberDailyActivity.activity_date < endDate,
+                Member.leave_at.is_(None),
                 Member.is_staff.is_(False),
                 Member.is_mod.is_(False),
                 Member.is_admin.is_(False),
@@ -213,6 +214,7 @@ class MemberDailyActivityRepository:
             .filter(
                 MemberDailyActivity.activity_date >= startDate,
                 MemberDailyActivity.activity_date < endDate,
+                Member.leave_at.is_(None),
                 Member.is_staff.is_(False),
                 Member.is_mod.is_(False),
                 Member.is_admin.is_(False),
