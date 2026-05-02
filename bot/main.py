@@ -146,6 +146,7 @@ async def main():
         "bot.commands.removeAdmin",
         "bot.commands.setAutoRes",
         "bot.commands.removeAutoRes",
+        "bot.commands.topVoice",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",

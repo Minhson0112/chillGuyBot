@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, or_
 
 from bot.models.member import Member
 from bot.models.memberDailyActivity import MemberDailyActivity
@@ -145,6 +145,9 @@ class MemberDailyActivityRepository:
             .filter(
                 MemberDailyActivity.activity_date >= startDate,
                 MemberDailyActivity.activity_date < endDate,
+                Member.is_staff.is_(False),
+                Member.is_mod.is_(False),
+                Member.is_admin.is_(False),
             )
             .group_by(
                 Member.user_id,
@@ -154,6 +157,74 @@ class MemberDailyActivityRepository:
             )
             .having(levelChatCount > 0)
             .order_by(desc(levelChatCount))
+            .limit(limit)
+            .all()
+        )
+    
+    def findTopLevelChatStaffMembersByMonth(self, year, month, limit=10):
+        startDate, endDate = self.getMonthRange(year, month)
+
+        levelChatCount = func.sum(MemberDailyActivity.level_chat_count).label("level_chat_count")
+
+        return (
+            self.session.query(
+                Member.user_id,
+                Member.global_name,
+                Member.username,
+                Member.nick,
+                levelChatCount,
+            )
+            .join(Member, Member.user_id == MemberDailyActivity.user_id)
+            .filter(
+                MemberDailyActivity.activity_date >= startDate,
+                MemberDailyActivity.activity_date < endDate,
+                or_(
+                    Member.is_staff.is_(True),
+                    Member.is_mod.is_(True),
+                    Member.is_admin.is_(True),
+                ),
+            )
+            .group_by(
+                Member.user_id,
+                Member.global_name,
+                Member.username,
+                Member.nick,
+            )
+            .having(levelChatCount > 0)
+            .order_by(desc(levelChatCount))
+            .limit(limit)
+            .all()
+        )
+    
+    def findTopVoiceMembersByMonth(self, year, month, limit=10):
+        startDate, endDate = self.getMonthRange(year, month)
+
+        voiceSeconds = func.sum(MemberDailyActivity.voice_seconds).label("voice_seconds")
+
+        return (
+            self.session.query(
+                Member.user_id,
+                Member.global_name,
+                Member.username,
+                Member.nick,
+                voiceSeconds,
+            )
+            .join(Member, Member.user_id == MemberDailyActivity.user_id)
+            .filter(
+                MemberDailyActivity.activity_date >= startDate,
+                MemberDailyActivity.activity_date < endDate,
+                Member.is_staff.is_(False),
+                Member.is_mod.is_(False),
+                Member.is_admin.is_(False),
+            )
+            .group_by(
+                Member.user_id,
+                Member.global_name,
+                Member.username,
+                Member.nick,
+            )
+            .having(voiceSeconds > 0)
+            .order_by(desc(voiceSeconds))
             .limit(limit)
             .all()
         )
