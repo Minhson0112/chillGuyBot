@@ -11,14 +11,14 @@ class MemberChatRankingImageService:
     ROW_CENTER_Y_LIST = [
         510,
         615,
-        717,
+        713,
         798,
         888,
         972,
         1060,
         1145,
         1232,
-        1318,
+        1313,
     ]
 
     NAME_BOX_LEFT = 350
