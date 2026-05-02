@@ -228,6 +228,114 @@ class MemberDailyActivityRepository:
             .limit(limit)
             .all()
         )
+    
+    def findLevelChatRankByMonth(self, userId, year, month):
+        startDate, endDate = self.getMonthRange(year, month)
+
+        levelChatCount = func.sum(MemberDailyActivity.level_chat_count).label("level_chat_count")
+
+        rankingSubQuery = (
+            self.session.query(
+                MemberDailyActivity.user_id.label("user_id"),
+                levelChatCount,
+            )
+            .join(Member, Member.user_id == MemberDailyActivity.user_id)
+            .filter(
+                MemberDailyActivity.activity_date >= startDate,
+                MemberDailyActivity.activity_date < endDate,
+                Member.is_staff.is_(False),
+                Member.is_mod.is_(False),
+                Member.is_admin.is_(False),
+            )
+            .group_by(MemberDailyActivity.user_id)
+            .having(levelChatCount > 0)
+            .subquery()
+        )
+
+        targetRankData = (
+            self.session.query(
+                rankingSubQuery.c.user_id,
+                rankingSubQuery.c.level_chat_count,
+            )
+            .filter(rankingSubQuery.c.user_id == userId)
+            .first()
+        )
+
+        if targetRankData is None:
+            return None
+
+        higherRankCount = (
+            self.session.query(func.count())
+            .select_from(rankingSubQuery)
+            .filter(rankingSubQuery.c.level_chat_count > targetRankData.level_chat_count)
+            .scalar()
+        )
+
+        totalRankedMemberCount = (
+            self.session.query(func.count())
+            .select_from(rankingSubQuery)
+            .scalar()
+        )
+
+        return {
+            "rank": higherRankCount + 1,
+            "level_chat_count": targetRankData.level_chat_count,
+            "total_ranked_member_count": totalRankedMemberCount,
+        }
+    
+    def findVoiceRankByMonth(self, userId, year, month):
+        startDate, endDate = self.getMonthRange(year, month)
+
+        voiceSeconds = func.sum(MemberDailyActivity.voice_seconds).label("voice_seconds")
+
+        rankingSubQuery = (
+            self.session.query(
+                MemberDailyActivity.user_id.label("user_id"),
+                voiceSeconds,
+            )
+            .join(Member, Member.user_id == MemberDailyActivity.user_id)
+            .filter(
+                MemberDailyActivity.activity_date >= startDate,
+                MemberDailyActivity.activity_date < endDate,
+                Member.is_staff.is_(False),
+                Member.is_mod.is_(False),
+                Member.is_admin.is_(False),
+            )
+            .group_by(MemberDailyActivity.user_id)
+            .having(voiceSeconds > 0)
+            .subquery()
+        )
+
+        targetRankData = (
+            self.session.query(
+                rankingSubQuery.c.user_id,
+                rankingSubQuery.c.voice_seconds,
+            )
+            .filter(rankingSubQuery.c.user_id == userId)
+            .first()
+        )
+
+        if targetRankData is None:
+            return None
+
+        higherRankCount = (
+            self.session.query(func.count())
+            .select_from(rankingSubQuery)
+            .filter(rankingSubQuery.c.voice_seconds > targetRankData.voice_seconds)
+            .scalar()
+        )
+
+        totalRankedMemberCount = (
+            self.session.query(func.count())
+            .select_from(rankingSubQuery)
+            .scalar()
+        )
+
+        return {
+            "rank": higherRankCount + 1,
+            "voice_seconds": targetRankData.voice_seconds,
+            "total_ranked_member_count": totalRankedMemberCount,
+        }
 
 def getMonthRange(self, year, month):
     startDate = date(year, month, 1)
