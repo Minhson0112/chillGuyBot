@@ -815,3 +815,10 @@ CREATE TABLE member_daily_activity (
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_unicode_ci
 COMMENT='daily member activity statistics';
+
+# thêm để kiểm soát member
+ALTER TABLE member
+    ADD COLUMN is_staff TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'is staff member?' AFTER chill_coin,
+    ADD COLUMN is_mod TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'is moderator member?' AFTER is_staff,
+    ADD COLUMN is_admin TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'is admin member?' AFTER is_mod,
+    ADD COLUMN can_create_auto_res TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'can create auto responder?' AFTER is_admin;

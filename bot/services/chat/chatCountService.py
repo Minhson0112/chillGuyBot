@@ -1,5 +1,5 @@
 from bot.cache.chatCountCache import chatCountCache
-from bot.config.channel import EXCLUDED_LEVEL_CHANNEL_IDS
+from bot.config.channel import LEVEL_CHANNEL_IDS
 
 
 class ChatCountService:
@@ -21,5 +21,5 @@ class ChatCountService:
 
         chatCountCache[userId]["total_chat_count"] += 1
 
-        if channelId not in EXCLUDED_LEVEL_CHANNEL_IDS:
+        if channelId in LEVEL_CHANNEL_IDS:
             chatCountCache[userId]["level_chat_count"] += 1

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 from bot.cache.memberDailyActivityCache import memberDailyActivityCache
-from bot.config.channel import EXCLUDED_LEVEL_CHANNEL_IDS
+from bot.config.channel import LEVEL_CHANNEL_IDS
 
 
 class MemberDailyActivityService:
@@ -30,5 +30,5 @@ class MemberDailyActivityService:
 
         memberDailyActivityCache[cacheKey]["total_chat_count"] += 1
 
-        if channelId not in EXCLUDED_LEVEL_CHANNEL_IDS:
+        if channelId in LEVEL_CHANNEL_IDS:
             memberDailyActivityCache[cacheKey]["level_chat_count"] += 1
