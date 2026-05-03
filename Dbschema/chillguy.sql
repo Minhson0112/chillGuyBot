@@ -863,7 +863,7 @@ CREATE TABLE daily_checkin_rewards (
 CREATE TABLE daily_checkin_histories (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'daily checkin history id',
 
-    user_id BIGINT NOT NULL COMMENT 'discord user id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
 
     checkin_date DATE NOT NULL COMMENT 'checkin date',
 
