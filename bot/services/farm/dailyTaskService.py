@@ -1,7 +1,7 @@
 import random
 from datetime import datetime, timedelta, timezone
 
-from bot.cache.userDailyTaskCache import userDailyTaskCache
+from bot.cache.userDailyTaskCache import userDailyTaskCache, userDailyTaskLoadedCache
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.repository.dailyTaskMasterRepository import DailyTaskMasterRepository
@@ -15,6 +15,9 @@ class DailyTaskService:
     GMT7 = timezone(timedelta(hours=7))
 
     TASK_TYPE_CHAT_MESSAGE = "chat_message"
+    TASK_TYPE_VOICE_TIME = "voice_time"
+
+    STATUS_COMPLETED = "completed"
 
     def getOrCreateTodayTasks(self, userId: int):
         today = self.getTodayDate()
@@ -82,6 +85,12 @@ class DailyTaskService:
                     taskDate=today,
                 )
 
+            self.syncTodayTasksToCache(
+                userId=userId,
+                taskDate=today,
+                tasks=todayTasks,
+            )
+
             cachedTaskMap = self.buildCachedTaskMap(
                 userId=userId,
                 taskDate=today,
@@ -89,12 +98,37 @@ class DailyTaskService:
 
             return {
                 "success": True,
-                "message": self.buildTaskMessage(
+                "embedData": self.buildTaskEmbedData(
                     tasks=todayTasks,
+                    taskDate=today,
                     isNew=isNew,
                     cachedTaskMap=cachedTaskMap,
                 ),
             }
+
+    def syncTodayTasksToCache(
+        self,
+        userId: int,
+        taskDate,
+        tasks,
+    ):
+        cacheKey = (userId, taskDate)
+
+        userDailyTaskCache[cacheKey] = [
+            {
+                "id": task.id,
+                "task_type": task.task_type,
+                "target_item_id": task.target_item_id,
+                "target_crop_id": task.target_crop_id,
+                "target_channel_id": task.target_channel_id,
+                "required_value": task.required_value,
+                "progress_value": task.progress_value,
+                "status": task.status,
+            }
+            for task in tasks
+        ]
+
+        userDailyTaskLoadedCache.add(cacheKey)
 
     def buildCachedTaskMap(
         self,
@@ -119,6 +153,10 @@ class DailyTaskService:
 
         while len(selectedTaskMasters) < count and remainingTaskMasters:
             totalWeight = sum(taskMaster.weight for taskMaster in remainingTaskMasters)
+
+            if totalWeight <= 0:
+                break
+
             randomPoint = random.uniform(0, totalWeight)
             currentWeight = 0
 
@@ -132,41 +170,100 @@ class DailyTaskService:
 
         return selectedTaskMasters
 
-    def buildTaskMessage(
+    def buildTaskEmbedData(
         self,
         tasks,
+        taskDate,
         isNew: bool,
         cachedTaskMap=None,
     ):
         if cachedTaskMap is None:
             cachedTaskMap = {}
 
+        completedCount = self.countCompletedTasks(tasks, cachedTaskMap)
+        totalCount = len(tasks)
+
+        title = "Daily Task"
+
+        descriptionLines = [
+            f"Ngày: **{taskDate.strftime('%d/%m/%Y')}**",
+            f"Tiến độ hôm nay: **{completedCount}/{totalCount}** task đã hoàn thành",
+        ]
+
+        if isNew:
+            descriptionLines.append("Bạn đã nhận **5 task mới** cho hôm nay.")
+
+        fields = []
+
+        for task in tasks:
+            fields.append(
+                {
+                    "name": self.buildTaskFieldName(task, cachedTaskMap),
+                    "value": self.buildTaskFieldValue(task, cachedTaskMap),
+                }
+            )
+
+        return {
+            "title": title,
+            "description": "\n".join(descriptionLines),
+            "fields": fields,
+            "footer": "Dùng cg task để xem lại tiến độ daily task hôm nay.",
+        }
+
+    def buildTaskFieldName(
+        self,
+        task,
+        cachedTaskMap,
+    ):
+        status = self.getDisplayStatus(task, cachedTaskMap)
+
+        if status == self.STATUS_COMPLETED:
+            statusText = "Hoàn thành"
+        else:
+            statusText = "Đang làm"
+
+        return f"{task.slot_no}. {task.task_name} — {statusText}"
+
+    def buildTaskFieldValue(
+        self,
+        task,
+        cachedTaskMap,
+    ):
         chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
         expEmoji = FARM_GAME_EMOJI["exp"]
 
-        title = "Daily task hôm nay"
+        progressValue = self.getDisplayProgressValue(task, cachedTaskMap)
+        progressText = self.formatProgress(task, progressValue)
+        progressBar = self.buildProgressBar(
+            progressValue=progressValue,
+            requiredValue=task.required_value,
+        )
 
-        if isNew:
-            title += "\nBạn đã nhận 5 task mới cho hôm nay."
+        rewardText = (
+            f"**{self.formatNumber(task.reward_chill_coin)}** {chillCoinEmoji} "
+            f"+ **{self.formatNumber(task.reward_exp)}** {expEmoji}"
+        )
 
-        lines = [title]
+        return (
+            f"{task.description}\n"
+            f"`{progressBar}` **{progressText}**\n"
+            f"Phần thưởng: {rewardText}"
+        )
+
+    def countCompletedTasks(
+        self,
+        tasks,
+        cachedTaskMap,
+    ):
+        completedCount = 0
 
         for task in tasks:
-            progressValue = self.getDisplayProgressValue(task, cachedTaskMap)
             status = self.getDisplayStatus(task, cachedTaskMap)
-            statusText = "Hoàn thành" if status == "completed" else "Đang làm"
 
-            lines.append(
-                "\n"
-                f"**{task.slot_no}. {task.task_name}**\n"
-                f"{task.description}\n"
-                f"Tiến độ: **{self.formatProgress(task, progressValue)}**\n"
-                f"Phần thưởng: **{self.formatNumber(task.reward_chill_coin)}** {chillCoinEmoji} "
-                f"+ **{self.formatNumber(task.reward_exp)}** {expEmoji}\n"
-                f"Trạng thái: **{statusText}**"
-            )
+            if status == self.STATUS_COMPLETED:
+                completedCount += 1
 
-        return "\n".join(lines)
+        return completedCount
 
     def getDisplayProgressValue(
         self,
@@ -203,7 +300,7 @@ class DailyTaskService:
         task,
         progressValue: int,
     ):
-        if task.task_type == "voice_time":
+        if task.task_type == self.TASK_TYPE_VOICE_TIME:
             return (
                 f"{self.formatDuration(progressValue)}"
                 f"/{self.formatDuration(task.required_value)}"
@@ -213,6 +310,22 @@ class DailyTaskService:
             f"{self.formatNumber(progressValue)}"
             f"/{self.formatNumber(task.required_value)}"
         )
+
+    def buildProgressBar(
+        self,
+        progressValue: int,
+        requiredValue: int,
+    ):
+        totalBlock = 10
+
+        if requiredValue <= 0:
+            return "░" * totalBlock
+
+        progressRate = min(progressValue / requiredValue, 1)
+        filledBlock = int(progressRate * totalBlock)
+        emptyBlock = totalBlock - filledBlock
+
+        return "█" * filledBlock + "░" * emptyBlock
 
     def formatDuration(self, seconds: int):
         minutes = seconds // 60
