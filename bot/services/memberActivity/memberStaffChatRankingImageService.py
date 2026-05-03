@@ -17,7 +17,7 @@ class MemberStaffChatRankingImageService:
         1080,
         1175,
         1258,
-        1245,
+        1348,
     ]
 
     NAME_BOX_LEFT = 350
