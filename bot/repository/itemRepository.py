@@ -28,3 +28,25 @@ class ItemRepository:
             .order_by(asc(Item.id))
             .all()
         )
+    
+    def findActiveByNameKeyword(self, itemName: str):
+        keyword = itemName.strip()
+
+        exactItem = (
+            self.session.query(Item)
+            .filter(Item.is_active == 1)
+            .filter(Item.name == keyword)
+            .order_by(asc(Item.id))
+            .first()
+        )
+
+        if exactItem is not None:
+            return exactItem
+
+        return (
+            self.session.query(Item)
+            .filter(Item.is_active == 1)
+            .filter(Item.name.like(f"%{keyword}%"))
+            .order_by(asc(Item.id))
+            .first()
+        )

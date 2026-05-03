@@ -162,3 +162,19 @@ class FarmMarketListingRepository:
             .filter(FarmMarketListing.id == listingId)
             .first()
         )
+    
+    def findFirstOpenListingByItemId(self, itemId: int):
+        return (
+            self.session.query(FarmMarketListing)
+            .options(
+                joinedload(FarmMarketListing.item),
+                joinedload(FarmMarketListing.seller),
+            )
+            .filter(FarmMarketListing.item_id == itemId)
+            .filter(FarmMarketListing.is_sold.is_(False))
+            .order_by(
+                asc(FarmMarketListing.created_at),
+                asc(FarmMarketListing.id),
+            )
+            .first()
+        )
