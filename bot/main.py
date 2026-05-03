@@ -150,6 +150,7 @@ async def main():
         "bot.commands.topChatStaff",
         "bot.commands.myChatRank",
         "bot.commands.myVoiceRank",
+        "bot.commands.daily",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",

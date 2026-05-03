@@ -822,3 +822,84 @@ ALTER TABLE member
     ADD COLUMN is_mod TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'is moderator member?' AFTER is_staff,
     ADD COLUMN is_admin TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'is admin member?' AFTER is_mod,
     ADD COLUMN can_create_auto_res TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'can create auto responder?' AFTER is_admin;
+
+# lệnh daily
+CREATE TABLE daily_checkin_rewards (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'daily checkin reward id',
+
+    streak_day INT NOT NULL COMMENT 'streak day from 1 to 7',
+
+    reward_chill_coin BIGINT NOT NULL DEFAULT 0 COMMENT 'reward chill coin',
+
+    reward_item_id BIGINT DEFAULT NULL COMMENT 'reward item id',
+    reward_item_quantity BIGINT NOT NULL DEFAULT 0 COMMENT 'reward item quantity',
+
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'whether reward is active',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_daily_checkin_rewards_streak_day (streak_day),
+
+    KEY idx_daily_checkin_rewards_reward_item_id (reward_item_id),
+    KEY idx_daily_checkin_rewards_is_active (is_active),
+
+    CONSTRAINT fk_daily_checkin_rewards_reward_item_id
+        FOREIGN KEY (reward_item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_daily_checkin_rewards_streak_day
+        CHECK (streak_day >= 1 AND streak_day <= 7),
+
+    CONSTRAINT chk_daily_checkin_rewards_reward_chill_coin
+        CHECK (reward_chill_coin >= 0),
+
+    CONSTRAINT chk_daily_checkin_rewards_reward_item_quantity
+        CHECK (reward_item_quantity >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily checkin reward master';
+
+CREATE TABLE daily_checkin_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'daily checkin history id',
+
+    user_id BIGINT NOT NULL COMMENT 'discord user id',
+
+    checkin_date DATE NOT NULL COMMENT 'checkin date',
+
+    streak_day INT NOT NULL COMMENT 'streak day when checked in',
+
+    reward_chill_coin BIGINT NOT NULL DEFAULT 0 COMMENT 'received chill coin snapshot',
+
+    reward_item_id BIGINT DEFAULT NULL COMMENT 'received item id snapshot',
+    reward_item_quantity BIGINT NOT NULL DEFAULT 0 COMMENT 'received item quantity snapshot',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_daily_checkin_histories_user_date (user_id, checkin_date),
+
+    KEY idx_daily_checkin_histories_user_id (user_id),
+    KEY idx_daily_checkin_histories_checkin_date (checkin_date),
+    KEY idx_daily_checkin_histories_streak_day (streak_day),
+    KEY idx_daily_checkin_histories_reward_item_id (reward_item_id),
+
+    CONSTRAINT fk_daily_checkin_histories_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_daily_checkin_histories_reward_item_id
+        FOREIGN KEY (reward_item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_daily_checkin_histories_streak_day
+        CHECK (streak_day >= 1 AND streak_day <= 7),
+
+    CONSTRAINT chk_daily_checkin_histories_reward_chill_coin
+        CHECK (reward_chill_coin >= 0),
+
+    CONSTRAINT chk_daily_checkin_histories_reward_item_quantity
+        CHECK (reward_item_quantity >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily checkin histories';
+

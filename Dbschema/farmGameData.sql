@@ -1386,3 +1386,40 @@ JOIN food_recipes recipe ON recipe.result_item_id = resultItem.id
 JOIN items ingredientItem ON ingredientItem.code = ingredientData.ingredient_item_code
 ON DUPLICATE KEY UPDATE
     quantity = VALUES(quantity);
+
+#data daily
+INSERT INTO daily_checkin_rewards (
+    streak_day,
+    reward_chill_coin,
+    reward_item_id,
+    reward_item_quantity,
+    is_active
+)
+SELECT
+    reward_data.streak_day,
+    reward_data.reward_chill_coin,
+    items.id,
+    reward_data.reward_item_quantity,
+    1
+FROM (
+    SELECT 1 AS streak_day, 10 AS reward_chill_coin, 'bug' AS reward_item_code, 3 AS reward_item_quantity
+    UNION ALL
+    SELECT 2, 20, 'cheese', 2
+    UNION ALL
+    SELECT 3, 30, 'wheat_flour', 4
+    UNION ALL
+    SELECT 4, 40, 'oil', 3
+    UNION ALL
+    SELECT 5, 50, 'sugar', 3
+    UNION ALL
+    SELECT 6, 60, 'salmon', 1
+    UNION ALL
+    SELECT 7, 70, 'ice_cream', 1
+) reward_data
+INNER JOIN items
+    ON items.code = reward_data.reward_item_code
+ON DUPLICATE KEY UPDATE
+    reward_chill_coin = VALUES(reward_chill_coin),
+    reward_item_id = VALUES(reward_item_id),
+    reward_item_quantity = VALUES(reward_item_quantity),
+    is_active = VALUES(is_active);

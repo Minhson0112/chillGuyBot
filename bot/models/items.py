@@ -39,3 +39,11 @@ class Item(Base):
         "FoodRecipeIngredient",
         back_populates="item",
     )
+    dailyCheckinHistories = relationship(
+        "DailyCheckinHistory",
+        back_populates="rewardItem",
+    )
+    dailyCheckinRewards = relationship(
+        "DailyCheckinReward",
+        back_populates="rewardItem",
+    )
