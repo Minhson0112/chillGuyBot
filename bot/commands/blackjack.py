@@ -81,7 +81,6 @@ class Blackjack(commands.Cog):
             statusText=(
                 f"{self.HIT_EMOJI}: Rút bài\n"
                 f"{self.STAND_EMOJI}: Dừng\n"
-                f"Cược: **{self.formatNumber(bet)}** {chillCoinEmoji}"
             ),
         )
 
