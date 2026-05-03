@@ -903,3 +903,146 @@ CREATE TABLE daily_checkin_histories (
         CHECK (reward_item_quantity >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily checkin histories';
 
+# daily task
+CREATE TABLE daily_task_masters (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'daily task master id',
+
+    task_code VARCHAR(100) NOT NULL COMMENT 'unique task code',
+    task_name VARCHAR(255) NOT NULL COMMENT 'task display name',
+    description VARCHAR(500) DEFAULT NULL COMMENT 'task description',
+
+    task_type VARCHAR(50) NOT NULL COMMENT 'task type: chat_message, voice_time, plant_crop, sell_market_item, fishing, cooking, train_delivery',
+
+    target_item_id BIGINT DEFAULT NULL COMMENT 'target item id if task requires an item',
+    target_crop_id BIGINT DEFAULT NULL COMMENT 'target crop id if task requires a crop',
+    target_channel_id BIGINT DEFAULT NULL COMMENT 'discord channel id if task targets a channel',
+
+    required_value BIGINT NOT NULL DEFAULT 1 COMMENT 'required progress value, message count, seconds, item count, etc',
+
+    reward_chill_coin BIGINT NOT NULL DEFAULT 0 COMMENT 'reward chill coin',
+    reward_exp INT NOT NULL DEFAULT 0 COMMENT 'reward farm exp',
+
+    min_farm_level INT NOT NULL DEFAULT 1 COMMENT 'minimum farm level to receive this task',
+    weight INT NOT NULL DEFAULT 100 COMMENT 'random weight',
+
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'whether task is active',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_daily_task_masters_task_code (task_code),
+
+    KEY idx_daily_task_masters_task_type (task_type),
+    KEY idx_daily_task_masters_target_item_id (target_item_id),
+    KEY idx_daily_task_masters_target_crop_id (target_crop_id),
+    KEY idx_daily_task_masters_target_channel_id (target_channel_id),
+    KEY idx_daily_task_masters_min_farm_level (min_farm_level),
+    KEY idx_daily_task_masters_is_active (is_active),
+
+    CONSTRAINT fk_daily_task_masters_target_item_id
+        FOREIGN KEY (target_item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_daily_task_masters_target_crop_id
+        FOREIGN KEY (target_crop_id) REFERENCES crops(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_daily_task_masters_required_value
+        CHECK (required_value > 0),
+
+    CONSTRAINT chk_daily_task_masters_reward_chill_coin
+        CHECK (reward_chill_coin >= 0),
+
+    CONSTRAINT chk_daily_task_masters_reward_exp
+        CHECK (reward_exp >= 0),
+
+    CONSTRAINT chk_daily_task_masters_min_farm_level
+        CHECK (min_farm_level >= 1),
+
+    CONSTRAINT chk_daily_task_masters_weight
+        CHECK (weight > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily task master';
+
+
+CREATE TABLE user_daily_tasks (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'user daily task id',
+
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    task_date DATE NOT NULL COMMENT 'daily task date',
+
+    slot_no INT NOT NULL COMMENT 'task slot from 1 to 5',
+
+    task_master_id BIGINT NOT NULL COMMENT 'daily task master id',
+
+    task_code VARCHAR(100) NOT NULL COMMENT 'snapshot task code',
+    task_name VARCHAR(255) NOT NULL COMMENT 'snapshot task name',
+    description VARCHAR(500) DEFAULT NULL COMMENT 'snapshot task description',
+
+    task_type VARCHAR(50) NOT NULL COMMENT 'snapshot task type',
+
+    target_item_id BIGINT DEFAULT NULL COMMENT 'snapshot target item id',
+    target_crop_id BIGINT DEFAULT NULL COMMENT 'snapshot target crop id',
+    target_channel_id BIGINT DEFAULT NULL COMMENT 'snapshot target channel id',
+
+    required_value BIGINT NOT NULL COMMENT 'required progress value',
+    progress_value BIGINT NOT NULL DEFAULT 0 COMMENT 'current progress value',
+
+    reward_chill_coin BIGINT NOT NULL DEFAULT 0 COMMENT 'reward chill coin snapshot',
+    reward_exp INT NOT NULL DEFAULT 0 COMMENT 'reward farm exp snapshot',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'in_progress' COMMENT 'task status: in_progress, completed',
+
+    completed_at DATETIME DEFAULT NULL COMMENT 'completed at',
+    reward_received_at DATETIME DEFAULT NULL COMMENT 'reward received at',
+    notified_at DATETIME DEFAULT NULL COMMENT 'completion notification sent at',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_user_daily_tasks_user_date_slot (user_id, task_date, slot_no),
+    UNIQUE KEY uq_user_daily_tasks_user_date_master (user_id, task_date, task_master_id),
+
+    KEY idx_user_daily_tasks_user_id (user_id),
+    KEY idx_user_daily_tasks_task_date (task_date),
+    KEY idx_user_daily_tasks_task_master_id (task_master_id),
+    KEY idx_user_daily_tasks_task_type (task_type),
+    KEY idx_user_daily_tasks_status (status),
+    KEY idx_user_daily_tasks_target_item_id (target_item_id),
+    KEY idx_user_daily_tasks_target_crop_id (target_crop_id),
+    KEY idx_user_daily_tasks_target_channel_id (target_channel_id),
+
+    CONSTRAINT fk_user_daily_tasks_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_user_daily_tasks_task_master_id
+        FOREIGN KEY (task_master_id) REFERENCES daily_task_masters(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_user_daily_tasks_target_item_id
+        FOREIGN KEY (target_item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_user_daily_tasks_target_crop_id
+        FOREIGN KEY (target_crop_id) REFERENCES crops(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_user_daily_tasks_slot_no
+        CHECK (slot_no >= 1 AND slot_no <= 5),
+
+    CONSTRAINT chk_user_daily_tasks_required_value
+        CHECK (required_value > 0),
+
+    CONSTRAINT chk_user_daily_tasks_progress_value
+        CHECK (progress_value >= 0),
+
+    CONSTRAINT chk_user_daily_tasks_reward_chill_coin
+        CHECK (reward_chill_coin >= 0),
+
+    CONSTRAINT chk_user_daily_tasks_reward_exp
+        CHECK (reward_exp >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='user daily tasks';

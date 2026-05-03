@@ -3,9 +3,12 @@ from bot.config.emoji import FARM_GAME_EMOJI
 from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmBuyShopService:
+    DAILY_TASK_TYPE_BUY_MARKET_ITEM = "buy_market_item"
+
     def buyShopItem(
         self,
         buyerUserId: int,
@@ -15,6 +18,7 @@ class FarmBuyShopService:
             memberRepository = MemberRepository(session)
             farmMarketListingRepository = FarmMarketListingRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
+            dailyTaskProgressService = DailyTaskProgressService(session)
 
             buyer = memberRepository.findByUserId(buyerUserId)
 
@@ -80,15 +84,31 @@ class FarmBuyShopService:
                 buyerUserId=buyerUserId,
             )
 
+            completedDailyTasks = dailyTaskProgressService.addProgress(
+                userId=buyerUserId,
+                taskType=self.DAILY_TASK_TYPE_BUY_MARKET_ITEM,
+                amount=marketListing.quantity,
+                targetItemId=marketListing.item_id,
+            )
+
+            dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
+                completedDailyTasks,
+            )
+
             session.commit()
+
+            message = (
+                f"Bạn đã mua **{marketListing.quantity}** {itemText} "
+                f"từ shop của **{self.getSellerDisplayName(seller)}** với "
+                f"**{self.formatNumber(marketListing.price)}** {chillCoinEmoji}."
+            )
+
+            if dailyTaskMessage is not None:
+                message += f"\n\n{dailyTaskMessage}"
 
             return {
                 "success": True,
-                "message": (
-                    f"Bạn đã mua **{marketListing.quantity}** {itemText} "
-                    f"từ shop của **{self.getSellerDisplayName(seller)}** với "
-                    f"**{self.formatNumber(marketListing.price)}** {chillCoinEmoji}."
-                ),
+                "message": message,
             }
 
     def buildItemText(self, item):

@@ -1423,3 +1423,123 @@ ON DUPLICATE KEY UPDATE
     reward_item_id = VALUES(reward_item_id),
     reward_item_quantity = VALUES(reward_item_quantity),
     is_active = VALUES(is_active);
+
+# data daily task
+INSERT INTO daily_task_masters (
+    task_code,
+    task_name,
+    description,
+    task_type,
+    target_item_id,
+    target_crop_id,
+    target_channel_id,
+    required_value,
+    reward_chill_coin,
+    reward_exp,
+    min_farm_level,
+    weight,
+    is_active
+)
+SELECT
+    task_data.task_code,
+    task_data.task_name,
+    task_data.description,
+    task_data.task_type,
+    items.id AS target_item_id,
+    crops.id AS target_crop_id,
+    task_data.target_channel_id,
+    task_data.required_value,
+    task_data.reward_chill_coin,
+    task_data.reward_exp,
+    task_data.min_farm_level,
+    task_data.weight,
+    task_data.is_active
+FROM (
+    SELECT
+        'chat_general_20' AS task_code,
+        'trò chuyện 20 tin nhắn' AS task_name,
+        'gửi 20 tin nhắn trong kênh chat chung' AS description,
+        'chat_message' AS task_type,
+        NULL AS target_item_code,
+        NULL AS target_crop_code,
+        1356994232857923827 AS target_channel_id,
+        20 AS required_value,
+        30 AS reward_chill_coin,
+        10 AS reward_exp,
+        1 AS min_farm_level,
+        90 AS weight,
+        1 AS is_active
+
+    UNION ALL
+    SELECT 'voice_any_5_minutes', 'vào voice 5 phút', 'kết nối voice bất kỳ trong tổng cộng 5 phút', 'voice_time', NULL, NULL, NULL, 300, 35, 10, 1, 60, 1
+
+    UNION ALL
+    SELECT 'plant_sunflower_4', 'trồng 4 hướng dương', 'trồng 4 cây hướng dương trong farm', 'plant_crop', NULL, 'sunflower', NULL, 4, 35, 12, 1, 70, 1
+
+    UNION ALL
+    SELECT 'plant_sugarcane_4', 'trồng 4 mía', 'trồng 4 cây mía trong farm', 'plant_crop', NULL, 'sugarcane', NULL, 4, 35, 12, 1, 70, 1
+
+    UNION ALL
+    SELECT 'plant_wheat_4', 'trồng 4 lúa mì', 'trồng 4 cây lúa mì trong farm', 'plant_crop', NULL, 'wheat', NULL, 4, 25, 12, 1, 60, 1
+
+    UNION ALL
+    SELECT 'plant_green_bean_4', 'trồng 4 đậu xanh', 'trồng 4 cây đậu xanh trong farm', 'plant_crop', NULL, 'green_bean', NULL, 4, 35, 13, 1, 50, 1
+
+    UNION ALL
+    SELECT 'sell_market_any_1', 'đăng bán 1 món ở shop riêng', 'đăng bán 1 món bất kỳ lên shop cá nhân', 'sell_market_item', NULL, NULL, NULL, 1, 45, 14, 1, 80, 1
+
+    UNION ALL
+    SELECT 'fishing_3', 'câu cá 3 lần', 'câu cá tổng cộng 3 lần', 'fishing', NULL, NULL, NULL, 3, 25, 10, 1, 80, 1
+
+    UNION ALL
+    SELECT 'cooking_cheese_2', 'nấu 2 phô mai', 'bắt đầu nấu 2 phô mai', 'cooking', 'cheese', NULL, NULL, 2, 45, 15, 1, 60, 1
+
+    UNION ALL
+    SELECT 'cooking_oil_2', 'nấu 2 dầu ăn', 'bắt đầu nấu 2 dầu ăn', 'cooking', 'oil', NULL, NULL, 2, 45, 15, 1, 60, 1
+
+    UNION ALL
+    SELECT 'cooking_wheat_flour_4', 'nấu 4 bột mì', 'bắt đầu nấu 4 bột mì', 'cooking', 'wheat_flour', NULL, NULL, 4, 45, 15, 1, 60, 1
+
+    UNION ALL
+    SELECT 'cooking_sugar_2', 'nấu 2 đường', 'bắt đầu nấu 2 đường', 'cooking', 'sugar', NULL, NULL, 2, 45, 15, 1, 60, 1
+
+    UNION ALL
+    SELECT 'train_delivery_1', 'hoàn thành 1 đơn tàu hỏa', 'chất hàng lên tàu hỏa thành công 1 lần', 'train_delivery', NULL, NULL, NULL, 1, 50, 20, 1, 50, 1
+
+    UNION ALL
+    SELECT 'pest_remove_1', 'bắt sâu 1 lần', 'bắt sâu cho cây trồng 1 lần', 'pest_remove', NULL, NULL, NULL, 1, 15, 6, 1, 60, 1
+
+    UNION ALL
+    SELECT 'buy_market_any_1', 'mua 1 món từ shop người chơi', 'mua 1 món bất kỳ từ shop cá nhân của người chơi khác', 'buy_market_item', NULL, NULL, NULL, 1, 30, 20, 1, 60, 1
+
+    UNION ALL
+    SELECT 'egg_collect_1', 'lấy trứng 1 lần', 'lấy trứng từ chuồng gà 1 lần', 'egg_collect', 'egg', NULL, NULL, 1, 40, 4, 1, 70, 1
+
+    UNION ALL
+    SELECT 'milk_collect_1', 'vắt sữa 1 lần', 'vắt sữa từ chuồng bò 1 lần', 'milk_collect', 'milk', NULL, NULL, 1, 45, 4, 1, 70, 1
+) task_data
+LEFT JOIN items
+    ON items.code = task_data.target_item_code
+LEFT JOIN crops
+    ON crops.code = task_data.target_crop_code
+WHERE (
+    task_data.target_item_code IS NULL
+    OR items.id IS NOT NULL
+)
+AND (
+    task_data.target_crop_code IS NULL
+    OR crops.id IS NOT NULL
+)
+ON DUPLICATE KEY UPDATE
+    task_name = VALUES(task_name),
+    description = VALUES(description),
+    task_type = VALUES(task_type),
+    target_item_id = VALUES(target_item_id),
+    target_crop_id = VALUES(target_crop_id),
+    target_channel_id = VALUES(target_channel_id),
+    required_value = VALUES(required_value),
+    reward_chill_coin = VALUES(reward_chill_coin),
+    reward_exp = VALUES(reward_exp),
+    min_farm_level = VALUES(min_farm_level),
+    weight = VALUES(weight),
+    is_active = VALUES(is_active);

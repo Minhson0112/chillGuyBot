@@ -5,9 +5,12 @@ from bot.repository.farmTrainEventHistoryRepository import FarmTrainEventHistory
 from bot.repository.farmTrainEventRepository import FarmTrainEventRepository
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmTrainEventQueueService:
+    DAILY_TASK_TYPE_TRAIN_DELIVERY = "train_delivery"
+
     def queueTrain(self, userId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
@@ -15,6 +18,7 @@ class FarmTrainEventQueueService:
             farmTrainEventRepository = FarmTrainEventRepository(session)
             farmTrainEventHistoryRepository = FarmTrainEventHistoryRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
+            dailyTaskProgressService = DailyTaskProgressService(session)
 
             farm = farmRepository.findByUserId(userId)
 
@@ -112,19 +116,35 @@ class FarmTrainEventQueueService:
 
             farmRepository.updateTrainEventFlag(farm, False)
 
+            completedDailyTasks = dailyTaskProgressService.addProgress(
+                userId=userId,
+                taskType=self.DAILY_TASK_TYPE_TRAIN_DELIVERY,
+                amount=1,
+                targetItemId=requiredItem.id,
+            )
+
+            dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
+                completedDailyTasks,
+            )
+
             session.commit()
 
             chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
             expEmoji = FARM_GAME_EMOJI["exp"]
 
+            message = (
+                f"Bạn đã chất **{self.formatNumber(trainEvent.required_quantity)}** "
+                f"{self.buildItemText(requiredItem)} lên tàu.\n"
+                f"Nhận được **{self.formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji} "
+                f"và **{self.formatNumber(trainEvent.reward_exp)}** {expEmoji}."
+            )
+
+            if dailyTaskMessage is not None:
+                message += f"\n\n{dailyTaskMessage}"
+
             return {
                 "success": True,
-                "message": (
-                    f"Bạn đã chất **{self.formatNumber(trainEvent.required_quantity)}** "
-                    f"{self.buildItemText(requiredItem)} lên tàu.\n"
-                    f"Nhận được **{self.formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji}"
-                    f"và {expEmoji} **{self.formatNumber(trainEvent.reward_exp)}**."
-                ),
+                "message": message,
             }
 
     def buildItemText(self, item):

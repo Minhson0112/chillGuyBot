@@ -6,6 +6,7 @@ from bot.repository.farmCowShedRepository import FarmCowShedRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.itemRepository import ItemRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmCowMilkCollectService:
@@ -14,12 +15,15 @@ class FarmCowMilkCollectService:
     MILK_COLLECT_INTERVAL_MINUTES = 15
     MILK_COLLECT_EXP = 1
 
+    DAILY_TASK_TYPE_MILK_COLLECT = "milk_collect"
+
     def collectMilk(self, userId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmCowShedRepository = FarmCowShedRepository(session)
             itemRepository = ItemRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
+            dailyTaskProgressService = DailyTaskProgressService(session)
 
             farm = farmRepository.findByUserId(userId)
 
@@ -78,13 +82,29 @@ class FarmCowMilkCollectService:
             farmCowShedRepository.markMilkCollected(cowShed)
             farmRepository.increaseFarmExp(farm, self.MILK_COLLECT_EXP)
 
+            completedDailyTasks = dailyTaskProgressService.addProgress(
+                userId=userId,
+                taskType=self.DAILY_TASK_TYPE_MILK_COLLECT,
+                amount=milkQuantity,
+                targetItemId=milkItem.id,
+            )
+
+            dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
+                completedDailyTasks,
+            )
+
             session.commit()
 
             milkText = self.buildItemText(milkItem)
 
+            message = f"Bạn đã vắt được **{milkQuantity}** {milkText}."
+
+            if dailyTaskMessage is not None:
+                message += f"\n\n{dailyTaskMessage}"
+
             return {
                 "success": True,
-                "message": f"Bạn đã vắt được **{milkQuantity}** {milkText}.",
+                "message": message,
             }
 
     def isCowHungry(self, cowShed, now: datetime):

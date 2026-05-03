@@ -16,7 +16,19 @@ class VoiceStateUpdateEvent(commands.Cog):
         before: discord.VoiceState,
         after: discord.VoiceState,
     ):
-        self.memberVoiceActivityService.handleVoiceStateUpdate(member, before, after)
+        dailyTaskMessage = self.memberVoiceActivityService.handleVoiceStateUpdate(
+            member,
+            before,
+            after,
+        )
+
+        if dailyTaskMessage is None:
+            return
+
+        try:
+            await member.send(dailyTaskMessage)
+        except Exception as e:
+            print(f"Send voice daily task message error: {e}")
 
 
 async def setup(bot):

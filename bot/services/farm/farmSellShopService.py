@@ -4,10 +4,13 @@ from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmSellShopService:
     MARKET_PRICE_BONUS_RATE = 1.1
+
+    DAILY_TASK_TYPE_SELL_MARKET_ITEM = "sell_market_item"
 
     def sellShopItem(
         self,
@@ -27,6 +30,7 @@ class FarmSellShopService:
         with getDbSession() as session:
             userInventoryRepository = UserInventoryRepository(session)
             farmMarketListingRepository = FarmMarketListingRepository(session)
+            dailyTaskProgressService = DailyTaskProgressService(session)
 
             userInventory = userInventoryRepository.findByIdWithItem(inventoryId)
 
@@ -82,17 +86,33 @@ class FarmSellShopService:
                 price=totalMarketPrice,
             )
 
+            completedDailyTasks = dailyTaskProgressService.addProgress(
+                userId=userId,
+                taskType=self.DAILY_TASK_TYPE_SELL_MARKET_ITEM,
+                amount=quantity,
+                targetItemId=item.id,
+            )
+
+            dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
+                completedDailyTasks,
+            )
+
             session.commit()
+
+            message = (
+                f"Bạn đã đăng bán **{quantity}** {itemText} lên shop riêng.\n"
+                f"Giá gốc mỗi món: **{self.formatNumber(item.sell_price)}** {chillCoinEmoji}\n"
+                f"Giá shop riêng mỗi món: **{self.formatNumber(unitMarketPrice)}** {chillCoinEmoji}\n"
+                f"Tổng giá bán: **{self.formatNumber(totalMarketPrice)}** {chillCoinEmoji}\n"
+                f"ID đăng bán: **{farmMarketListing.id}**"
+            )
+
+            if dailyTaskMessage is not None:
+                message += f"\n\n{dailyTaskMessage}"
 
             return {
                 "success": True,
-                "message": (
-                    f"Bạn đã đăng bán **{quantity}** {itemText} lên shop riêng.\n"
-                    f"Giá gốc mỗi món: **{self.formatNumber(item.sell_price)}** {chillCoinEmoji}\n"
-                    f"Giá shop riêng mỗi món:**{self.formatNumber(unitMarketPrice)}** {chillCoinEmoji}\n"
-                    f"Tổng giá bán: **{self.formatNumber(totalMarketPrice)}** {chillCoinEmoji}\n"
-                    f"ID đăng bán: **{farmMarketListing.id}**"
-                ),
+                "message": message,
             }
 
     def calculateMarketUnitPrice(self, sellPrice: int):

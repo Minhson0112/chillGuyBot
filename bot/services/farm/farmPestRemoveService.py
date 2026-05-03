@@ -4,17 +4,22 @@ from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.itemRepository import ItemRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmPestRemoveService:
     BUG_ITEM_CODE = "bug"
     PEST_REMOVE_EXP = 1
+
+    DAILY_TASK_TYPE_PEST_REMOVE = "pest_remove"
+
     def removePest(self, userId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmCropAreaRepository = FarmCropAreaRepository(session)
             itemRepository = ItemRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
+            dailyTaskProgressService = DailyTaskProgressService(session)
 
             farm = farmRepository.findByUserId(userId)
 
@@ -63,13 +68,29 @@ class FarmPestRemoveService:
             farmCropAreaRepository.markPestRemoved(farmCropArea)
             farmRepository.increaseFarmExp(farm, self.PEST_REMOVE_EXP)
 
+            completedDailyTasks = dailyTaskProgressService.addProgress(
+                userId=userId,
+                taskType=self.DAILY_TASK_TYPE_PEST_REMOVE,
+                amount=1,
+                targetCropId=farmCropArea.crop_id,
+            )
+
+            dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
+                completedDailyTasks,
+            )
+
             session.commit()
 
             bugText = self.buildItemText(bugItem)
 
+            message = f"Bạn đã bắt được **{bugQuantity}** {bugText} và cây đã hết sâu bệnh."
+
+            if dailyTaskMessage is not None:
+                message += f"\n\n{dailyTaskMessage}"
+
             return {
                 "success": True,
-                "message": f"Bạn đã bắt được **{bugQuantity}** {bugText} và cây đã hết sâu bệnh.",
+                "message": message,
             }
 
     def buildItemText(self, item):

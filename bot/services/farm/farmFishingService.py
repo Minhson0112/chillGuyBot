@@ -9,6 +9,7 @@ from bot.repository.farmRepository import FarmRepository
 from bot.repository.fishingHistoryRepository import FishingHistoryRepository
 from bot.repository.itemRepository import ItemRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmFishingService:
@@ -23,6 +24,8 @@ class FarmFishingService:
     MIN_WEIGHT_KG = 1
     MAX_WEIGHT_KG = 100
 
+    DAILY_TASK_TYPE_FISHING = "fishing"
+
     def fish(self, userId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
@@ -30,6 +33,7 @@ class FarmFishingService:
             itemRepository = ItemRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
             fishingHistoryRepository = FishingHistoryRepository(session)
+            dailyTaskProgressService = DailyTaskProgressService(session)
 
             farm = farmRepository.findByUserId(userId)
 
@@ -115,17 +119,33 @@ class FarmFishingService:
             farmFishPondRepository.markFished(fishPond)
             farmRepository.increaseFarmExp(farm, self.EXP_PER_FISHING)
 
+            completedDailyTasks = dailyTaskProgressService.addProgress(
+                userId=userId,
+                taskType=self.DAILY_TASK_TYPE_FISHING,
+                amount=1,
+                targetItemId=caughtItem.id,
+            )
+
+            dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
+                completedDailyTasks,
+            )
+
             session.commit()
 
             caughtItemText = self.buildItemText(caughtItem)
 
+            message = (
+                f"Bạn đã câu được {caughtItemText} nặng **{weightKg}kg**. "
+                f"Đã dùng **{self.BUG_COST_PER_FISHING}** {bugText}. "
+                f"Farm EXP +{self.EXP_PER_FISHING}."
+            )
+
+            if dailyTaskMessage is not None:
+                message += f"\n\n{dailyTaskMessage}"
+
             return {
                 "success": True,
-                "message": (
-                    f"Bạn đã câu được {caughtItemText} nặng **{weightKg}kg**. "
-                    f"Đã dùng **{self.BUG_COST_PER_FISHING}** {bugText}. "
-                    f"Farm EXP +{self.EXP_PER_FISHING}."
-                ),
+                "message": message,
             }
 
     def checkFishingCooldown(self, fishPond):

@@ -6,9 +6,12 @@ from bot.repository.farmKitchenRepository import FarmKitchenRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.foodRecipeRepository import FoodRecipeRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmCookService:
+    DAILY_TASK_TYPE_COOKING = "cooking"
+
     def cook(
         self,
         userId: int,
@@ -29,6 +32,7 @@ class FarmCookService:
             farmKitchenRepository = FarmKitchenRepository(session)
             foodRecipeRepository = FoodRecipeRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
+            dailyTaskProgressService = DailyTaskProgressService(session)
 
             farm = farmRepository.findByUserId(userId)
 
@@ -111,16 +115,32 @@ class FarmCookService:
                 totalCookingSeconds=totalCookingSeconds,
             )
 
+            completedDailyTasks = dailyTaskProgressService.addProgress(
+                userId=userId,
+                taskType=self.DAILY_TASK_TYPE_COOKING,
+                amount=cookingQuantity,
+                targetItemId=recipe.resultItem.id,
+            )
+
+            dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
+                completedDailyTasks,
+            )
+
             session.commit()
 
             resultItemText = self.buildItemText(recipe.resultItem)
 
+            message = (
+                f"Bạn đã bắt đầu nấu **{cookingQuantity}** {resultItemText}. "
+                f"Thời gian nấu: **{self.formatRemainingTime(totalCookingSeconds)}**."
+            )
+
+            if dailyTaskMessage is not None:
+                message += f"\n\n{dailyTaskMessage}"
+
             return {
                 "success": True,
-                "message": (
-                    f"Bạn đã bắt đầu nấu **{cookingQuantity}** {resultItemText}. "
-                    f"Thời gian nấu: **{self.formatRemainingTime(totalCookingSeconds)}**."
-                ),
+                "message": message,
             }
 
     def isKitchenIdle(self, farmKitchen):

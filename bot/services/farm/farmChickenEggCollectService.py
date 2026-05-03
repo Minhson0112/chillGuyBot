@@ -6,6 +6,7 @@ from bot.repository.farmChickenCoopRepository import FarmChickenCoopRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.itemRepository import ItemRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmChickenEggCollectService:
@@ -14,12 +15,15 @@ class FarmChickenEggCollectService:
     EGG_COLLECT_INTERVAL_MINUTES = 10
     EGG_COLLECT_EXP = 1
 
+    DAILY_TASK_TYPE_EGG_COLLECT = "egg_collect"
+
     def collectEgg(self, userId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmChickenCoopRepository = FarmChickenCoopRepository(session)
             itemRepository = ItemRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
+            dailyTaskProgressService = DailyTaskProgressService(session)
 
             farm = farmRepository.findByUserId(userId)
 
@@ -78,13 +82,29 @@ class FarmChickenEggCollectService:
             farmChickenCoopRepository.markEggCollected(chickenCoop)
             farmRepository.increaseFarmExp(farm, self.EGG_COLLECT_EXP)
 
+            completedDailyTasks = dailyTaskProgressService.addProgress(
+                userId=userId,
+                taskType=self.DAILY_TASK_TYPE_EGG_COLLECT,
+                amount=eggQuantity,
+                targetItemId=eggItem.id,
+            )
+
+            dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
+                completedDailyTasks,
+            )
+
             session.commit()
 
             eggText = self.buildItemText(eggItem)
 
+            message = f"Bạn đã lấy được **{eggQuantity}** {eggText}."
+
+            if dailyTaskMessage is not None:
+                message += f"\n\n{dailyTaskMessage}"
+
             return {
                 "success": True,
-                "message": f"Bạn đã lấy được **{eggQuantity}** {eggText}.",
+                "message": message,
             }
 
     def isChickenHungry(self, chickenCoop, now: datetime):

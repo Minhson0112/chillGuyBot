@@ -4,9 +4,12 @@ from bot.repository.cropRepository import CropRepository
 from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmPlantService:
+    DAILY_TASK_TYPE_PLANT_CROP = "plant_crop"
+
     def plantCrop(
         self,
         userId: int,
@@ -17,6 +20,7 @@ class FarmPlantService:
             farmRepository = FarmRepository(session)
             farmCropAreaRepository = FarmCropAreaRepository(session)
             cropRepository = CropRepository(session)
+            dailyTaskProgressService = DailyTaskProgressService(session)
 
             userInventory = userInventoryRepository.findByIdWithItem(userInventoryId)
 
@@ -101,14 +105,30 @@ class FarmPlantService:
                 totalGrowthSeconds=crop.total_growth_seconds,
             )
 
+            completedDailyTasks = dailyTaskProgressService.addProgress(
+                userId=userId,
+                taskType=self.DAILY_TASK_TYPE_PLANT_CROP,
+                amount=requiredSeedQuantity,
+                targetCropId=crop.id,
+            )
+
+            dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
+                completedDailyTasks,
+            )
+
             session.commit()
+
+            message = (
+                f"Bạn đã trồng **{crop.name}** bằng "
+                f"**{requiredSeedQuantity}** {itemText}."
+            )
+
+            if dailyTaskMessage is not None:
+                message += f"\n\n{dailyTaskMessage}"
 
             return {
                 "success": True,
-                "message": (
-                    f"Bạn đã trồng **{crop.name}** bằng "
-                    f"**{requiredSeedQuantity}** {itemText}."
-                ),
+                "message": message,
             }
 
     def buildItemText(self, item):
