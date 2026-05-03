@@ -88,8 +88,8 @@ class FarmShopBuyService:
                     "success": False,
                     "message": (
                         f"Mua **{quantity}** {itemText} cần "
-                        f"{chillCoinEmoji} **{self.formatNumber(totalPrice)}**, "
-                        f"bạn chỉ có {chillCoinEmoji} **{self.formatNumber(member.chill_coin)}**."
+                        f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}, "
+                        f"bạn chỉ có **{self.formatNumber(member.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -110,7 +110,7 @@ class FarmShopBuyService:
                     "success": True,
                     "message": (
                         f"{animalBuyResult['message']} "
-                        f"Bạn đã trả {chillCoinEmoji} **{self.formatNumber(totalPrice)}**."
+                        f"Bạn đã trả **{self.formatNumber(totalPrice)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -128,7 +128,7 @@ class FarmShopBuyService:
                 "success": True,
                 "message": (
                     f"Bạn đã mua **{quantity}** {itemText} với "
-                    f"{chillCoinEmoji} **{self.formatNumber(totalPrice)}**."
+                    f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}."
                 ),
             }
 

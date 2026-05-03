@@ -107,7 +107,7 @@ class DailyCheckinService:
         chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
         rewardMessages = [
-            f"{chillCoinEmoji} **{self.formatNumber(reward.reward_chill_coin)}**",
+            f"**{self.formatNumber(reward.reward_chill_coin)}** {chillCoinEmoji}",
         ]
 
         if reward.rewardItem is not None and reward.reward_item_quantity > 0:

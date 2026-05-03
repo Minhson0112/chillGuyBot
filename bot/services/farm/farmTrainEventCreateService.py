@@ -65,7 +65,7 @@ class FarmTrainEventCreateService:
                 "message": (
                     f"Đã tạo sự kiện tàu hỏa **#{farmTrainEvent.id}**.\n"
                     f"Yêu cầu: **{self.formatNumber(requiredQuantity)}** {itemText}\n"
-                    f"Thưởng: {chillCoinEmoji} **{self.formatNumber(rewardChillCoin)}** "
+                    f"Thưởng: **{self.formatNumber(rewardChillCoin)}** {chillCoinEmoji}"
                     f"và **{self.formatNumber(rewardExp)} EXP**.\n"
                     f"Tàu hỏa đã xuất hiện ở toàn bộ farm."
                 ),

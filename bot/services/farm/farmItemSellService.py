@@ -86,7 +86,7 @@ class FarmItemSellService:
                 "success": True,
                 "message": (
                     f"Bạn đã bán **{quantity}** {itemText} và nhận được "
-                    f"{chillCoinEmoji} **{self.formatNumber(totalPrice)}**."
+                    f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}."
                 ),
             }
 

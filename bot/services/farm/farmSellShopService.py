@@ -88,9 +88,9 @@ class FarmSellShopService:
                 "success": True,
                 "message": (
                     f"Bạn đã đăng bán **{quantity}** {itemText} lên shop riêng.\n"
-                    f"Giá gốc mỗi món: {chillCoinEmoji} **{self.formatNumber(item.sell_price)}**\n"
-                    f"Giá shop riêng mỗi món: {chillCoinEmoji} **{self.formatNumber(unitMarketPrice)}**\n"
-                    f"Tổng giá bán: {chillCoinEmoji} **{self.formatNumber(totalMarketPrice)}**\n"
+                    f"Giá gốc mỗi món: **{self.formatNumber(item.sell_price)}** {chillCoinEmoji}\n"
+                    f"Giá shop riêng mỗi món:**{self.formatNumber(unitMarketPrice)}** {chillCoinEmoji}\n"
+                    f"Tổng giá bán: **{self.formatNumber(totalMarketPrice)}** {chillCoinEmoji}\n"
                     f"ID đăng bán: **{farmMarketListing.id}**"
                 ),
             }

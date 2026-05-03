@@ -122,7 +122,7 @@ class FarmTrainEventQueueService:
                 "message": (
                     f"Bạn đã chất **{self.formatNumber(trainEvent.required_quantity)}** "
                     f"{self.buildItemText(requiredItem)} lên tàu.\n"
-                    f"Nhận được {chillCoinEmoji} **{self.formatNumber(trainEvent.reward_chill_coin)}** "
+                    f"Nhận được **{self.formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji}"
                     f"và {expEmoji} **{self.formatNumber(trainEvent.reward_exp)}**."
                 ),
             }

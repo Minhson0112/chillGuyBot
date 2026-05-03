@@ -23,7 +23,7 @@ class CashCommand(commands.Cog):
             chillCoin = self.formatNumber(member.chill_coin)
 
             await ctx.reply(
-                f"{ctx.author.mention} ơi, bạn hiện có {chillCoinEmoji} **{chillCoin}** chill coin."
+                f"{ctx.author.mention} ơi, bạn hiện có **{chillCoin}** {chillCoinEmoji} chill coin."
             )
 
     def formatNumber(self, number: int):

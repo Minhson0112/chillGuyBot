@@ -55,8 +55,8 @@ class ChillCoinGiveService:
                     "success": False,
                     "message": (
                         f"Bạn không đủ {chillCoinEmoji} để chuyển. "
-                        f"Muốn chuyển {chillCoinEmoji} **{self.formatNumber(amount)}**, "
-                        f"hiện có {chillCoinEmoji} **{self.formatNumber(fromMember.chill_coin)}**."
+                        f"Muốn chuyển **{self.formatNumber(amount)}** {chillCoinEmoji}, "
+                        f"hiện có **{self.formatNumber(fromMember.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -75,7 +75,7 @@ class ChillCoinGiveService:
                     "success": False,
                     "message": (
                         f"Hôm nay người này đã nhận đủ giới hạn "
-                        f"{chillCoinEmoji} **{self.formatNumber(self.DAILY_RECEIVE_LIMIT)}** rồi."
+                        f"**{self.formatNumber(self.DAILY_RECEIVE_LIMIT)}** {chillCoinEmoji} rồi."
                     ),
                 }
 
@@ -84,7 +84,7 @@ class ChillCoinGiveService:
                     "success": False,
                     "message": (
                         f"Hôm nay người này chỉ nhận thêm được "
-                        f"{chillCoinEmoji} **{self.formatNumber(remainingReceivableAmount)}** nữa thôi."
+                        f"**{self.formatNumber(remainingReceivableAmount)}** {chillCoinEmoji} nữa thôi."
                     ),
                 }
 
@@ -104,7 +104,7 @@ class ChillCoinGiveService:
             return {
                 "success": True,
                 "message": (
-                    f"Bạn đã chuyển {chillCoinEmoji} **{self.formatNumber(amount)}** "
+                    f"Bạn đã chuyển **{self.formatNumber(amount)}** {chillCoinEmoji}"
                     f"cho **{self.getMemberDisplayName(toMember)}**."
                 ),
             }

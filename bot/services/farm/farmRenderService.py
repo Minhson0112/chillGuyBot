@@ -552,8 +552,8 @@ class FarmRenderService:
             "trainEventText": (
                 f"Tàu hỏa yêu cầu **{self.formatNumber(trainEvent.required_quantity)}** "
                 f"{itemEmoji} **{requiredItem.name}**, "
-                f"phần thưởng {chillCoinEmoji} **{self.formatNumber(trainEvent.reward_chill_coin)}** "
-                f"{expEmoji} **{self.formatNumber(trainEvent.reward_exp)}**"
+                f"phần thưởng **{self.formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji} "
+                f"**{self.formatNumber(trainEvent.reward_exp)}** {expEmoji}"
             ),
         }
 

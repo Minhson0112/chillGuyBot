@@ -80,8 +80,8 @@ class FarmPlotUnlockService:
                     "success": False,
                     "message": (
                         f"Mở ô đất thứ **{nextPlotCount}** cần "
-                        f"{chillCoinEmoji} **{self.formatNumber(unlockPrice)}**, "
-                        f"bạn chỉ có {chillCoinEmoji} **{self.formatNumber(member.chill_coin)}**."
+                        f"**{self.formatNumber(unlockPrice)}** {chillCoinEmoji}, "
+                        f"bạn chỉ có **{self.formatNumber(member.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -94,7 +94,7 @@ class FarmPlotUnlockService:
                 "success": True,
                 "message": (
                     f"Bạn đã mở ô đất thứ **{nextPlotCount}** với "
-                    f"{chillCoinEmoji} **{self.formatNumber(unlockPrice)}**."
+                    f"**{self.formatNumber(unlockPrice)}** {chillCoinEmoji}."
                 ),
             }
 
