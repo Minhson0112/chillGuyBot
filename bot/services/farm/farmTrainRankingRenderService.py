@@ -34,7 +34,7 @@ class FarmTrainRankingRenderService:
     ]
 
     NAME_X = 225
-    NAME_MAX_WIDTH = 120
+    NAME_MAX_WIDTH = 250
 
     COUNT_RIGHT_X = 835
     COUNT_MAX_WIDTH = 120
