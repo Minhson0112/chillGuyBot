@@ -398,7 +398,7 @@ class FarmRenderService:
         elapsedSeconds = int((now - cropArea.planted_at).total_seconds())
 
         return max(elapsedSeconds, 0)
-    
+
     def buildKitchenEmbedData(self, kitchen):
         if kitchen is None:
             return {
@@ -658,7 +658,12 @@ class FarmRenderService:
         if user is None:
             user = await self.bot.fetch_user(memberId)
 
-        avatarAsset = user.display_avatar.replace(size=256, static_format="png")
+        avatarAsset = user.display_avatar.replace(
+            size=256,
+            format="png",
+            static_format="png",
+        )
+
         avatarBytes = await avatarAsset.read()
 
         return Image.open(BytesIO(avatarBytes)).convert("RGBA")
