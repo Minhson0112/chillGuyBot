@@ -123,7 +123,7 @@ class FarmTrainRankingRenderService:
         memberDisplayName: str,
         centerY: int,
     ):
-        self.drawFitTextCenterY(
+        self.drawEllipsisTextCenterY(
             baseImage=baseImage,
             text=memberDisplayName,
             x=self.NAME_X,
@@ -171,7 +171,7 @@ class FarmTrainRankingRenderService:
 
         return str(userId)
 
-    def drawFitTextCenterY(
+    def drawEllipsisTextCenterY(
         self,
         baseImage: Image.Image,
         text: str,
@@ -181,19 +181,57 @@ class FarmTrainRankingRenderService:
         fontSize: int,
     ):
         draw = ImageDraw.Draw(baseImage)
-        font = self.getFitFont(draw, text, maxWidth, fontSize)
+        font = ImageFont.truetype(str(self.FONT_PATH), fontSize)
 
-        textHeight = self.getTextHeight(draw, text, font)
+        displayText = self.truncateTextToFit(
+            draw=draw,
+            text=text,
+            maxWidth=maxWidth,
+            font=font,
+        )
+
+        textHeight = self.getTextHeight(draw, displayText, font)
         y = centerY - textHeight // 2 - 2
 
         draw.text(
             (x, y),
-            text,
+            displayText,
             font=font,
             fill=self.TEXT_FILL,
             stroke_width=2,
             stroke_fill=self.STROKE_FILL,
         )
+
+    def truncateTextToFit(
+        self,
+        draw: ImageDraw.ImageDraw,
+        text: str,
+        maxWidth: int,
+        font: ImageFont.FreeTypeFont,
+    ):
+        if text is None:
+            return ""
+
+        if self.getTextWidth(draw, text, font) <= maxWidth:
+            return text
+
+        ellipsis = "..."
+        ellipsisWidth = self.getTextWidth(draw, ellipsis, font)
+
+        if ellipsisWidth >= maxWidth:
+            return ellipsis
+
+        result = ""
+
+        for char in text:
+            nextText = result + char
+
+            if self.getTextWidth(draw, nextText, font) + ellipsisWidth > maxWidth:
+                break
+
+            result = nextText
+
+        return result + ellipsis
 
     def drawRightFitTextCenterY(
         self,

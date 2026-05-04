@@ -20,6 +20,7 @@ class FarmFishingService:
     EXP_PER_FISHING = 1
 
     FISHING_COOLDOWN_MINUTES = 5
+    FISH_LINE_BREAK_RATE = 0.3
 
     MIN_WEIGHT_KG = 1
     MAX_WEIGHT_KG = 100
@@ -88,9 +89,29 @@ class FarmFishingService:
                     ),
                 }
 
+            userInventoryRepository.decreaseQuantity(
+                userInventory=bugInventory,
+                quantity=self.BUG_COST_PER_FISHING,
+            )
+
+            farmFishPondRepository.markFished(fishPond)
+
+            if self.isFishingLineBroken():
+                session.commit()
+
+                return {
+                    "success": True,
+                    "message": (
+                        f"Bạn bị đứt dây câu, câu được cái nịt. "
+                        f"Đã dùng **{self.BUG_COST_PER_FISHING}** {bugText}."
+                    ),
+                }
+
             seafoodItems = itemRepository.findActiveItemsByTypeCode(self.SEAFOOD_TYPE_CODE)
 
             if not seafoodItems:
+                session.rollback()
+
                 return {
                     "success": False,
                     "message": "Không tìm thấy dữ liệu cá trong hệ thống.",
@@ -98,11 +119,6 @@ class FarmFishingService:
 
             caughtItem = self.randomSeafoodItem(seafoodItems)
             weightKg = self.randomWeightKg()
-
-            userInventoryRepository.decreaseQuantity(
-                userInventory=bugInventory,
-                quantity=self.BUG_COST_PER_FISHING,
-            )
 
             userInventoryRepository.addOrCreate(
                 userId=userId,
@@ -116,7 +132,6 @@ class FarmFishingService:
                 weightKg=weightKg,
             )
 
-            farmFishPondRepository.markFished(fishPond)
             farmRepository.increaseFarmExp(farm, self.EXP_PER_FISHING)
 
             completedDailyTasks = dailyTaskProgressService.addProgress(
@@ -169,6 +184,9 @@ class FarmFishingService:
             "canFish": False,
             "remainingTimeText": self.formatRemainingTime(remainingSeconds),
         }
+
+    def isFishingLineBroken(self):
+        return random.random() < self.FISH_LINE_BREAK_RATE
 
     def randomSeafoodItem(self, seafoodItems):
         return random.choice(seafoodItems)
