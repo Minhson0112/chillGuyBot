@@ -1543,3 +1543,38 @@ ON DUPLICATE KEY UPDATE
     min_farm_level = VALUES(min_farm_level),
     weight = VALUES(weight),
     is_active = VALUES(is_active);
+
+#gift 
+START TRANSACTION;
+
+INSERT INTO giftcodes (
+    code,
+    reward_chill_coin,
+    expired_at
+)
+VALUES (
+    'chillstation',
+    50,
+    '2099-12-31'
+)
+ON DUPLICATE KEY UPDATE
+    reward_chill_coin = VALUES(reward_chill_coin),
+    expired_at = VALUES(expired_at),
+    id = LAST_INSERT_ID(id);
+
+SET @giftcode_id = LAST_INSERT_ID();
+
+INSERT INTO giftcode_rewards (
+    giftcode_id,
+    item_id,
+    quantity
+)
+VALUES (
+    @giftcode_id,
+    1,
+    10
+)
+ON DUPLICATE KEY UPDATE
+    quantity = VALUES(quantity);
+
+COMMIT;

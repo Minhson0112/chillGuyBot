@@ -155,6 +155,7 @@ async def main():
         "bot.commands.findMarketItem",
         "bot.commands.slot",
         "bot.commands.blackjack",
+        "bot.commands.giftcode",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",

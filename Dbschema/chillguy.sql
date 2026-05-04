@@ -1046,3 +1046,76 @@ CREATE TABLE user_daily_tasks (
     CONSTRAINT chk_user_daily_tasks_reward_exp
         CHECK (reward_exp >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='user daily tasks';
+
+# gift code
+
+CREATE TABLE giftcodes (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'giftcode id',
+
+    code VARCHAR(100) NOT NULL COMMENT 'giftcode code',
+    reward_chill_coin BIGINT NOT NULL DEFAULT 0 COMMENT 'reward chill coin',
+
+    expired_at DATE NOT NULL COMMENT 'giftcode expiration date',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_giftcodes_code (code),
+    KEY idx_giftcodes_expired_at (expired_at),
+
+    CONSTRAINT chk_giftcodes_reward_chill_coin
+        CHECK (reward_chill_coin >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='giftcode master';
+
+CREATE TABLE giftcode_claim_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'giftcode claim history id',
+
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    giftcode_id BIGINT NOT NULL COMMENT 'giftcode id',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_giftcode_claim_histories_user_giftcode (user_id, giftcode_id),
+
+    KEY idx_giftcode_claim_histories_user_id (user_id),
+    KEY idx_giftcode_claim_histories_giftcode_id (giftcode_id),
+
+    CONSTRAINT fk_giftcode_claim_histories_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_giftcode_claim_histories_giftcode_id
+        FOREIGN KEY (giftcode_id) REFERENCES giftcodes(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='giftcode claim history';
+
+CREATE TABLE giftcode_rewards (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'giftcode reward id',
+
+    giftcode_id BIGINT NOT NULL COMMENT 'giftcode id',
+    item_id BIGINT NOT NULL COMMENT 'reward item id',
+    quantity BIGINT NOT NULL COMMENT 'reward item quantity',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_giftcode_rewards_giftcode_item (giftcode_id, item_id),
+
+    KEY idx_giftcode_rewards_giftcode_id (giftcode_id),
+    KEY idx_giftcode_rewards_item_id (item_id),
+
+    CONSTRAINT fk_giftcode_rewards_giftcode_id
+        FOREIGN KEY (giftcode_id) REFERENCES giftcodes(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_giftcode_rewards_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_giftcode_rewards_quantity
+        CHECK (quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='giftcode item rewards';

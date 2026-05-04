@@ -17,3 +17,6 @@ from bot.models.chillCoinTransaction import ChillCoinTransaction
 from bot.models.farmKitchen import FarmKitchen
 from bot.models.foodRecipe import FoodRecipe
 from bot.models.foodRecipeIngredient import FoodRecipeIngredient
+from bot.models.giftcode import Giftcode
+from bot.models.giftcodeReward import GiftcodeReward
+from bot.models.giftcodeClaimHistory import GiftcodeClaimHistory
