@@ -108,7 +108,7 @@ class FarmRenderService:
         }
 
     def renderFarmImage(self, farm):
-        baseImage = assetImageService.getImage(farm.base_image_key).copy()
+        baseImage = assetImageService.getImage(farm.base_image_key)
 
         cropArea = farm.cropArea
 
@@ -313,6 +313,92 @@ class FarmRenderService:
 
         return f"Còn {self.formatRemainingTime(remainingSeconds)}"
 
+    def formatRemainingTime(self, remainingSeconds: int):
+        minutes = remainingSeconds // 60
+        seconds = remainingSeconds % 60
+
+        return f"{minutes}:{seconds:02d}"
+
+    def resolveLandImageKey(self, cropArea):
+        if cropArea is not None and cropArea.is_dry:
+            return self.LAND_DRY_IMAGE_KEY
+
+        return self.LAND_WET_IMAGE_KEY
+
+    def getUnlockedGridPositions(self, unlockedPlotCount: int):
+        if unlockedPlotCount <= 0:
+            return []
+
+        plotCount = min(unlockedPlotCount, self.MAX_PLOT_COUNT)
+
+        return self.LAND_GRID_POSITIONS[:plotCount]
+
+    def renderChickens(self, baseImage: Image.Image, chickenCoop):
+        if chickenCoop.chicken_count >= 1:
+            chickenImage = assetImageService.getImage("chicken_1_image_key")
+            chickenImage = self.resizeByScale(chickenImage, chickenCoop.render_scale)
+
+            self.pasteSprite(
+                baseImage,
+                chickenImage,
+                x=chickenCoop.chicken_1_x,
+                y=chickenCoop.chicken_1_y,
+            )
+
+        if chickenCoop.chicken_count >= 2:
+            chickenImage = assetImageService.getImage("chicken_2_image_key")
+            chickenImage = self.resizeByScale(chickenImage, chickenCoop.render_scale)
+
+            self.pasteSprite(
+                baseImage,
+                chickenImage,
+                x=chickenCoop.chicken_2_x,
+                y=chickenCoop.chicken_2_y,
+            )
+
+    def renderCow(self, baseImage: Image.Image, cowShed):
+        if cowShed.cow_count < 1:
+            return
+
+        cowImage = assetImageService.getImage("cow_image_key")
+        cowImage = self.resizeByScale(cowImage, cowShed.render_scale)
+
+        self.pasteSprite(
+            baseImage,
+            cowImage,
+            x=cowShed.cow_x,
+            y=cowShed.cow_y,
+        )
+
+    def resolveCurrentCropStage(self, cropArea):
+        if cropArea.crop is None:
+            return None
+
+        cropStages = sorted(
+            cropArea.crop.growthStages,
+            key=lambda cropStage: cropStage.stage_start_seconds,
+        )
+
+        if not cropStages:
+            return None
+
+        elapsedSeconds = self.calculateElapsedGrowthSeconds(cropArea)
+        currentStage = cropStages[0]
+
+        for cropStage in cropStages:
+            if elapsedSeconds >= cropStage.stage_start_seconds:
+                currentStage = cropStage
+            else:
+                break
+
+        return currentStage
+
+    def calculateElapsedGrowthSeconds(self, cropArea):
+        now = datetime.now()
+        elapsedSeconds = int((now - cropArea.planted_at).total_seconds())
+
+        return max(elapsedSeconds, 0)
+    
     def buildKitchenEmbedData(self, kitchen):
         if kitchen is None:
             return {
@@ -358,114 +444,6 @@ class FarmRenderService:
             return "Có thể nhận món"
 
         return self.formatRemainingTime(remainingSeconds)
-
-    def buildTrainEventEmbedData(self, farm, trainEvent):
-        if not farm.is_train_event:
-            return {
-                "trainEventText": "Tàu đang ở ga Chill Station, sẽ cập bến farm của bạn sớm thôi.",
-            }
-
-        if trainEvent is None or trainEvent.requiredItem is None:
-            return {
-                "trainEventText": "Tàu hỏa đang cập bến, nhưng chưa tìm thấy dữ liệu yêu cầu.",
-            }
-
-        requiredItem = trainEvent.requiredItem
-        itemEmoji = FARM_GAME_EMOJI.get(requiredItem.icon_image_key, "")
-        chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
-        expEmoji = FARM_GAME_EMOJI["exp"]
-
-        return {
-            "trainEventText": (
-                f"Tàu hỏa yêu cầu **{self.formatNumber(trainEvent.required_quantity)}** "
-                f"{itemEmoji} **{requiredItem.name}**, "
-                f"phần thưởng **{self.formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji} "
-                f"**{self.formatNumber(trainEvent.reward_exp)}** {expEmoji}"
-            ),
-        }
-
-    def renderChickens(self, baseImage: Image.Image, chickenCoop):
-        if chickenCoop.chicken_count >= 1 and chickenCoop.chicken_1_image_key:
-            chickenImage = assetImageService.getImage(chickenCoop.chicken_1_image_key)
-            chickenImage = self.resizeByScale(chickenImage, chickenCoop.render_scale)
-
-            self.pasteSprite(
-                baseImage,
-                chickenImage,
-                x=chickenCoop.chicken_1_x,
-                y=chickenCoop.chicken_1_y,
-            )
-
-        if chickenCoop.chicken_count >= 2 and chickenCoop.chicken_2_image_key:
-            chickenImage = assetImageService.getImage(chickenCoop.chicken_2_image_key)
-            chickenImage = self.resizeByScale(chickenImage, chickenCoop.render_scale)
-
-            self.pasteSprite(
-                baseImage,
-                chickenImage,
-                x=chickenCoop.chicken_2_x,
-                y=chickenCoop.chicken_2_y,
-            )
-
-    def renderCow(self, baseImage: Image.Image, cowShed):
-        if cowShed.cow_count < 1:
-            return
-
-        if not cowShed.cow_image_key:
-            return
-
-        cowImage = assetImageService.getImage(cowShed.cow_image_key)
-        cowImage = self.resizeByScale(cowImage, cowShed.render_scale)
-
-        self.pasteSprite(
-            baseImage,
-            cowImage,
-            x=cowShed.cow_x,
-            y=cowShed.cow_y,
-        )
-
-    def resolveCurrentCropStage(self, cropArea):
-        if cropArea.crop is None:
-            return None
-
-        cropStages = sorted(
-            cropArea.crop.growthStages,
-            key=lambda cropStage: cropStage.stage_start_seconds,
-        )
-
-        if not cropStages:
-            return None
-
-        elapsedSeconds = self.calculateElapsedGrowthSeconds(cropArea)
-        currentStage = cropStages[0]
-
-        for cropStage in cropStages:
-            if elapsedSeconds >= cropStage.stage_start_seconds:
-                currentStage = cropStage
-            else:
-                break
-
-        return currentStage
-
-    def calculateElapsedGrowthSeconds(self, cropArea):
-        now = datetime.now()
-        elapsedSeconds = int((now - cropArea.planted_at).total_seconds())
-
-        return max(elapsedSeconds, 0)
-
-    def resolveLandImageKey(self, cropArea):
-        if cropArea is not None and cropArea.is_dry:
-            return self.LAND_DRY_IMAGE_KEY
-
-        return self.LAND_WET_IMAGE_KEY
-
-    def getUnlockedGridPositions(self, unlockedPlotCount: int):
-        if unlockedPlotCount <= 0:
-            return []
-
-        plotCount = min(unlockedPlotCount, self.MAX_PLOT_COUNT)
-
-        return self.LAND_GRID_POSITIONS[:plotCount]
 
     def renderFarmStatusInfo(self, baseImage: Image.Image, farm):
         self.renderChillCoinInfo(baseImage, farm)
@@ -553,6 +531,31 @@ class FarmRenderService:
             y=self.EXP_TEXT_Y,
             fontSize=self.EXP_FONT_SIZE,
         )
+
+    def buildTrainEventEmbedData(self, farm, trainEvent):
+        if not farm.is_train_event:
+            return {
+                "trainEventText": "Tàu đang ở ga Chill Station, sẽ cập bến farm của bạn sớm thôi.",
+            }
+
+        if trainEvent is None or trainEvent.requiredItem is None:
+            return {
+                "trainEventText": "Tàu hỏa đang cập bến, nhưng chưa tìm thấy dữ liệu yêu cầu.",
+            }
+
+        requiredItem = trainEvent.requiredItem
+        itemEmoji = FARM_GAME_EMOJI.get(requiredItem.icon_image_key, "")
+        chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
+        expEmoji = FARM_GAME_EMOJI["exp"]
+
+        return {
+            "trainEventText": (
+                f"Tàu hỏa yêu cầu **{self.formatNumber(trainEvent.required_quantity)}** "
+                f"{itemEmoji} **{requiredItem.name}**, "
+                f"phần thưởng **{self.formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji} "
+                f"**{self.formatNumber(trainEvent.reward_exp)}** {expEmoji}"
+            ),
+        }
 
     def drawExpBar(self, baseImage: Image.Image, progressRate: float):
         draw = ImageDraw.Draw(baseImage)
@@ -647,57 +650,21 @@ class FarmRenderService:
         if x is None or y is None:
             return
 
-        if spriteImg.mode != "RGBA":
-            spriteImg = spriteImg.convert("RGBA")
-
         baseImg.paste(spriteImg, (x, y), spriteImg)
 
     async def getMemberAvatarImage(self, memberId: int):
-        try:
-            user = self.bot.get_user(memberId)
+        user = self.bot.get_user(memberId)
 
-            if user is None:
-                user = await self.bot.fetch_user(memberId)
+        if user is None:
+            user = await self.bot.fetch_user(memberId)
 
-        except Exception as e:
-            print(f"Failed to fetch member avatar user: {e}")
-            return None
+        avatarAsset = user.display_avatar.replace(size=256, static_format="png")
+        avatarBytes = await avatarAsset.read()
 
-        try:
-            avatarAsset = user.display_avatar.replace(
-                size=256,
-                format="png",
-            )
-            avatarBytes = await avatarAsset.read()
-
-            return Image.open(BytesIO(avatarBytes)).convert("RGBA")
-
-        except Exception as e:
-            print(f"Failed to load member avatar as png: {e}")
-
-        try:
-            avatarAsset = user.display_avatar.replace(size=256)
-            avatarBytes = await avatarAsset.read()
-
-            avatarImage = Image.open(BytesIO(avatarBytes))
-
-            if getattr(avatarImage, "is_animated", False):
-                avatarImage.seek(0)
-
-            return avatarImage.convert("RGBA")
-
-        except Exception as e:
-            print(f"Failed to load member avatar fallback: {e}")
-            return None
+        return Image.open(BytesIO(avatarBytes)).convert("RGBA")
 
     def pasteMemberAvatar(self, baseImage: Image.Image, avatarImage: Image.Image):
-        avatarImage = avatarImage.resize(
-            (self.AVATAR_SIZE, self.AVATAR_SIZE),
-            Image.LANCZOS,
-        )
-
-        if avatarImage.mode != "RGBA":
-            avatarImage = avatarImage.convert("RGBA")
+        avatarImage = avatarImage.resize((self.AVATAR_SIZE, self.AVATAR_SIZE), Image.LANCZOS)
 
         baseImage.paste(
             avatarImage,
@@ -741,12 +708,6 @@ class FarmRenderService:
             stroke_width=strokeWidth,
             stroke_fill=(0, 0, 0, 255),
         )
-
-    def formatRemainingTime(self, remainingSeconds: int):
-        minutes = remainingSeconds // 60
-        seconds = remainingSeconds % 60
-
-        return f"{minutes}:{seconds:02d}"
 
     def formatNumber(self, number: int):
         return f"{number:,}"
