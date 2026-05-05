@@ -17,7 +17,7 @@ class FarmRepository:
             user_id=userId,
             farm_level=1,
             farm_exp=0,
-            base_image_key="farm_base",
+            base_image_key="base",
             is_train_event=False,
         )
 
