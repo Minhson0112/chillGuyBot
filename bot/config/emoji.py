@@ -143,6 +143,39 @@ FARM_GAME_EMOJI = {
     "item_sunflower_seed" : "<:sunflower_seed:1498775517455978636>",
     "item_sunflower" : "<:sunflower:1498775607624994967>",
 
+    "item_hot_pepper_seed" : "<:Hot_Pepper_seed:1501209922371715185>",
+    "item_hot_pepper" : "<:Hot_Pepper:1501209874426630287>",
+
+    "item_red_cabbage_seed" : "<:Red_Cabbage_seed:1501210008816451745>",
+    "item_red_cabbage" : "<:Red_Cabbage:1501209978436980826>",
+
+    "item_yam_seed" : "<:Yam_seed:1501210085639192708>",
+    "item_yam" : "<:Yam:1501210045520674966>",
+
+    "item_cranberry_seed" : "<:Cranberry_seed:1501210215918342264>",
+    "item_cranberry" : "<:Cranberry:1501210191822196776>",
+
+    "item_pumpkin_seed" : "<:Pumpkin_seed:1501210275402092734>",
+    "item_pumpkin" : "<:Pumpkin:1501210246046027948>",
+
+    "item_artichoke_seed" : "<:Artichoke_seed:1501210342276071525>",
+    "item_artichoke" : "<:Artichoke:1501210310558744786>",
+
+    "item_blueberry_seed" : "<:Blueberry_seed:1501210403341078598>",
+    "item_blueberry" : "<:Blueberry:1501210380473733310>",
+
+    "item_strawberry_seed" : "<:Strawberry_seed:1501210450027614259>",
+    "item_strawberry" : "<:Strawberry:1501210429815521380>",
+
+    "item_eggplant_seed" : "<:Eggplant_seed:1501210532991209562>",
+    "item_eggplant" : "<:Eggplant:1501210498119504012>",
+
+    "item_grape_seed" : "<:Grape_seed:1501210582223687730>",
+    "item_grape" : "<:Grape:1501210562330234980>",
+
+    "item_bok_choy_seed" : "<:Bok_Choy_seed:1501210621839016047>",
+    "item_bok_choy" : "<:Bok_Choy:1501210603493130380>",
+
     "item_cheese": "<:Cheese:1498466831181021194>",
     "item_wheat_flour": "<:Wheat_Flour:1498466829440516278>",
     "item_oil": "<:Oil:1498466827251224627>",

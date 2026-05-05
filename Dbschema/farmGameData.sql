@@ -1578,3 +1578,218 @@ ON DUPLICATE KEY UPDATE
     quantity = VALUES(quantity);
 
 COMMIT;
+
+
+# big udate thêm cây
+START TRANSACTION;
+
+INSERT INTO items (
+    code,
+    name,
+    type_code,
+    icon_image_key,
+    description,
+    render_scale,
+    render_offset_y,
+    sell_price,
+    is_sellable,
+    is_usable,
+    is_active
+)
+VALUES
+    ('hot_pepper_seed', 'hạt giống ớt', 'seed', 'item_hot_pepper_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('hot_pepper', 'ớt', 'crop', 'item_hot_pepper', '', 1.0, 0, 100, 1, 1, 1),
+
+    ('red_cabbage_seed', 'hạt bắp cải đỏ', 'seed', 'item_red_cabbage_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('red_cabbage', 'bắp cải đỏ', 'crop', 'item_red_cabbage', '', 1.0, 0, 115, 1, 1, 1),
+
+    ('yam_seed', 'khoai lang giống', 'seed', 'item_yam_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('yam', 'khoai lang', 'crop', 'item_yam', '', 1.0, 0, 125, 1, 1, 1),
+
+    ('cranberry_seed', 'hạt nam việt quất', 'seed', 'item_cranberry_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('cranberry', 'nam việt quất', 'crop', 'item_cranberry', '', 1.0, 0, 142, 1, 1, 1),
+
+    ('pumpkin_seed', 'hạt bí ngô', 'seed', 'item_pumpkin_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('pumpkin', 'bí ngô', 'crop', 'item_pumpkin', '', 1.0, 0, 163, 1, 1, 1),
+
+    ('artichoke_seed', 'hạt atisô', 'seed', 'item_artichoke_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('artichoke', 'atisô', 'crop', 'item_artichoke', '', 1.0, 0, 175, 1, 1, 1),
+
+    ('blueberry_seed', 'hạt việt quất', 'seed', 'item_blueberry_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('blueberry', 'việt quất', 'crop', 'item_blueberry', '', 1.0, 0, 189, 1, 1, 1),
+
+    ('strawberry_seed', 'hạt dâu tây', 'seed', 'item_strawberry_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('strawberry', 'dâu tây', 'crop', 'item_strawberry', '', 1.0, 0, 196, 1, 1, 1),
+
+    ('eggplant_seed', 'hạt cà tím', 'seed', 'item_eggplant_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('eggplant', 'cà tím', 'crop', 'item_eggplant', '', 1.0, 0, 227, 1, 1, 1),
+
+    ('grape_seed', 'hạt nho', 'seed', 'item_grape_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('grape', 'nho', 'crop', 'item_grape', '', 1.0, 0, 241, 1, 1, 1),
+
+    ('bok_choy_seed', 'hạt cải thìa', 'seed', 'item_bok_choy_seed', '', 1.0, 0, 0, 0, 1, 1),
+    ('bok_choy', 'rau cải thìa', 'crop', 'item_bok_choy', '', 1.0, 0, 253, 1, 1, 1)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    type_code = VALUES(type_code),
+    icon_image_key = VALUES(icon_image_key),
+    description = VALUES(description),
+    render_scale = VALUES(render_scale),
+    render_offset_y = VALUES(render_offset_y),
+    sell_price = VALUES(sell_price),
+    is_sellable = VALUES(is_sellable),
+    is_usable = VALUES(is_usable),
+    is_active = VALUES(is_active);
+
+INSERT INTO crops (
+    code,
+    name,
+    seed_item_id,
+    crop_item_id,
+    harvest_quantity_per_plot,
+    total_growth_seconds
+)
+SELECT
+    src.code,
+    src.name,
+    seed_item.id,
+    crop_item.id,
+    src.harvest_quantity_per_plot,
+    src.total_growth_seconds
+FROM (
+    SELECT 'hot_pepper' AS code, 'ớt' AS name, 'hot_pepper_seed' AS seed_item_code, 'hot_pepper' AS crop_item_code, 2 AS harvest_quantity_per_plot, 2400 AS total_growth_seconds
+    UNION ALL SELECT 'red_cabbage', 'bắp cải đỏ', 'red_cabbage_seed', 'red_cabbage', 2, 2700
+    UNION ALL SELECT 'yam', 'khoai lang', 'yam_seed', 'yam', 2, 3300
+    UNION ALL SELECT 'cranberry', 'nam việt quất', 'cranberry_seed', 'cranberry', 2, 3720
+    UNION ALL SELECT 'pumpkin', 'bí ngô', 'pumpkin_seed', 'pumpkin', 2, 4380
+    UNION ALL SELECT 'artichoke', 'atisô', 'artichoke_seed', 'artichoke', 2, 5160
+    UNION ALL SELECT 'blueberry', 'việt quất', 'blueberry_seed', 'blueberry', 2, 5400
+    UNION ALL SELECT 'strawberry', 'dâu tây', 'strawberry_seed', 'strawberry', 2, 5760
+    UNION ALL SELECT 'eggplant', 'cà tím', 'eggplant_seed', 'eggplant', 2, 6720
+    UNION ALL SELECT 'grape', 'nho', 'grape_seed', 'grape', 2, 7440
+    UNION ALL SELECT 'bok_choy', 'rau cải thìa', 'bok_choy_seed', 'bok_choy', 2, 7800
+) src
+JOIN items seed_item ON seed_item.code = src.seed_item_code
+JOIN items crop_item ON crop_item.code = src.crop_item_code
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    seed_item_id = VALUES(seed_item_id),
+    crop_item_id = VALUES(crop_item_id),
+    harvest_quantity_per_plot = VALUES(harvest_quantity_per_plot),
+    total_growth_seconds = VALUES(total_growth_seconds);
+
+INSERT INTO crop_growth_stages (
+    crop_id,
+    stage_no,
+    stage_start_seconds,
+    image_key,
+    render_scale,
+    render_offset_y
+)
+SELECT
+    crops.id,
+    src.stage_no,
+    src.stage_start_seconds,
+    src.image_key,
+    src.render_scale,
+    src.render_offset_y
+FROM (
+    SELECT 'hot_pepper' AS crop_code, 1 AS stage_no, 0 AS stage_start_seconds, 'crop_hot_pepper_stage_1' AS image_key, 5 AS render_scale, 0 AS render_offset_y
+    UNION ALL SELECT 'hot_pepper', 2, 800, 'crop_hot_pepper_stage_2', 5, -10
+    UNION ALL SELECT 'hot_pepper', 3, 1600, 'crop_hot_pepper_stage_3', 5, -20
+    UNION ALL SELECT 'hot_pepper', 4, 2400, 'crop_hot_pepper_stage_4', 5, -25
+
+    UNION ALL SELECT 'red_cabbage', 1, 0, 'crop_red_cabbage_stage_1', 5, 0
+    UNION ALL SELECT 'red_cabbage', 2, 900, 'crop_red_cabbage_stage_2', 5, 0
+    UNION ALL SELECT 'red_cabbage', 3, 1800, 'crop_red_cabbage_stage_3', 5, 0
+    UNION ALL SELECT 'red_cabbage', 4, 2700, 'crop_red_cabbage_stage_4', 5, 0
+
+    UNION ALL SELECT 'yam', 1, 0, 'crop_yam_stage_1', 5, 0
+    UNION ALL SELECT 'yam', 2, 1100, 'crop_yam_stage_2', 5, -10
+    UNION ALL SELECT 'yam', 3, 2200, 'crop_yam_stage_3', 5, -15
+    UNION ALL SELECT 'yam', 4, 3300, 'crop_yam_stage_4', 5, 0
+
+    UNION ALL SELECT 'cranberry', 1, 0, 'crop_cranberry_stage_1', 5, 0
+    UNION ALL SELECT 'cranberry', 2, 1240, 'crop_cranberry_stage_2', 5, 0
+    UNION ALL SELECT 'cranberry', 3, 2480, 'crop_cranberry_stage_3', 5, -20
+    UNION ALL SELECT 'cranberry', 4, 3720, 'crop_cranberry_stage_4', 5, -20
+
+    UNION ALL SELECT 'pumpkin', 1, 0, 'crop_pumpkin_stage_1', 5, 0
+    UNION ALL SELECT 'pumpkin', 2, 1460, 'crop_pumpkin_stage_2', 5, -10
+    UNION ALL SELECT 'pumpkin', 3, 2920, 'crop_pumpkin_stage_3', 5, -10
+    UNION ALL SELECT 'pumpkin', 4, 4380, 'crop_pumpkin_stage_4', 5, -10
+
+    UNION ALL SELECT 'artichoke', 1, 0, 'crop_artichoke_stage_1', 5, 0
+    UNION ALL SELECT 'artichoke', 2, 1720, 'crop_artichoke_stage_2', 5, -10
+    UNION ALL SELECT 'artichoke', 3, 3440, 'crop_artichoke_stage_3', 5, -20
+    UNION ALL SELECT 'artichoke', 4, 5160, 'crop_artichoke_stage_4', 5, -20
+
+    UNION ALL SELECT 'blueberry', 1, 0, 'crop_blueberry_stage_1', 5, 0
+    UNION ALL SELECT 'blueberry', 2, 1800, 'crop_blueberry_stage_2', 5, -10
+    UNION ALL SELECT 'blueberry', 3, 3600, 'crop_blueberry_stage_3', 5, -25
+    UNION ALL SELECT 'blueberry', 4, 5400, 'crop_blueberry_stage_4', 5, -30
+
+    UNION ALL SELECT 'strawberry', 1, 0, 'crop_strawberry_stage_1', 5, 0
+    UNION ALL SELECT 'strawberry', 2, 1920, 'crop_strawberry_stage_2', 5, 0
+    UNION ALL SELECT 'strawberry', 3, 3840, 'crop_strawberry_stage_3', 5, 0
+    UNION ALL SELECT 'strawberry', 4, 5760, 'crop_strawberry_stage_4', 5, -10
+
+    UNION ALL SELECT 'eggplant', 1, 0, 'crop_eggplant_stage_1', 5, 0
+    UNION ALL SELECT 'eggplant', 2, 2240, 'crop_eggplant_stage_2', 5, -10
+    UNION ALL SELECT 'eggplant', 3, 4480, 'crop_eggplant_stage_3', 5, -25
+    UNION ALL SELECT 'eggplant', 4, 6720, 'crop_eggplant_stage_4', 5, -25
+
+    UNION ALL SELECT 'grape', 1, 0, 'crop_grape_stage_1', 5, -50
+    UNION ALL SELECT 'grape', 2, 2480, 'crop_grape_stage_2', 5, -50
+    UNION ALL SELECT 'grape', 3, 4960, 'crop_grape_stage_3', 5, -50
+    UNION ALL SELECT 'grape', 4, 7440, 'crop_grape_stage_4', 5, -50
+
+    UNION ALL SELECT 'bok_choy', 1, 0, 'crop_bok_choy_stage_1', 5, 0
+    UNION ALL SELECT 'bok_choy', 2, 2600, 'crop_bok_choy_stage_2', 5, -5
+    UNION ALL SELECT 'bok_choy', 3, 5200, 'crop_bok_choy_stage_3', 5, -5
+    UNION ALL SELECT 'bok_choy', 4, 7800, 'crop_bok_choy_stage_4', 5, -10
+) src
+JOIN crops ON crops.code = src.crop_code
+ON DUPLICATE KEY UPDATE
+    stage_start_seconds = VALUES(stage_start_seconds),
+    image_key = VALUES(image_key),
+    render_scale = VALUES(render_scale),
+    render_offset_y = VALUES(render_offset_y);
+
+INSERT INTO shop_items (
+    item_id,
+    buy_price,
+    required_farm_level,
+    is_visible,
+    is_active,
+    sort_order
+)
+SELECT
+    items.id,
+    src.buy_price,
+    src.required_farm_level,
+    src.is_visible,
+    src.is_active,
+    src.sort_order
+FROM (
+    SELECT 'hot_pepper_seed' AS item_code, 40 AS buy_price, 3 AS required_farm_level, 1 AS is_visible, 1 AS is_active, 19 AS sort_order
+    UNION ALL SELECT 'red_cabbage_seed', 50, 3, 1, 1, 20
+    UNION ALL SELECT 'yam_seed', 65, 3, 1, 1, 21
+    UNION ALL SELECT 'cranberry_seed', 74, 3, 1, 1, 22
+    UNION ALL SELECT 'pumpkin_seed', 91, 3, 1, 1, 23
+    UNION ALL SELECT 'artichoke_seed', 101, 3, 1, 1, 24
+    UNION ALL SELECT 'blueberry_seed', 113, 4, 1, 1, 25
+    UNION ALL SELECT 'strawberry_seed', 121, 4, 1, 1, 26
+    UNION ALL SELECT 'eggplant_seed', 148, 4, 1, 1, 27
+    UNION ALL SELECT 'grape_seed', 159, 4, 1, 1, 28
+    UNION ALL SELECT 'bok_choy_seed', 164, 4, 1, 1, 29
+) src
+JOIN items ON items.code = src.item_code
+ON DUPLICATE KEY UPDATE
+    buy_price = VALUES(buy_price),
+    required_farm_level = VALUES(required_farm_level),
+    is_visible = VALUES(is_visible),
+    is_active = VALUES(is_active),
+    sort_order = VALUES(sort_order);
+
+COMMIT;
