@@ -1793,3 +1793,200 @@ ON DUPLICATE KEY UPDATE
     sort_order = VALUES(sort_order);
 
 COMMIT;
+
+
+# thêm đồ ăn
+START TRANSACTION;
+
+INSERT INTO items (
+    code,
+    name,
+    type_code,
+    icon_image_key,
+    description,
+    render_scale,
+    render_offset_y,
+    sell_price,
+    is_sellable,
+    is_usable,
+    is_active
+)
+VALUES
+    ('tortilla', 'bánh tráng ngô', 'food', 'item_tortilla', '', 1.0, 0, 21, 1, 1, 1),
+    ('vinegar', 'giấm', 'food', 'item_vinegar', '', 1.0, 0, 18, 1, 1, 1),
+    ('mayonnaise', 'sốt mayonnaise', 'food', 'item_mayonnaise', '', 1.0, 0, 28, 1, 1, 1),
+    ('baked_fish', 'cá nướng tỏi', 'food', 'item_baked_fish', '', 1.0, 0, 216, 1, 1, 1),
+    ('strawberry_lover_pie', 'bánh kem dâu', 'food', 'item_strawberry_lover_pie', '', 1.0, 0, 621, 1, 1, 1),
+    ('fish_taco', 'bánh cá', 'food', 'item_fish_taco', '', 1.0, 0, 421, 1, 1, 1),
+    ('escargot', 'sên sào tỏi', 'food', 'item_escargot', '', 1.0, 0, 181, 1, 1, 1),
+    ('lobster_bisque', 'súp tôm hùm', 'food', 'item_lobster_bisque', '', 1.0, 0, 130, 1, 1, 1),
+    ('cranberry_candy', 'nước ép việt quất', 'food', 'item_cranberry_candy', '', 1.0, 0, 180, 1, 1, 1),
+    ('blackberry_cobbler', 'bánh nhân nho', 'food', 'item_blackberry_cobbler', '', 1.0, 0, 600, 1, 1, 1),
+    ('fruit_salad', 'salad hoa quả', 'food', 'item_fruit_salad', '', 1.0, 0, 636, 1, 1, 1),
+    ('pumpkin_pie', 'bánh bí ngô', 'food', 'item_pumpkin_pie', '', 1.0, 0, 211, 1, 1, 1),
+    ('artichoke_dip', 'atisô chấm sữa', 'food', 'item_artichoke_dip', '', 1.0, 0, 236, 1, 1, 1),
+    ('cranberry_sauce', 'mứt việt quất', 'food', 'item_cranberry_sauce', '', 1.0, 0, 270, 1, 1, 1),
+    ('fish_burger', 'burger cá', 'food', 'item_fish_burger', '', 1.0, 0, 661, 1, 1, 1),
+    ('stuffing', 'món trộn', 'food', 'item_stuffing', '', 1.0, 0, 226, 1, 1, 1),
+    ('super_meal', 'rau chộn', 'food', 'item_super_meal', '', 1.0, 0, 700, 1, 1, 1),
+    ('pumpkin_soup', 'súp bí ngô', 'food', 'item_pumpkin_soup', '', 1.0, 0, 206, 1, 1, 1),
+    ('autumn_bounty', 'đặc sản mùa thu', 'food', 'item_autumn_bounty', '', 1.0, 0, 300, 1, 1, 1),
+    ('blueberry_tart', 'bánh tart', 'food', 'item_blueberry_tart', '', 1.0, 0, 320, 1, 1, 1),
+    ('spicy_octopus', 'bạch tuộc sốt cay', 'food', 'item_spicy_octopus', '', 1.0, 0, 203, 1, 1, 1),
+    ('tom_yum_soup', 'súp tomyum', 'food', 'item_tom_yum_soup', '', 1.0, 0, 180, 1, 1, 1),
+    ('pepper_poppers', 'phô mai cay', 'food', 'item_pepper_poppers', '', 1.0, 0, 136, 1, 1, 1),
+    ('treat', 'kẹo mút', 'food', 'item_treat', '', 1.0, 0, 312, 1, 1, 1)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    type_code = VALUES(type_code),
+    icon_image_key = VALUES(icon_image_key),
+    description = VALUES(description),
+    render_scale = VALUES(render_scale),
+    render_offset_y = VALUES(render_offset_y),
+    sell_price = VALUES(sell_price),
+    is_sellable = VALUES(is_sellable),
+    is_usable = VALUES(is_usable),
+    is_active = VALUES(is_active);
+
+INSERT INTO food_recipes (
+    result_item_id,
+    result_quantity,
+    cooking_seconds,
+    required_farm_level,
+    is_active
+)
+SELECT
+    result_item.id,
+    src.result_quantity,
+    src.cooking_seconds,
+    src.required_farm_level,
+    src.is_active
+FROM (
+    SELECT 'tortilla' AS result_item_code, 1 AS result_quantity, 240 AS cooking_seconds, 1 AS required_farm_level, 1 AS is_active
+    UNION ALL SELECT 'vinegar', 1, 180, 1, 1
+    UNION ALL SELECT 'mayonnaise', 1, 200, 1, 1
+    UNION ALL SELECT 'baked_fish', 1, 1260, 2, 1
+    UNION ALL SELECT 'strawberry_lover_pie', 1, 1380, 4, 1
+    UNION ALL SELECT 'fish_taco', 1, 420, 3, 1
+    UNION ALL SELECT 'escargot', 1, 1007, 2, 1
+    UNION ALL SELECT 'lobster_bisque', 1, 1320, 1, 1
+    UNION ALL SELECT 'cranberry_candy', 1, 360, 3, 1
+    UNION ALL SELECT 'blackberry_cobbler', 1, 480, 4, 1
+    UNION ALL SELECT 'fruit_salad', 1, 540, 4, 1
+    UNION ALL SELECT 'pumpkin_pie', 1, 600, 3, 1
+    UNION ALL SELECT 'artichoke_dip', 1, 660, 3, 1
+    UNION ALL SELECT 'cranberry_sauce', 1, 330, 3, 1
+    UNION ALL SELECT 'fish_burger', 1, 3000, 4, 1
+    UNION ALL SELECT 'stuffing', 1, 230, 3, 1
+    UNION ALL SELECT 'super_meal', 1, 720, 4, 1
+    UNION ALL SELECT 'pumpkin_soup', 1, 780, 3, 1
+    UNION ALL SELECT 'autumn_bounty', 1, 240, 3, 1
+    UNION ALL SELECT 'blueberry_tart', 1, 1500, 4, 1
+    UNION ALL SELECT 'spicy_octopus', 1, 840, 3, 1
+    UNION ALL SELECT 'tom_yum_soup', 1, 1620, 3, 1
+    UNION ALL SELECT 'pepper_poppers', 1, 960, 3, 1
+    UNION ALL SELECT 'treat', 1, 960, 4, 1
+) src
+JOIN items result_item ON result_item.code = src.result_item_code
+ON DUPLICATE KEY UPDATE
+    result_quantity = VALUES(result_quantity),
+    cooking_seconds = VALUES(cooking_seconds),
+    required_farm_level = VALUES(required_farm_level),
+    is_active = VALUES(is_active);
+
+INSERT INTO food_recipe_ingredients (
+    recipe_id,
+    item_id,
+    quantity
+)
+SELECT
+    food_recipes.id,
+    ingredient_item.id,
+    src.quantity
+FROM (
+    SELECT 'tortilla' AS result_item_code, 'corn' AS ingredient_item_code, 1 AS quantity
+
+    UNION ALL SELECT 'vinegar', 'wheat', 2
+
+    UNION ALL SELECT 'mayonnaise', 'egg', 2
+
+    UNION ALL SELECT 'baked_fish', 'tilapia', 1
+    UNION ALL SELECT 'baked_fish', 'garlic', 1
+
+    UNION ALL SELECT 'strawberry_lover_pie', 'pink_cake', 1
+    UNION ALL SELECT 'strawberry_lover_pie', 'strawberry', 1
+
+    UNION ALL SELECT 'fish_taco', 'red_cabbage', 1
+    UNION ALL SELECT 'fish_taco', 'tortilla', 1
+    UNION ALL SELECT 'fish_taco', 'chub', 1
+    UNION ALL SELECT 'fish_taco', 'mayonnaise', 1
+
+    UNION ALL SELECT 'escargot', 'garlic', 1
+    UNION ALL SELECT 'escargot', 'snail', 1
+
+    UNION ALL SELECT 'lobster_bisque', 'lobster', 1
+    UNION ALL SELECT 'lobster_bisque', 'milk', 2
+
+    UNION ALL SELECT 'cranberry_candy', 'cranberry', 1
+    UNION ALL SELECT 'cranberry_candy', 'sugar', 1
+
+    UNION ALL SELECT 'blackberry_cobbler', 'grape', 2
+    UNION ALL SELECT 'blackberry_cobbler', 'sugar', 1
+    UNION ALL SELECT 'blackberry_cobbler', 'wheat_flour', 1
+
+    UNION ALL SELECT 'fruit_salad', 'grape', 1
+    UNION ALL SELECT 'fruit_salad', 'blueberry', 1
+    UNION ALL SELECT 'fruit_salad', 'melon', 1
+
+    UNION ALL SELECT 'pumpkin_pie', 'pumpkin', 1
+    UNION ALL SELECT 'pumpkin_pie', 'wheat_flour', 1
+    UNION ALL SELECT 'pumpkin_pie', 'sugar', 1
+
+    UNION ALL SELECT 'artichoke_dip', 'artichoke', 1
+    UNION ALL SELECT 'artichoke_dip', 'milk', 1
+
+    UNION ALL SELECT 'cranberry_sauce', 'cranberry', 1
+    UNION ALL SELECT 'cranberry_sauce', 'sugar', 2
+
+    UNION ALL SELECT 'fish_burger', 'bread', 1
+    UNION ALL SELECT 'fish_burger', 'eggplant', 1
+    UNION ALL SELECT 'fish_burger', 'anchovy', 1
+
+    UNION ALL SELECT 'stuffing', 'bread', 1
+    UNION ALL SELECT 'stuffing', 'cranberry', 1
+
+    UNION ALL SELECT 'super_meal', 'bok_choy', 1
+    UNION ALL SELECT 'super_meal', 'cranberry', 1
+    UNION ALL SELECT 'super_meal', 'artichoke', 1
+
+    UNION ALL SELECT 'pumpkin_soup', 'pumpkin', 1
+    UNION ALL SELECT 'pumpkin_soup', 'milk', 1
+
+    UNION ALL SELECT 'autumn_bounty', 'pumpkin', 1
+    UNION ALL SELECT 'autumn_bounty', 'yam', 1
+
+    UNION ALL SELECT 'blueberry_tart', 'blueberry', 1
+    UNION ALL SELECT 'blueberry_tart', 'wheat_flour', 1
+    UNION ALL SELECT 'blueberry_tart', 'sugar', 1
+    UNION ALL SELECT 'blueberry_tart', 'egg', 1
+
+    UNION ALL SELECT 'spicy_octopus', 'octopus', 1
+    UNION ALL SELECT 'spicy_octopus', 'hot_pepper', 1
+
+    UNION ALL SELECT 'tom_yum_soup', 'shrimp', 1
+    UNION ALL SELECT 'tom_yum_soup', 'hot_pepper', 1
+
+    UNION ALL SELECT 'pepper_poppers', 'cheese', 1
+    UNION ALL SELECT 'pepper_poppers', 'hot_pepper', 1
+
+    UNION ALL SELECT 'treat', 'sugar', 1
+    UNION ALL SELECT 'treat', 'strawberry', 1
+    UNION ALL SELECT 'treat', 'milk', 1
+) src
+JOIN items result_item ON result_item.code = src.result_item_code
+JOIN food_recipes ON food_recipes.result_item_id = result_item.id
+JOIN items ingredient_item ON ingredient_item.code = src.ingredient_item_code
+ON DUPLICATE KEY UPDATE
+    quantity = VALUES(quantity);
+
+COMMIT;
