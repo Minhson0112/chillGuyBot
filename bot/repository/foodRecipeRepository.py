@@ -3,6 +3,7 @@ from sqlalchemy.orm import joinedload
 
 from bot.models.foodRecipe import FoodRecipe
 from bot.models.foodRecipeIngredient import FoodRecipeIngredient
+from bot.models.items import Item
 
 
 class FoodRecipeRepository:
@@ -21,6 +22,7 @@ class FoodRecipeRepository:
 
         return (
             self.session.query(FoodRecipe)
+            .join(FoodRecipe.resultItem)
             .options(
                 joinedload(FoodRecipe.resultItem),
                 joinedload(FoodRecipe.ingredients).joinedload(FoodRecipeIngredient.item),
@@ -28,6 +30,7 @@ class FoodRecipeRepository:
             .filter(FoodRecipe.is_active.is_(True))
             .order_by(
                 asc(FoodRecipe.required_farm_level),
+                asc(Item.sell_price),
                 asc(FoodRecipe.id),
             )
             .offset(offset)
