@@ -7,8 +7,8 @@ from bot.repository.farmRepository import FarmRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
 
 class FarmHarvestService:
-    DRY_REDUCTION_SECONDS_PER_QUANTITY = 480
-    PEST_REDUCTION_SECONDS_PER_QUANTITY = 360
+    DRY_REDUCTION_SECONDS_PER_QUANTITY = 900
+    PEST_REDUCTION_SECONDS_PER_QUANTITY = 900
     HARVEST_EXP_PER_CROP = 1
 
     def harvestCrop(self, userId: int):
