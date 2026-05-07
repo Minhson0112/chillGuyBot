@@ -588,7 +588,7 @@ class MyFarmView(discord.ui.View):
         )
 
         embed.add_field(
-            name="--------------------------------------------------------",
+            name="------------------------------------------",
             value="**Trạng thái chuồng gà <:chicken_left:1495565972692537415>**",
             inline=False,
         )
@@ -606,7 +606,7 @@ class MyFarmView(discord.ui.View):
         )
 
         embed.add_field(
-        name="--------------------------------------------------------",
+        name="------------------------------------------",
         value="**Trạng thái chuồng bò <:cow_left:1495566015164317747>**",
         inline=False,
     )
@@ -624,7 +624,7 @@ class MyFarmView(discord.ui.View):
         )
 
         embed.add_field(
-            name="--------------------------------------------------------",
+            name="------------------------------------------",
             value="**Trạng thái nhà bếp 🍳**",
             inline=False,
         )
@@ -648,7 +648,7 @@ class MyFarmView(discord.ui.View):
         )
 
         embed.add_field(
-            name="--------------------------------------------------------",
+            name="------------------------------------------",
             value="**Sự kiện tàu hỏa 🚂**",
             inline=False,
         )
