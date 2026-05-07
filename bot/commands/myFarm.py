@@ -14,78 +14,16 @@ from bot.services.farm.farmMarketShopRenderService import FarmMarketShopRenderSe
 from bot.services.farm.farmPlotUnlockService import FarmPlotUnlockService
 from bot.services.farm.farmKitchenCollectService import FarmKitchenCollectService
 from bot.services.farm.farmTrainEventQueueService import FarmTrainEventQueueService
+from bot.views.farm.myFarmShopPaginationView import MyFarmShopPaginationView
+from bot.services.farm.farmInventoryRenderService import FarmInventoryRenderService
+from bot.views.farm.mySiloPaginationView import MySiloPaginationView
+from bot.services.farm.farmInventoryRenderService import FarmInventoryRenderService
+from bot.views.farm.myBarnPaginationView import MyBarnPaginationView
+from bot.services.farm.farmShopRenderService import FarmShopRenderService
+from bot.views.farm.farmNpcShopPaginationView import FarmNpcShopPaginationView
+from bot.services.farm.farmRecipeRenderService import FarmRecipeRenderService
+from bot.views.farm.farmRecipePaginationView import FarmRecipePaginationView
 
-
-class MyFarmShopPaginationView(discord.ui.View):
-    def __init__(
-        self,
-        sellerUserId: int,
-        sellerDisplayName: str,
-        currentPage: int,
-        totalPage: int,
-    ):
-        super().__init__(timeout=600)
-
-        self.sellerUserId = sellerUserId
-        self.sellerDisplayName = sellerDisplayName
-        self.currentPage = currentPage
-        self.totalPage = totalPage
-        self.farmMarketShopRenderService = FarmMarketShopRenderService()
-
-        self.updateButtonState()
-
-    def updateButtonState(self):
-        self.previousButton.disabled = self.currentPage <= 1
-        self.nextButton.disabled = self.currentPage >= self.totalPage
-
-    @discord.ui.button(label="Trước", emoji="⬅️", style=discord.ButtonStyle.secondary)
-    async def previousButton(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if self.currentPage > 1:
-            self.currentPage -= 1
-
-        await self.refreshShopMessage(interaction)
-
-    @discord.ui.button(label="Tiếp", emoji="➡️", style=discord.ButtonStyle.secondary)
-    async def nextButton(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if self.currentPage < self.totalPage:
-            self.currentPage += 1
-
-        await self.refreshShopMessage(interaction)
-
-    async def refreshShopMessage(self, interaction: discord.Interaction):
-        renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
-            sellerUserId=self.sellerUserId,
-            memberDisplayName=self.sellerDisplayName,
-            page=self.currentPage,
-        )
-
-        self.currentPage = renderResult["currentPage"]
-        self.totalPage = renderResult["totalPage"]
-        self.updateButtonState()
-
-        file = discord.File(
-            renderResult["buffer"],
-            filename="my_shop.png",
-        )
-
-        embed = self.buildShopEmbed()
-        embed.set_image(url="attachment://my_shop.png")
-
-        await interaction.response.edit_message(
-            embed=embed,
-            attachments=[file],
-            view=self,
-        )
-
-    def buildShopEmbed(self):
-        return discord.Embed(
-            title=f"Shop của {self.sellerDisplayName}",
-            description=(
-                "Dùng `cg buyshop <id>` để mua món hàng trong shop này.\n"
-                f"Trang **{self.currentPage} / {self.totalPage}**"
-            ),
-            color=discord.Color.gold(),
-        )
 
 class MyFarmView(discord.ui.View):
     def __init__(self, bot, authorId: int, memberDisplayName: str):
@@ -107,8 +45,10 @@ class MyFarmView(discord.ui.View):
         self.farmPlotUnlockService = FarmPlotUnlockService()
         self.farmKitchenCollectService = FarmKitchenCollectService()
         self.farmTrainEventQueueService = FarmTrainEventQueueService()
-        
-        
+        self.farmInventoryRenderService = FarmInventoryRenderService()
+        self.farmInventoryRenderService = FarmInventoryRenderService()
+        self.farmShopRenderService = FarmShopRenderService()
+        self.farmRecipeRenderService = FarmRecipeRenderService()
 
     async def interaction_check(self, interaction: discord.Interaction):
         if interaction.user.id != self.authorId:
@@ -120,11 +60,11 @@ class MyFarmView(discord.ui.View):
 
         return True
 
-    @discord.ui.button(label="Làm mới", emoji="🔄", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="Làm mới", emoji="<:reload:1501945504546689095>", style=discord.ButtonStyle.secondary)
     async def refreshButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.refreshFarmMessage(interaction)
 
-    @discord.ui.button(label="Tưới nước", emoji="💧", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Tưới nước", emoji="<:watering:1501945506018885743>", style=discord.ButtonStyle.primary)
     async def waterButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             waterResult = self.farmWaterService.waterCrop(self.authorId)
@@ -148,7 +88,7 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
-    @discord.ui.button(label="Bắt sâu", emoji="🐛", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Bắt sâu", emoji="<:bug:1498089075867914281>", style=discord.ButtonStyle.danger)
     async def removePestButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             pestResult = self.farmPestRemoveService.removePest(self.authorId)
@@ -172,7 +112,7 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
-    @discord.ui.button(label="Thu hoạch", emoji="🌾", style=discord.ButtonStyle.success)
+    @discord.ui.button(label="Thu hoạch", emoji="<:harvest:1501945507277438997>", style=discord.ButtonStyle.success)
     async def harvestButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             harvestResult = self.farmHarvestService.harvestCrop(self.authorId)
@@ -196,7 +136,7 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
-    @discord.ui.button(label="Cho gà ăn", emoji="🐔", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Cho gà ăn", emoji="<:feeding_chicken:1501945509152030860>", style=discord.ButtonStyle.primary)
     async def feedChickenButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             feedResult = self.farmChickenFeedService.feedChicken(self.authorId)
@@ -220,7 +160,7 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
-    @discord.ui.button(label="Cho bò ăn", emoji="🐄", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Cho bò ăn", emoji="<:feed_cow:1501945511241060352>", style=discord.ButtonStyle.primary)
     async def feedCowButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             feedResult = self.farmCowFeedService.feedCow(self.authorId)
@@ -244,7 +184,7 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
     
-    @discord.ui.button(label="Lấy trứng", emoji="🥚", style=discord.ButtonStyle.success)
+    @discord.ui.button(label="Lấy trứng", emoji="<:easteregg:1501945513157853345>", style=discord.ButtonStyle.success)
     async def collectEggButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             collectResult = self.farmChickenEggCollectService.collectEgg(self.authorId)
@@ -268,7 +208,7 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
-    @discord.ui.button(label="Vắt sữa", emoji="🥛", style=discord.ButtonStyle.success)
+    @discord.ui.button(label="Vắt sữa", emoji="<:milking:1501945514651025510>", style=discord.ButtonStyle.success)
     async def collectMilkButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             collectResult = self.farmCowMilkCollectService.collectMilk(self.authorId)
@@ -292,7 +232,7 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
-    @discord.ui.button(label="Câu cá", emoji="🎣", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="Câu cá", emoji="<:fishing:1501945516378816563>", style=discord.ButtonStyle.secondary)
     async def fishingButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             fishingResult = self.farmFishingService.fish(self.authorId)
@@ -315,8 +255,128 @@ class MyFarmView(discord.ui.View):
                 "Đã xảy ra lỗi khi câu cá.",
                 ephemeral=True,
             )
+        
+    @discord.ui.button(label="Xem silo", emoji="<:silo:1501945517880639498>", style=discord.ButtonStyle.secondary)
+    async def viewMySiloButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            renderResult = self.farmInventoryRenderService.renderSiloPageToBuffer(
+                userId=self.authorId,
+                memberDisplayName=self.memberDisplayName,
+                page=1,
+            )
+
+            file = discord.File(
+                renderResult["buffer"],
+                filename="my_silo.png",
+            )
+
+            view = MySiloPaginationView(
+                authorId=self.authorId,
+                memberDisplayName=self.memberDisplayName,
+                currentPage=renderResult["currentPage"],
+                totalPage=renderResult["totalPage"],
+            )
+
+            await interaction.response.send_message(
+                file=file,
+                view=view,
+                ephemeral=True,
+            )
+
+        except FileNotFoundError as e:
+            print(f"Silo asset file not found: {e}")
+            await interaction.response.send_message(
+                "Không tìm thấy ảnh asset để render silo.",
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Render my silo error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi xem silo của bạn.",
+                ephemeral=True,
+            )
+
+    @discord.ui.button(label="Xem barn", emoji="<:barn:1501945519680000041>", style=discord.ButtonStyle.secondary)
+    async def viewMyBarnButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            renderResult = self.farmInventoryRenderService.renderBarnPageToBuffer(
+                userId=self.authorId,
+                memberDisplayName=self.memberDisplayName,
+                page=1,
+            )
+
+            file = discord.File(
+                renderResult["buffer"],
+                filename="my_barn.png",
+            )
+
+            view = MyBarnPaginationView(
+                authorId=self.authorId,
+                memberDisplayName=self.memberDisplayName,
+                currentPage=renderResult["currentPage"],
+                totalPage=renderResult["totalPage"],
+            )
+
+            await interaction.response.send_message(
+                file=file,
+                view=view,
+                ephemeral=True,
+            )
+
+        except FileNotFoundError as e:
+            print(f"Barn asset file not found: {e}")
+            await interaction.response.send_message(
+                "Không tìm thấy ảnh asset để render barn.",
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Render my barn error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi xem barn của bạn.",
+                ephemeral=True,
+            )
+
+    @discord.ui.button(label="Shop NPC", emoji="<:store:1501945501883568331>", style=discord.ButtonStyle.secondary)
+    async def viewNpcShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            renderResult = self.farmShopRenderService.renderShopPageToBuffer(
+                page=1,
+            )
+
+            file = discord.File(
+                renderResult["buffer"],
+                filename="farm_shop.png",
+            )
+
+            view = FarmNpcShopPaginationView(
+                authorId=self.authorId,
+                currentPage=renderResult["currentPage"],
+                totalPage=renderResult["totalPage"],
+            )
+
+            await interaction.response.send_message(
+                file=file,
+                view=view,
+                ephemeral=True,
+            )
+
+        except FileNotFoundError as e:
+            print(f"Farm NPC shop asset file not found: {e}")
+            await interaction.response.send_message(
+                "Không tìm thấy ảnh asset để render shop NPC.",
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Render farm NPC shop error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi xem shop NPC.",
+                ephemeral=True,
+            )
     
-    @discord.ui.button(label="Xem shop của bạn", emoji="🛒", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="Xem shop của bạn", emoji="<:producemarket:1501945503133208737>", style=discord.ButtonStyle.secondary)
     async def viewMyShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
@@ -361,7 +421,46 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
-    @discord.ui.button(label="Nhận đồ ăn", emoji="🍱", style=discord.ButtonStyle.success)
+    @discord.ui.button(label="Công thức cooking", emoji="<:cooking:1501948950377267221>", style=discord.ButtonStyle.secondary)
+    async def viewRecipeButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            renderResult = self.farmRecipeRenderService.renderRecipePageToBuffer(
+                page=1,
+            )
+
+            file = discord.File(
+                renderResult["buffer"],
+                filename="recipes.png",
+            )
+
+            view = FarmRecipePaginationView(
+                authorId=self.authorId,
+                currentPage=renderResult["currentPage"],
+                totalPage=renderResult["totalPage"],
+            )
+
+            await interaction.response.send_message(
+                content=FarmRecipePaginationView.COOK_GUIDE_TEXT,
+                file=file,
+                view=view,
+                ephemeral=True,
+            )
+
+        except FileNotFoundError as e:
+            print(f"Recipe asset file not found: {e}")
+            await interaction.response.send_message(
+                "Không tìm thấy ảnh asset để render công thức nấu ăn.",
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Render recipe error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi xem công thức nấu ăn.",
+                ephemeral=True,
+            )
+
+    @discord.ui.button(label="Nhận đồ ăn", emoji="<:food:1501945500558164128>", style=discord.ButtonStyle.success)
     async def collectFoodButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             collectResult = self.farmKitchenCollectService.collectFood(self.authorId)
@@ -409,7 +508,7 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
-    @discord.ui.button(label="+ Ô đất", emoji="🧱", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="+ Ô đất", emoji="<:farmland_wet:1501946998105047241>", style=discord.ButtonStyle.secondary)
     async def unlockPlotButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
             unlockResult = self.farmPlotUnlockService.unlockPlot(self.authorId)

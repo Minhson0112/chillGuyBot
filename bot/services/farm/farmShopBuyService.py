@@ -116,7 +116,7 @@ class FarmShopBuyService:
 
             member.chill_coin -= totalPrice
 
-            userInventoryRepository.addOrCreate(
+            userInventory = userInventoryRepository.addOrCreate(
                 userId=userId,
                 itemId=shopItem.item_id,
                 quantity=quantity,
@@ -129,6 +129,7 @@ class FarmShopBuyService:
                 "message": (
                     f"Bạn đã mua **{quantity}** {itemText} với "
                     f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}."
+                     f"ID kho: **{userInventory.id}**"
                 ),
             }
 

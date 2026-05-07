@@ -2,60 +2,7 @@ import discord
 from discord.ext import commands
 
 from bot.services.farm.farmShopRenderService import FarmShopRenderService
-
-
-class FarmShopPaginationView(discord.ui.View):
-    def __init__(self, authorId: int, currentPage: int, totalPage: int):
-        super().__init__(timeout=180)
-
-        self.authorId = authorId
-        self.currentPage = currentPage
-        self.totalPage = totalPage
-        self.farmShopRenderService = FarmShopRenderService()
-
-        self.updateButtonState()
-
-    def updateButtonState(self):
-        self.previousButton.disabled = self.currentPage <= 1
-        self.nextButton.disabled = self.currentPage >= self.totalPage
-
-    async def updateShopMessage(self, interaction: discord.Interaction):
-        renderResult = self.farmShopRenderService.renderShopPageToBuffer(self.currentPage)
-
-        self.currentPage = renderResult["currentPage"]
-        self.totalPage = renderResult["totalPage"]
-
-        self.updateButtonState()
-
-        file = discord.File(
-            renderResult["buffer"],
-            filename="farm_shop.png",
-        )
-
-        await interaction.response.edit_message(
-            attachments=[file],
-            view=self,
-        )
-
-    async def interaction_check(self, interaction: discord.Interaction):
-        if interaction.user.id != self.authorId:
-            await interaction.response.send_message(
-                "Bạn không thể điều khiển shop của người khác.",
-                ephemeral=True,
-            )
-            return False
-
-        return True
-
-    @discord.ui.button(label="Trước", style=discord.ButtonStyle.secondary)
-    async def previousButton(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.currentPage -= 1
-        await self.updateShopMessage(interaction)
-
-    @discord.ui.button(label="Tiếp", style=discord.ButtonStyle.secondary)
-    async def nextButton(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.currentPage += 1
-        await self.updateShopMessage(interaction)
+from bot.views.farm.farmNpcShopPaginationView import FarmNpcShopPaginationView
 
 
 class ShopFarmCommand(commands.Cog):
@@ -73,7 +20,7 @@ class ShopFarmCommand(commands.Cog):
                 filename="farm_shop.png",
             )
 
-            view = FarmShopPaginationView(
+            view = FarmNpcShopPaginationView(
                 authorId=ctx.author.id,
                 currentPage=renderResult["currentPage"],
                 totalPage=renderResult["totalPage"],
