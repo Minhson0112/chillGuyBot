@@ -24,7 +24,7 @@ intents.message_content = True
 intents.guilds = True
 intents.voice_states = True
 
-bot = commands.Bot(command_prefix=["cg ", "Cg"], intents=intents, help_command=None)
+bot = commands.Bot(command_prefix=["cg ", "Cg "], intents=intents, help_command=None)
 
 
 @tasks.loop(minutes=10)
