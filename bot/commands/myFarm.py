@@ -473,7 +473,6 @@ class MyFarmView(discord.ui.View):
             )
 
             await interaction.response.send_message(
-                content=FarmRecipePaginationView.COOK_GUIDE_TEXT,
                 file=file,
                 view=view,
                 ephemeral=True,
@@ -569,14 +568,14 @@ class MyFarmView(discord.ui.View):
         with getDbSession() as session:
             userInventoryRepository = UserInventoryRepository(session)
 
-            seedInventories = userInventoryRepository.findSeedItemsByUserId(
+            seedRows = userInventoryRepository.findSeedItemsByUserId(
                 userId=self.authorId,
                 limit=25,
             )
 
             seedOptions = []
 
-            for seedInventory in seedInventories:
+            for seedInventory, totalGrowthSeconds in seedRows:
                 item = seedInventory.item
 
                 if item is None:
@@ -587,9 +586,19 @@ class MyFarmView(discord.ui.View):
                     "itemName": item.name,
                     "iconImageKey": item.icon_image_key,
                     "quantity": seedInventory.quantity,
+                    "growthTimeText": self.formatGrowthTime(totalGrowthSeconds),
                 })
 
             return seedOptions
+        
+    def formatGrowthTime(self, totalGrowthSeconds: int):
+        if totalGrowthSeconds is None:
+            return "-"
+
+        minutes = totalGrowthSeconds // 60
+        seconds = totalGrowthSeconds % 60
+
+        return f"{minutes}:{seconds:02d}"
 
     async def refreshFarmMessage(
         self,

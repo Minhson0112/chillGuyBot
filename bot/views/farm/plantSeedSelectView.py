@@ -15,7 +15,10 @@ class PlantSeedSelect(discord.ui.Select):
                 discord.SelectOption(
                     label=seedOption["itemName"][:100],
                     value=str(seedOption["userInventoryId"]),
-                    description=f"SL: {seedOption['quantity']}"[:100],
+                    description=(
+                        f"SL: {seedOption['quantity']} "
+                        f"⏱️{seedOption['growthTimeText']}"
+                    )[:100],
                     emoji=itemEmoji,
                 )
             )

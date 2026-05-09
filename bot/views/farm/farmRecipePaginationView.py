@@ -39,7 +39,7 @@ class FarmRecipePaginationView(discord.ui.View):
 
         return True
 
-    @discord.ui.button(label="Làm mới", emoji="🔄", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Hướng dẫn", emoji="📖", style=discord.ButtonStyle.primary)
     async def refreshButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.refreshRecipeMessage(interaction)
 

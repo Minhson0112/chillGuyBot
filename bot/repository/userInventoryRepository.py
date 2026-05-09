@@ -2,8 +2,7 @@ from sqlalchemy import asc
 from sqlalchemy.orm import joinedload
 from bot.models.items import Item
 from bot.models.userInventory import UserInventory
-
-from bot.models.userInventory import UserInventory
+from bot.models.crop import Crop
 
 
 class UserInventoryRepository:
@@ -152,8 +151,12 @@ class UserInventoryRepository:
         limit: int = 25,
     ):
         return (
-            self.session.query(UserInventory)
+            self.session.query(
+                UserInventory,
+                Crop.total_growth_seconds.label("total_growth_seconds"),
+            )
             .join(UserInventory.item)
+            .join(Crop, Crop.seed_item_id == Item.id)
             .options(joinedload(UserInventory.item))
             .filter(UserInventory.user_id == userId)
             .filter(UserInventory.quantity > 0)
