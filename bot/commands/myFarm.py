@@ -23,6 +23,9 @@ from bot.services.farm.farmShopRenderService import FarmShopRenderService
 from bot.views.farm.farmNpcShopPaginationView import FarmNpcShopPaginationView
 from bot.services.farm.farmRecipeRenderService import FarmRecipeRenderService
 from bot.views.farm.farmRecipePaginationView import FarmRecipePaginationView
+from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.views.farm.plantSeedSelectView import PlantSeedSelectView
+from bot.config.database import getDbSession
 
 
 class MyFarmView(discord.ui.View):
@@ -63,6 +66,36 @@ class MyFarmView(discord.ui.View):
     @discord.ui.button(label="Làm mới", emoji="<:reload:1501945504546689095>", style=discord.ButtonStyle.secondary)
     async def refreshButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.refreshFarmMessage(interaction)
+
+    @discord.ui.button(label="Trồng cây", emoji="🌱", style=discord.ButtonStyle.success)
+    async def plantCropButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            seedOptions = self.findSeedOptions()
+
+            if not seedOptions:
+                await interaction.response.send_message(
+                    "Bạn không có hạt giống nào trong silo.",
+                    ephemeral=True,
+                )
+                return
+
+            view = PlantSeedSelectView(
+                authorId=self.authorId,
+                seedOptions=seedOptions,
+            )
+
+            await interaction.response.send_message(
+                content="Chọn hạt giống muốn trồng:",
+                view=view,
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Open plant seed select error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi mở danh sách hạt giống.",
+                ephemeral=True,
+            )
 
     @discord.ui.button(label="Tưới nước", emoji="<:watering:1501945506018885743>", style=discord.ButtonStyle.primary)
     async def waterButton(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -532,6 +565,32 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
+    def findSeedOptions(self):
+        with getDbSession() as session:
+            userInventoryRepository = UserInventoryRepository(session)
+
+            seedInventories = userInventoryRepository.findSeedItemsByUserId(
+                userId=self.authorId,
+                limit=25,
+            )
+
+            seedOptions = []
+
+            for seedInventory in seedInventories:
+                item = seedInventory.item
+
+                if item is None:
+                    continue
+
+                seedOptions.append({
+                    "userInventoryId": seedInventory.id,
+                    "itemName": item.name,
+                    "iconImageKey": item.icon_image_key,
+                    "quantity": seedInventory.quantity,
+                })
+
+            return seedOptions
+
     async def refreshFarmMessage(
         self,
         interaction: discord.Interaction,
@@ -544,10 +603,7 @@ class MyFarmView(discord.ui.View):
             filename="my_farm.png",
         )
 
-        embed = self.buildFarmEmbed(renderResult["embedData"])
-
-        if extraMessage is not None:
-            embed.description = extraMessage
+        embed = self.buildFarmEmbed(renderResult["embedData"], extraMessage)
 
         embed.set_image(url="attachment://my_farm.png")
 
@@ -557,7 +613,7 @@ class MyFarmView(discord.ui.View):
             view=self,
         )
 
-    def buildFarmEmbed(self, embedData):
+    def buildFarmEmbed(self, embedData, extraMessage: str = None):
         embed = discord.Embed(
             title=f"Farm của {self.memberDisplayName}",
             color=discord.Color.green(),
@@ -658,6 +714,13 @@ class MyFarmView(discord.ui.View):
             value=embedData["trainEventText"],
             inline=False,
         )
+
+        if extraMessage is not None:
+            embed.add_field(
+                name="------------------------------------------",
+                value=extraMessage,
+                inline=False,
+            )
 
         return embed
 

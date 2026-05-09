@@ -145,3 +145,22 @@ class UserInventoryRepository:
             .filter(UserInventory.id == userInventoryId)
             .first()
         )
+    
+    def findSeedItemsByUserId(
+        self,
+        userId: int,
+        limit: int = 25,
+    ):
+        return (
+            self.session.query(UserInventory)
+            .join(UserInventory.item)
+            .options(joinedload(UserInventory.item))
+            .filter(UserInventory.user_id == userId)
+            .filter(UserInventory.quantity > 0)
+            .filter(Item.type_code == "seed")
+            .order_by(
+                asc(UserInventory.id),
+            )
+            .limit(limit)
+            .all()
+        )
