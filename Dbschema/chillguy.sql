@@ -1240,8 +1240,8 @@ CREATE TABLE owo_exchange_coin_histories (
     message_id BIGINT NOT NULL COMMENT 'owo bot message id',
     channel_id BIGINT NOT NULL COMMENT 'discord channel id',
 
-    sender_user_id BIGINT NOT NULL COMMENT 'discord user id who sent cowoncy',
-    receiver_user_id BIGINT NOT NULL COMMENT 'discord user id who received cowoncy',
+    sender_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id who sent cowoncy',
+    receiver_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id who received cowoncy',
 
     cowoncy_amount BIGINT NOT NULL COMMENT 'transferred cowoncy amount',
 

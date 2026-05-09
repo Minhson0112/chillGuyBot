@@ -20,3 +20,4 @@ from bot.models.foodRecipeIngredient import FoodRecipeIngredient
 from bot.models.giftcode import Giftcode
 from bot.models.giftcodeReward import GiftcodeReward
 from bot.models.giftcodeClaimHistory import GiftcodeClaimHistory
+from bot.models.owoExchangeCoinHistory import OwoExchangeCoinHistory
