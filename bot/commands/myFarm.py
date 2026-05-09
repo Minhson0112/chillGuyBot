@@ -74,7 +74,7 @@ class MyFarmView(discord.ui.View):
 
             if not seedOptions:
                 await interaction.response.send_message(
-                    "Bạn không có hạt giống nào trong silo.",
+                    "Bạn không có hạt giống nào trong silo. hãy bấm nút **<:store:1501945501883568331> Shop NPC** để mua hạt giống.",
                     ephemeral=True,
                 )
                 return
@@ -85,7 +85,7 @@ class MyFarmView(discord.ui.View):
             )
 
             await interaction.response.send_message(
-                content="Chọn hạt giống muốn trồng:",
+                content="Các hạt giống 🌱 bên dưới là các hạt giống trong silo của bạn.<:silo:1501945517880639498>",
                 view=view,
                 ephemeral=True,
             )

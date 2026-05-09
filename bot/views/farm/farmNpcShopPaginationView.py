@@ -4,6 +4,11 @@ from bot.services.farm.farmShopRenderService import FarmShopRenderService
 
 
 class FarmNpcShopPaginationView(discord.ui.View):
+    GUIDE_TEXT = (
+        "Để mua đồ hãy dùng lệnh:\n"
+        "`cg buy {id đồ} {số lượng muốn mua}`\n"
+        "Nếu không nhập số lượng thì mặc định là **1**."
+    )
     def __init__(
         self,
         authorId: int,
@@ -39,6 +44,7 @@ class FarmNpcShopPaginationView(discord.ui.View):
         )
 
         await interaction.response.edit_message(
+            content=self.GUIDE_TEXT,
             attachments=[file],
             view=self,
         )

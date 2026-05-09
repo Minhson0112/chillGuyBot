@@ -4,6 +4,11 @@ from bot.services.farm.farmInventoryRenderService import FarmInventoryRenderServ
 
 
 class MySiloPaginationView(discord.ui.View):
+    GUIDE_TEXT = (
+        "Để bán đồ hãy dùng lệnh:\n"
+        "`cg sell {id món đồ} {số lượng muốn bán}`\n"
+        "Nếu không nhập số lượng thì mặc định là **1**."
+    )
     def __init__(
         self,
         authorId: int,
@@ -43,6 +48,7 @@ class MySiloPaginationView(discord.ui.View):
         )
 
         await interaction.response.edit_message(
+            content=self.GUIDE_TEXT,
             attachments=[file],
             view=self,
         )
