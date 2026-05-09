@@ -17,7 +17,7 @@ class FarmChickenCoopRepository:
         farmChickenCoop = FarmChickenCoop(
             farm_id=farmId,
             chicken_count=0,
-            render_scale=1.0,
+            render_scale=2.0,
         )
 
         self.session.add(farmChickenCoop)

@@ -1119,3 +1119,152 @@ CREATE TABLE giftcode_rewards (
     CONSTRAINT chk_giftcode_rewards_quantity
         CHECK (quantity > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='giftcode item rewards';
+
+# dụng cụ
+
+CREATE TABLE tool_templates (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'tool template id',
+
+    item_id BIGINT NOT NULL COMMENT 'tool item id',
+
+    tool_type VARCHAR(50) NOT NULL COMMENT 'tool type: watering_can, sickle, fishing_rod',
+    tool_level INT NOT NULL DEFAULT 1 COMMENT 'tool level',
+
+    max_durability INT NOT NULL COMMENT 'maximum durability',
+    durability_cost_per_use INT NOT NULL DEFAULT 1 COMMENT 'durability cost per use',
+
+    water_efficiency INT NOT NULL DEFAULT 0 COMMENT 'watering effect value',
+    harvest_bonus_percent INT NOT NULL DEFAULT 0 COMMENT 'harvest bonus percent',
+    fishing_break_rate_reduction_percent INT NOT NULL DEFAULT 0 COMMENT 'fishing line break rate reduction percent',
+    fishing_weight_bonus_percent INT NOT NULL DEFAULT 0 COMMENT 'fishing weight bonus percent',
+    fishing_cooldown_reduction_seconds INT NOT NULL DEFAULT 0 COMMENT 'fishing cooldown reduction seconds',
+
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'whether tool template is active',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_tool_templates_item_id (item_id),
+    KEY idx_tool_templates_tool_type (tool_type),
+    KEY idx_tool_templates_tool_level (tool_level),
+    KEY idx_tool_templates_is_active (is_active),
+
+    CONSTRAINT fk_tool_templates_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_tool_templates_tool_level
+        CHECK (tool_level >= 1),
+
+    CONSTRAINT chk_tool_templates_max_durability
+        CHECK (max_durability > 0),
+
+    CONSTRAINT chk_tool_templates_durability_cost_per_use
+        CHECK (durability_cost_per_use > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='tool template master';
+
+
+CREATE TABLE user_tools (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'user tool id',
+
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    item_id BIGINT NOT NULL COMMENT 'tool item id',
+    tool_template_id BIGINT NOT NULL COMMENT 'tool template id',
+
+    current_durability INT NOT NULL COMMENT 'current durability',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'available' COMMENT 'tool status: available, equipped, broken',
+
+    acquired_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'acquired at',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_user_tools_user_id (user_id),
+    KEY idx_user_tools_item_id (item_id),
+    KEY idx_user_tools_tool_template_id (tool_template_id),
+    KEY idx_user_tools_status (status),
+
+    CONSTRAINT fk_user_tools_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_user_tools_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_user_tools_tool_template_id
+        FOREIGN KEY (tool_template_id) REFERENCES tool_templates(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_user_tools_current_durability
+        CHECK (current_durability >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='owned tools of user';
+
+
+CREATE TABLE farm_tool_equipment (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm tool equipment id',
+
+    farm_id BIGINT NOT NULL COMMENT 'farm id',
+    tool_type VARCHAR(50) NOT NULL COMMENT 'tool type: watering_can, sickle, fishing_rod',
+    user_tool_id BIGINT NOT NULL COMMENT 'equipped user tool id',
+
+    equipped_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'equipped at',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_farm_tool_equipment_farm_type (farm_id, tool_type),
+    UNIQUE KEY uq_farm_tool_equipment_user_tool_id (user_tool_id),
+
+    KEY idx_farm_tool_equipment_farm_id (farm_id),
+    KEY idx_farm_tool_equipment_tool_type (tool_type),
+
+    CONSTRAINT fk_farm_tool_equipment_farm_id
+        FOREIGN KEY (farm_id) REFERENCES farm(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_tool_equipment_user_tool_id
+        FOREIGN KEY (user_tool_id) REFERENCES user_tools(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='equipped tools of farm';
+
+# doi tien
+CREATE TABLE owo_exchange_coin_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'owo exchange coin history id',
+
+    message_id BIGINT NOT NULL COMMENT 'owo bot message id',
+    channel_id BIGINT NOT NULL COMMENT 'discord channel id',
+
+    sender_user_id BIGINT NOT NULL COMMENT 'discord user id who sent cowoncy',
+    receiver_user_id BIGINT NOT NULL COMMENT 'discord user id who received cowoncy',
+
+    cowoncy_amount BIGINT NOT NULL COMMENT 'transferred cowoncy amount',
+
+    transferred_at DATETIME NOT NULL COMMENT 'transferred datetime in GMT+7',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_owo_exchange_coin_histories_message_id (message_id),
+
+    KEY idx_owo_exchange_coin_histories_channel_id (channel_id),
+    KEY idx_owo_exchange_coin_histories_sender_user_id (sender_user_id),
+    KEY idx_owo_exchange_coin_histories_receiver_user_id (receiver_user_id),
+    KEY idx_owo_exchange_coin_histories_transferred_at (transferred_at),
+
+    CONSTRAINT fk_owo_exchange_coin_histories_sender_user_id
+        FOREIGN KEY (sender_user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_owo_exchange_coin_histories_receiver_user_id
+        FOREIGN KEY (receiver_user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_owo_exchange_coin_histories_cowoncy_amount
+        CHECK (cowoncy_amount > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='owo exchange coin histories';

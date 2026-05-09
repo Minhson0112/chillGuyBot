@@ -17,7 +17,7 @@ class FarmCowShedRepository:
         farmCowShed = FarmCowShed(
             farm_id=farmId,
             cow_count=0,
-            render_scale=1.0,
+            render_scale=2.0,
         )
 
         self.session.add(farmCowShed)
