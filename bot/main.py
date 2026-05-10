@@ -158,6 +158,7 @@ async def main():
         "bot.commands.giftcode",
         "bot.commands.createFarm",
         "bot.commands.sellRole",
+        "bot.commands.createRoleShop",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
