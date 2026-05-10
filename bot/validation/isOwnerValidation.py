@@ -6,9 +6,8 @@ from bot.config.userId import OWNER_ID
 
 def isOwner():
     async def predicate(interaction: discord.Interaction) -> bool:
-        member = interaction.user
-        if member != OWNER_ID:
+        if interaction.user.id != OWNER_ID:
             raise app_commands.CheckFailure("bạn không có quyền dùng lệnh này.")
-        return True
 
+        return True
     return app_commands.check(predicate)
