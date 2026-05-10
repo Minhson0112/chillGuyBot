@@ -1268,3 +1268,53 @@ CREATE TABLE owo_exchange_coin_histories (
     CONSTRAINT chk_owo_exchange_coin_histories_cowoncy_amount
         CHECK (cowoncy_amount > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='owo exchange coin histories';
+
+
+CREATE TABLE role_shop (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    role_id BIGINT NOT NULL,
+
+    price_cowoncy BIGINT NULL,
+    price_chill_coin BIGINT NULL,
+
+    valid_days INT NOT NULL DEFAULT 30,
+
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    sort_order INT NOT NULL DEFAULT 0,
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_role_shop_guild_role (guild_id, role_id)
+);
+
+CREATE TABLE member_role_purchase (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id BIGINT UNSIGNED NOT NULL,
+    role_shop_id BIGINT NOT NULL,
+
+    status VARCHAR(50) NOT NULL,
+
+    payment_type VARCHAR(50) NULL,
+    payment_amount BIGINT NULL,
+
+    registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    paid_at DATETIME NULL,
+    expired_at DATETIME NULL,
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_member_role_purchase_user
+        FOREIGN KEY (user_id)
+        REFERENCES member(user_id),
+
+    CONSTRAINT fk_member_role_purchase_role_shop
+        FOREIGN KEY (role_shop_id)
+        REFERENCES role_shop(id),
+
+    UNIQUE KEY uq_member_role_purchase_user_role (user_id, role_shop_id)
+);
+

@@ -21,3 +21,5 @@ from bot.models.giftcode import Giftcode
 from bot.models.giftcodeReward import GiftcodeReward
 from bot.models.giftcodeClaimHistory import GiftcodeClaimHistory
 from bot.models.owoExchangeCoinHistory import OwoExchangeCoinHistory
+from bot.models.roleShop import RoleShop
+from bot.models.memberRolePurchase import MemberRolePurchase
