@@ -1286,7 +1286,7 @@ CREATE TABLE role_shop (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    UNIQUE KEY uq_role_shop_guild_role (guild_id, role_id)
+    UNIQUE KEY uq_role_shop_role (role_id)
 );
 
 CREATE TABLE member_role_purchase (
@@ -1317,4 +1317,3 @@ CREATE TABLE member_role_purchase (
 
     UNIQUE KEY uq_member_role_purchase_user_role (user_id, role_shop_id)
 );
-
