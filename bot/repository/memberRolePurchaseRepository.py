@@ -49,3 +49,10 @@ class MemberRolePurchaseRepository:
             )
             .first()
         )
+
+    def findById(self, memberRolePurchaseId: int):
+        return (
+            self.session.query(MemberRolePurchase)
+            .filter(MemberRolePurchase.id == memberRolePurchaseId)
+            .first()
+        )
