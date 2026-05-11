@@ -38,7 +38,7 @@ class RoleShopPurchaseService:
                     "message": "Role này hiện không được bán trong shop.",
                 }
 
-            pendingPurchase = memberRolePurchaseRepository.findPendingPurchasesByUserId(userId)
+            pendingPurchase = memberRolePurchaseRepository.findPendingPurchaseByUserId(userId)
 
             if pendingPurchase is not None:
                 pendingRoleId = None

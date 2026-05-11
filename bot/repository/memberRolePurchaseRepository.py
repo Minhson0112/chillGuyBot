@@ -38,3 +38,14 @@ class MemberRolePurchaseRepository:
             )
             .all()
         )
+
+    def findPendingPurchaseByUserId(self, userId: int):
+        return (
+            self.session.query(MemberRolePurchase)
+            .join(RoleShop, RoleShop.id == MemberRolePurchase.role_shop_id)
+            .filter(
+                MemberRolePurchase.user_id == userId,
+                MemberRolePurchase.status == RolePurchaseStatus.PENDING_PAYMENT.value,
+            )
+            .first()
+        )
