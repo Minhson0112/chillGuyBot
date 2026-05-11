@@ -38,18 +38,33 @@ class RoleShopPurchaseService:
                     "message": "Role này hiện không được bán trong shop.",
                 }
 
+            pendingPurchase = memberRolePurchaseRepository.findPendingPurchasesByUserId(userId)
+
+            if pendingPurchase is not None:
+                pendingRoleId = None
+
+                if pendingPurchase.role_shop is not None:
+                    pendingRoleId = pendingPurchase.role_shop.role_id
+
+                if pendingPurchase.role_shop_id == roleShop.id:
+                    return {
+                        "success": False,
+                        "message": "Bạn đã đăng kí mua role này rồi. Vui lòng thanh toán hoặc dùng `cg cancelbuyrole` để hủy giao dịch.",
+                        "pendingRoleId": pendingRoleId,
+                    }
+
+                return {
+                    "success": False,
+                    "message": "Bạn đang có giao dịch mua role khác đang chờ thanh toán. Hãy thanh toán role đó trước rồi hãy mua thêm role mới.",
+                    "pendingRoleId": pendingRoleId,
+                }
+
             memberRolePurchase = memberRolePurchaseRepository.findByUserIdAndRoleShopId(
                 userId=userId,
                 roleShopId=roleShop.id,
             )
 
             if memberRolePurchase is not None:
-                if memberRolePurchase.status == RolePurchaseStatus.PENDING_PAYMENT.value:
-                    return {
-                        "success": False,
-                        "message": "Bạn đã đăng kí mua role này rồi. Vui lòng thanh toán hoặc dùng `cg cancelbuyrole` để hủy giao dịch.",
-                    }
-
                 if memberRolePurchase.status == RolePurchaseStatus.PAID.value:
                     if memberRolePurchase.expired_at is None or memberRolePurchase.expired_at > now:
                         return {

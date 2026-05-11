@@ -1,5 +1,6 @@
 from bot.models.memberRolePurchase import MemberRolePurchase
 from bot.enums.rolePurchaseStatus import RolePurchaseStatus
+from bot.models.roleShop import RoleShop
 
 
 class MemberRolePurchaseRepository:
@@ -26,3 +27,14 @@ class MemberRolePurchaseRepository:
 
         self.session.add(memberRolePurchase)
         return memberRolePurchase
+
+    def findPendingPurchasesByUserId(self, userId: int):
+        return (
+            self.session.query(MemberRolePurchase)
+            .join(RoleShop, RoleShop.id == MemberRolePurchase.role_shop_id)
+            .filter(
+                MemberRolePurchase.user_id == userId,
+                MemberRolePurchase.status == RolePurchaseStatus.PENDING_PAYMENT.value,
+            )
+            .all()
+        )

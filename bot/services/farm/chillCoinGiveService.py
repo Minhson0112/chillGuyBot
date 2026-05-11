@@ -15,6 +15,9 @@ class ChillCoinGiveService:
         fromUserId: int,
         toUserId: int,
         amount: int,
+        transactionType: str = TRANSACTION_TYPE,
+        note: str = "User transfer chill coin",
+        skipDailyReceiveLimit: bool = False,
     ):
         if amount is None or amount <= 0:
             return {
@@ -60,33 +63,34 @@ class ChillCoinGiveService:
                     ),
                 }
 
-            startAt, endAt = self.getTodayRange()
-            receivedTodayAmount = chillCoinTransactionRepository.sumReceivedAmountByUserIdBetween(
-                userId=toUserId,
-                startAt=startAt,
-                endAt=endAt,
-                transactionType=self.TRANSACTION_TYPE,
-            )
+            if not skipDailyReceiveLimit:
+                startAt, endAt = self.getTodayRange()
+                receivedTodayAmount = chillCoinTransactionRepository.sumReceivedAmountByUserIdBetween(
+                    userId=toUserId,
+                    startAt=startAt,
+                    endAt=endAt,
+                    transactionType=self.TRANSACTION_TYPE,
+                )
 
-            remainingReceivableAmount = self.DAILY_RECEIVE_LIMIT - receivedTodayAmount
+                remainingReceivableAmount = self.DAILY_RECEIVE_LIMIT - receivedTodayAmount
 
-            if remainingReceivableAmount <= 0:
-                return {
-                    "success": False,
-                    "message": (
-                        f"Hôm nay người này đã nhận đủ giới hạn "
-                        f"**{self.formatNumber(self.DAILY_RECEIVE_LIMIT)}** {chillCoinEmoji} rồi."
-                    ),
-                }
+                if remainingReceivableAmount <= 0:
+                    return {
+                        "success": False,
+                        "message": (
+                            f"Hôm nay người này đã nhận đủ giới hạn "
+                            f"**{self.formatNumber(self.DAILY_RECEIVE_LIMIT)}** {chillCoinEmoji} rồi."
+                        ),
+                    }
 
-            if amount > remainingReceivableAmount:
-                return {
-                    "success": False,
-                    "message": (
-                        f"Hôm nay người này chỉ nhận thêm được "
-                        f"**{self.formatNumber(remainingReceivableAmount)}** {chillCoinEmoji} nữa thôi."
-                    ),
-                }
+                if amount > remainingReceivableAmount:
+                    return {
+                        "success": False,
+                        "message": (
+                            f"Hôm nay người này chỉ nhận thêm được "
+                            f"**{self.formatNumber(remainingReceivableAmount)}** {chillCoinEmoji} nữa thôi."
+                        ),
+                    }
 
             fromMember.chill_coin -= amount
             toMember.chill_coin += amount
@@ -95,8 +99,8 @@ class ChillCoinGiveService:
                 fromUserId=fromUserId,
                 toUserId=toUserId,
                 amount=amount,
-                transactionType=self.TRANSACTION_TYPE,
-                note="User transfer chill coin",
+                transactionType=transactionType,
+                note=note,
             )
 
             session.commit()
@@ -104,7 +108,7 @@ class ChillCoinGiveService:
             return {
                 "success": True,
                 "message": (
-                    f"Bạn đã chuyển **{self.formatNumber(amount)}** {chillCoinEmoji}"
+                    f"Bạn đã chuyển **{self.formatNumber(amount)}** {chillCoinEmoji} "
                     f"cho **{self.getMemberDisplayName(toMember)}**."
                 ),
             }

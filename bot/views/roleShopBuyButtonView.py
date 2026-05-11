@@ -15,12 +15,13 @@ class RoleShopBuyButtonView(discord.ui.View):
     @discord.ui.button(
         label="Mua role",
         style=discord.ButtonStyle.primary,
+        emoji="<a:CS_kimcuong:1460648386628944106>",
         custom_id=ROLE_SHOP_BUY_BUTTON_CUSTOM_ID,
     )
     async def buyRoleButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.guild is None:
             await interaction.response.send_message(
-                f"Lệnh mua role chỉ dùng được trong server.",
+                "Lệnh mua role chỉ dùng được trong server.",
                 ephemeral=True,
             )
             return
@@ -46,7 +47,7 @@ class RoleShopBuyButtonView(discord.ui.View):
 
         if len(options) == 0:
             await interaction.response.send_message(
-                f"Hiện tại chưa có role nào đang được bán.",
+                "Hiện tại chưa có role nào đang được bán.",
                 ephemeral=True,
             )
             return
@@ -54,7 +55,7 @@ class RoleShopBuyButtonView(discord.ui.View):
         options = options[:25]
 
         await interaction.response.send_message(
-            f"Vui lòng chọn role bạn muốn mua.",
+            "Vui lòng chọn role bạn muốn mua.",
             view=RoleShopSelectView(options),
             ephemeral=True,
         )
@@ -90,7 +91,7 @@ class RoleShopSelect(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction):
         if interaction.guild is None:
             await interaction.response.send_message(
-                f"Lệnh mua role chỉ dùng được trong server.",
+                "Lệnh mua role chỉ dùng được trong server.",
                 ephemeral=True,
             )
             return
@@ -100,7 +101,7 @@ class RoleShopSelect(discord.ui.Select):
 
         if role is None:
             await interaction.response.send_message(
-                f"Role này không còn tồn tại trong server.",
+                "Role này không còn tồn tại trong server.",
                 ephemeral=True,
             )
             return
@@ -112,8 +113,21 @@ class RoleShopSelect(discord.ui.Select):
         )
 
         if not result["success"]:
+            pendingRoleId = result.get("pendingRoleId")
+
+            if pendingRoleId is not None:
+                pendingRole = interaction.guild.get_role(pendingRoleId)
+
+                if pendingRole is not None:
+                    await interaction.response.send_message(
+                        f"{result['message']}\n"
+                        f"Role đang chờ thanh toán: {pendingRole.mention}",
+                        ephemeral=True,
+                    )
+                    return
+
             await interaction.response.send_message(
-                f"{result['message']}",
+                result["message"],
                 ephemeral=True,
             )
             return
@@ -133,7 +147,7 @@ class RoleShopSelect(discord.ui.Select):
         prices = []
 
         if result["priceCowoncy"] is not None and result["priceCowoncy"] > 0:
-            prices.append(f"**{result['priceCowoncy']:,}** <:OwO:1503021935724859473> owo hoặc")
+            prices.append(f"**{result['priceCowoncy']:,}** <:OwO:1503021935724859473> owo")
 
         if result["priceChillCoin"] is not None and result["priceChillCoin"] > 0:
             prices.append(f"**{result['priceChillCoin']:,}** <:cs_coin:1495116560191324383> chill coin")
