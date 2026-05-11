@@ -170,7 +170,7 @@ class RoleShopSelect(discord.ui.Select):
 
         await interaction.followup.send(
             f"Bạn đã đăng kí mua role {role.mention} thành công.\n"
-            f"Để hoàn tất giao dịch, bạn hãy chuyển phí giao dịch cho chúng tôi ở kênh:\n"
+            f"Để hoàn tất giao dịch, bạn hãy chuyển phí giao dịch cho <@995730123166851102> ở kênh:\n"
             f"{ROLE_SHOP_PAYMENT_CHANNEL_URL}\n\n"
             f"Số tiền cần chuyển: {priceText}\n\n"
             f"Để hủy giao dịch hãy dùng lệnh `cg cancelbuyrole`",
