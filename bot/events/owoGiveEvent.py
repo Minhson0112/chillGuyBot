@@ -6,9 +6,9 @@ from discord.ext import commands
 from bot.config.channel import DONATE_CHANNEL_ID, EXCHANGE_COIN_CHANNEL_ID, PAYMENT_CHANNEL_ID
 from bot.config.emoji import LOGO
 from bot.config.userId import OWNER_ID, OWO_BOT_ID, TREASURER_MEMBER_ID_LIST
+from bot.enums.paymentType import PaymentType
 from bot.services.donate.donateRewardService import DonateRewardService
 from bot.services.exchange.owoExchangeCoinService import OwoExchangeCoinService
-from bot.enums.paymentType import PaymentType
 from bot.services.roleShop.roleShopPaymentService import RoleShopPaymentService
 
 
@@ -17,8 +17,8 @@ class OwoGiveEvent(commands.Cog):
         self.bot = bot
         self.donateRewardService = DonateRewardService()
         self.owoExchangeCoinService = OwoExchangeCoinService()
-        self.processedMessageIds = set()
         self.roleShopPaymentService = RoleShopPaymentService()
+        self.processedMessageIds = set()
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: discord.Message, after: discord.Message):
@@ -170,6 +170,140 @@ class OwoGiveEvent(commands.Cog):
             )
         )
 
+    async def handlePaymentChannel(
+        self,
+        message: discord.Message,
+        senderUserId: int,
+        receiverUserId: int,
+        cowoncyAmount: int,
+    ):
+        if receiverUserId != OWNER_ID and receiverUserId not in TREASURER_MEMBER_ID_LIST:
+            return
+
+        senderMember = await self.resolveGuildMember(
+            guild=message.guild,
+            userId=senderUserId,
+        )
+
+        if senderMember is None:
+            return
+
+        paymentResult = self.roleShopPaymentService.verifyPayment(
+            userId=senderUserId,
+            paymentType=PaymentType.COWONCY.value,
+            paymentAmount=cowoncyAmount,
+        )
+
+        if not paymentResult["success"]:
+            self.processedMessageIds.add(message.id)
+
+            await message.channel.send(
+                embed=self.buildRolePaymentFailedEmbed(
+                    senderMember=senderMember,
+                    paymentResult=paymentResult,
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+            )
+            return
+
+        role = message.guild.get_role(paymentResult["roleId"])
+
+        if role is None:
+            self.processedMessageIds.add(message.id)
+
+            await message.channel.send(
+                embed=self.buildRolePaymentErrorEmbed(
+                    title="Thanh toán role cần xử lý thủ công",
+                    description=(
+                        f"Người thanh toán: {senderMember.mention}\n"
+                        "User đã thanh toán, nhưng role cần cấp không còn tồn tại trong server.\n"
+                        "Vui lòng liên hệ quản trị viên."
+                    ),
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+            )
+            return
+
+        try:
+            await senderMember.add_roles(
+                role,
+                reason="Role shop payment completed",
+            )
+        except discord.Forbidden:
+            self.processedMessageIds.add(message.id)
+
+            await message.channel.send(
+                embed=self.buildRolePaymentErrorEmbed(
+                    title="Bot không có quyền cấp role",
+                    description=(
+                        f"Người thanh toán: {senderMember.mention}\n"
+                        f"Role cần cấp: {role.mention}\n"
+                        "User đã thanh toán, nhưng bot không có quyền cấp role này.\n"
+                        "Vui lòng kiểm tra lại vị trí role của bot."
+                    ),
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+            )
+            return
+        except discord.HTTPException:
+            self.processedMessageIds.add(message.id)
+
+            await message.channel.send(
+                embed=self.buildRolePaymentErrorEmbed(
+                    title="Cấp role thất bại",
+                    description=(
+                        f"Người thanh toán: {senderMember.mention}\n"
+                        f"Role cần cấp: {role.mention}\n"
+                        "User đã thanh toán, nhưng bot cấp role thất bại.\n"
+                        "Vui lòng liên hệ quản trị viên."
+                    ),
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+            )
+            return
+
+        completeResult = self.roleShopPaymentService.completePayment(
+            memberRolePurchaseId=paymentResult["memberRolePurchaseId"],
+            paymentType=PaymentType.COWONCY.value,
+            paymentAmount=cowoncyAmount,
+        )
+
+        if not completeResult["success"]:
+            try:
+                await senderMember.remove_roles(
+                    role,
+                    reason="Role shop payment database update failed",
+                )
+            except discord.HTTPException:
+                pass
+
+            self.processedMessageIds.add(message.id)
+
+            await message.channel.send(
+                embed=self.buildRolePaymentErrorEmbed(
+                    title="Cập nhật giao dịch thất bại",
+                    description=(
+                        f"Người thanh toán: {senderMember.mention}\n"
+                        f"Role đã cấp tạm thời: {role.mention}\n"
+                        f"Nội dung lỗi: {completeResult['message']}"
+                    ),
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+            )
+            return
+
+        self.processedMessageIds.add(message.id)
+
+        await message.channel.send(
+            embed=self.buildRolePaymentCompletedEmbed(
+                senderMember=senderMember,
+                role=role,
+                cowoncyAmount=cowoncyAmount,
+                expiredAt=completeResult["expiredAt"],
+            ),
+            allowed_mentions=discord.AllowedMentions.none(),
+        )
+
     async def resolveGuildMember(
         self,
         guild: discord.Guild,
@@ -231,110 +365,19 @@ class OwoGiveEvent(commands.Cog):
             f"Bạn nhận được **{chillCoinAmount:,}** <:cs_coin:1495116560191324383>."
         )
 
-    async def handlePaymentChannel(
-        self,
-        message: discord.Message,
-        senderUserId: int,
-        receiverUserId: int,
-        cowoncyAmount: int,
-    ):
-        if receiverUserId != OWNER_ID and receiverUserId not in TREASURER_MEMBER_ID_LIST:
-            return
-
-        senderMember = await self.resolveGuildMember(
-            guild=message.guild,
-            userId=senderUserId,
-        )
-
-        if senderMember is None:
-            return
-
-        paymentResult = self.roleShopPaymentService.verifyPayment(
-            userId=senderUserId,
-            paymentType=PaymentType.COWONCY.value,
-            paymentAmount=cowoncyAmount,
-        )
-
-        if not paymentResult["success"]:
-            self.processedMessageIds.add(message.id)
-
-            await message.channel.send(
-                self.buildRolePaymentFailedMessage(
-                    senderMember=senderMember,
-                    paymentResult=paymentResult,
-                )
-            )
-            return
-
-        role = message.guild.get_role(paymentResult["roleId"])
-
-        if role is None:
-            self.processedMessageIds.add(message.id)
-
-            await message.channel.send(
-                f"{senderMember.mention} đã thanh toán, nhưng role cần cấp không còn tồn tại trong server. Vui lòng liên hệ quản trị viên."
-            )
-            return
-
-        try:
-            await senderMember.add_roles(
-                role,
-                reason="Role shop payment completed",
-            )
-        except discord.Forbidden:
-            self.processedMessageIds.add(message.id)
-
-            await message.channel.send(
-                f"{senderMember.mention} đã thanh toán, nhưng bot không có quyền cấp role {role.mention}. Vui lòng liên hệ quản trị viên."
-            )
-            return
-        except discord.HTTPException:
-            self.processedMessageIds.add(message.id)
-
-            await message.channel.send(
-                f"{senderMember.mention} đã thanh toán, nhưng bot cấp role {role.mention} thất bại. Vui lòng liên hệ quản trị viên."
-            )
-            return
-
-        completeResult = self.roleShopPaymentService.completePayment(
-            memberRolePurchaseId=paymentResult["memberRolePurchaseId"],
-            paymentType=PaymentType.COWONCY.value,
-            paymentAmount=cowoncyAmount,
-        )
-
-        if not completeResult["success"]:
-            try:
-                await senderMember.remove_roles(
-                    role,
-                    reason="Role shop payment database update failed",
-                )
-            except discord.HTTPException:
-                pass
-
-            self.processedMessageIds.add(message.id)
-
-            await message.channel.send(
-                f"{senderMember.mention} {completeResult['message']}"
-            )
-            return
-
-        self.processedMessageIds.add(message.id)
-
-        await message.channel.send(
-            self.buildRolePaymentCompletedMessage(
-                senderMember=senderMember,
-                role=role,
-                cowoncyAmount=cowoncyAmount,
-                expiredAt=completeResult["expiredAt"],
-            )
-        )
-
-    def buildRolePaymentFailedMessage(
+    def buildRolePaymentFailedEmbed(
         self,
         senderMember: discord.Member,
         paymentResult: dict,
     ):
-        roleText = ""
+        embed = discord.Embed(
+            title="Thanh toán role chưa hoàn tất",
+            description=(
+                f"Người thanh toán: {senderMember.mention}\n"
+                f"Nội dung: {paymentResult['message']}"
+            ),
+            color=discord.Color.orange(),
+        )
 
         roleId = paymentResult.get("roleId")
 
@@ -342,14 +385,15 @@ class OwoGiveEvent(commands.Cog):
             role = senderMember.guild.get_role(roleId)
 
             if role is not None:
-                roleText = f"\nRole đang chờ thanh toán: {role.mention}"
+                embed.add_field(
+                    name="Role đang chờ thanh toán",
+                    value=role.mention,
+                    inline=False,
+                )
 
-        return (
-            f"{senderMember.mention} {paymentResult['message']}"
-            f"{roleText}"
-        )
+        return embed
 
-    def buildRolePaymentCompletedMessage(
+    def buildRolePaymentCompletedEmbed(
         self,
         senderMember: discord.Member,
         role: discord.Role,
@@ -358,11 +402,32 @@ class OwoGiveEvent(commands.Cog):
     ):
         expiredAtText = expiredAt.strftime("%d/%m/%Y %H:%M")
 
-        return (
-            f"{senderMember.mention} đã thanh toán **{cowoncyAmount:,}** <:OwO:1503021935724859473> owo thành công.\n"
-            f"Bạn đã được cấp role {role.mention}.\n"
-            f"Role sẽ hết hạn vào: **{expiredAtText}**."
+        embed = discord.Embed(
+            title="Thanh toán role thành công",
+            description=(
+                f"Người mua: {senderMember.mention}\n"
+                f"Role đã mua: {role.mention}\n"
+                f"Số tiền: **{cowoncyAmount:,}** <:OwO:1503021935724859473> owo\n"
+                f"Hạn sử dụng đến: **{expiredAtText}**"
+            ),
+            color=discord.Color.green(),
         )
+
+        return embed
+
+    def buildRolePaymentErrorEmbed(
+        self,
+        title: str,
+        description: str,
+    ):
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=discord.Color.red(),
+        )
+
+        return embed
+
 
 async def setup(bot):
     await bot.add_cog(OwoGiveEvent(bot))

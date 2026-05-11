@@ -18,13 +18,22 @@ class GiveChillCoinCommand(commands.Cog):
         self.roleShopPaymentService = RoleShopPaymentService()
 
     @commands.command(name="give")
-    async def give(self, ctx, member: discord.Member = None, amount: int = None):
+    async def give(self, ctx: commands.Context, member: discord.Member = None, amount: int = None):
+        if ctx.guild is None:
+            return
+
         if member is None or amount is None:
-            await ctx.reply("Cách dùng: `cg give @user <số chill coin>`")
+            await ctx.reply(
+                "Cách dùng: `cg give @user <số chill coin>`",
+                mention_author=False,
+            )
             return
 
         if member.bot:
-            await ctx.reply("Không thể chuyển chill coin cho bot.")
+            await ctx.reply(
+                "Không thể chuyển chill coin cho bot.",
+                mention_author=False,
+            )
             return
 
         try:
@@ -42,11 +51,18 @@ class GiveChillCoinCommand(commands.Cog):
                 amount=amount,
             )
 
-            await ctx.reply(giveResult["message"])
+            await ctx.reply(
+                giveResult["message"],
+                mention_author=False,
+            )
 
         except Exception as e:
             print(f"Give chill coin error: {e}")
-            await ctx.reply("Đã xảy ra lỗi khi chuyển chill coin.")
+
+            await ctx.reply(
+                "Đã xảy ra lỗi khi chuyển chill coin.",
+                mention_author=False,
+            )
 
     async def handleRolePayment(
         self,
@@ -55,7 +71,16 @@ class GiveChillCoinCommand(commands.Cog):
         amount: int,
     ):
         if receiverMember.id != OWNER_ID and receiverMember.id not in TREASURER_MEMBER_ID_LIST:
-            await ctx.reply("Kênh này chỉ dùng để thanh toán role cho quản trị viên hoặc thủ quỹ.")
+            await ctx.reply(
+                embed=self.buildRolePaymentErrorEmbed(
+                    title="Thanh toán role không hợp lệ",
+                    description=(
+                        "Kênh này chỉ dùng để thanh toán role cho quản trị viên hoặc thủ quỹ."
+                    ),
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+                mention_author=False,
+            )
             return
 
         paymentResult = self.roleShopPaymentService.verifyPayment(
@@ -66,10 +91,12 @@ class GiveChillCoinCommand(commands.Cog):
 
         if not paymentResult["success"]:
             await ctx.reply(
-                self.buildRolePaymentFailedMessage(
+                embed=self.buildRolePaymentFailedEmbed(
                     ctx=ctx,
                     paymentResult=paymentResult,
-                )
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+                mention_author=False,
             )
             return
 
@@ -83,15 +110,30 @@ class GiveChillCoinCommand(commands.Cog):
         )
 
         if not giveResult["success"]:
-            await ctx.reply(giveResult["message"])
+            await ctx.reply(
+                embed=self.buildRolePaymentErrorEmbed(
+                    title="Chuyển chill coin thất bại",
+                    description=giveResult["message"],
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+                mention_author=False,
+            )
             return
 
         role = ctx.guild.get_role(paymentResult["roleId"])
 
         if role is None:
             await ctx.reply(
-                f"{ctx.author.mention} đã chuyển chill coin thành công, nhưng role cần cấp không còn tồn tại trong server. "
-                f"Vui lòng liên hệ quản trị viên."
+                embed=self.buildRolePaymentErrorEmbed(
+                    title="Thanh toán role cần xử lý thủ công",
+                    description=(
+                        f"Người thanh toán: {ctx.author.mention}\n"
+                        "User đã chuyển chill coin thành công, nhưng role cần cấp không còn tồn tại trong server.\n"
+                        "Vui lòng liên hệ quản trị viên."
+                    ),
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+                mention_author=False,
             )
             return
 
@@ -102,14 +144,32 @@ class GiveChillCoinCommand(commands.Cog):
             )
         except discord.Forbidden:
             await ctx.reply(
-                f"{ctx.author.mention} đã chuyển chill coin thành công, nhưng bot không có quyền cấp role {role.mention}. "
-                f"Vui lòng liên hệ quản trị viên."
+                embed=self.buildRolePaymentErrorEmbed(
+                    title="Bot không có quyền cấp role",
+                    description=(
+                        f"Người thanh toán: {ctx.author.mention}\n"
+                        f"Role cần cấp: {role.mention}\n"
+                        "User đã chuyển chill coin thành công, nhưng bot không có quyền cấp role này.\n"
+                        "Vui lòng kiểm tra lại vị trí role của bot."
+                    ),
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+                mention_author=False,
             )
             return
         except discord.HTTPException:
             await ctx.reply(
-                f"{ctx.author.mention} đã chuyển chill coin thành công, nhưng bot cấp role {role.mention} thất bại. "
-                f"Vui lòng liên hệ quản trị viên."
+                embed=self.buildRolePaymentErrorEmbed(
+                    title="Cấp role thất bại",
+                    description=(
+                        f"Người thanh toán: {ctx.author.mention}\n"
+                        f"Role cần cấp: {role.mention}\n"
+                        "User đã chuyển chill coin thành công, nhưng bot cấp role thất bại.\n"
+                        "Vui lòng liên hệ quản trị viên."
+                    ),
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+                mention_author=False,
             )
             return
 
@@ -129,39 +189,59 @@ class GiveChillCoinCommand(commands.Cog):
                 pass
 
             await ctx.reply(
-                f"{ctx.author.mention} {completeResult['message']}"
+                embed=self.buildRolePaymentErrorEmbed(
+                    title="Cập nhật giao dịch thất bại",
+                    description=(
+                        f"Người thanh toán: {ctx.author.mention}\n"
+                        f"Role đã cấp tạm thời: {role.mention}\n"
+                        f"Nội dung lỗi: {completeResult['message']}"
+                    ),
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+                mention_author=False,
             )
             return
 
         await ctx.reply(
-            self.buildRolePaymentCompletedMessage(
+            embed=self.buildRolePaymentCompletedEmbed(
                 member=ctx.author,
                 role=role,
                 chillCoinAmount=amount,
                 expiredAt=completeResult["expiredAt"],
-            )
+            ),
+            allowed_mentions=discord.AllowedMentions.none(),
+            mention_author=False,
         )
 
-    def buildRolePaymentFailedMessage(
+    def buildRolePaymentFailedEmbed(
         self,
         ctx: commands.Context,
         paymentResult: dict,
     ):
-        roleText = ""
+        embed = discord.Embed(
+            title="Thanh toán role chưa hoàn tất",
+            description=(
+                f"Người thanh toán: {ctx.author.mention}\n"
+                f"Nội dung: {paymentResult['message']}"
+            ),
+            color=discord.Color.orange(),
+        )
+
         roleId = paymentResult.get("roleId")
 
         if roleId is not None:
             role = ctx.guild.get_role(roleId)
 
             if role is not None:
-                roleText = f"\nRole đang chờ thanh toán: {role.mention}"
+                embed.add_field(
+                    name="Role đang chờ thanh toán",
+                    value=role.mention,
+                    inline=False,
+                )
 
-        return (
-            f"{ctx.author.mention} {paymentResult['message']}"
-            f"{roleText}"
-        )
+        return embed
 
-    def buildRolePaymentCompletedMessage(
+    def buildRolePaymentCompletedEmbed(
         self,
         member: discord.Member,
         role: discord.Role,
@@ -171,11 +251,31 @@ class GiveChillCoinCommand(commands.Cog):
         chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
         expiredAtText = expiredAt.strftime("%d/%m/%Y %H:%M")
 
-        return (
-            f"{member.mention} đã thanh toán **{self.formatNumber(chillCoinAmount)}** {chillCoinEmoji} thành công.\n"
-            f"Bạn đã được cấp role {role.mention}.\n"
-            f"Role sẽ hết hạn vào: **{expiredAtText}**."
+        embed = discord.Embed(
+            title="Thanh toán role thành công",
+            description=(
+                f"Người mua: {member.mention}\n"
+                f"Role đã mua: {role.mention}\n"
+                f"Số tiền: **{self.formatNumber(chillCoinAmount)}** {chillCoinEmoji}\n"
+                f"Hạn sử dụng đến: **{expiredAtText}**"
+            ),
+            color=discord.Color.green(),
         )
+
+        return embed
+
+    def buildRolePaymentErrorEmbed(
+        self,
+        title: str,
+        description: str,
+    ):
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=discord.Color.red(),
+        )
+
+        return embed
 
     def formatNumber(self, number: int):
         return f"{number:,}"
