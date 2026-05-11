@@ -56,3 +56,15 @@ class MemberRolePurchaseRepository:
             .filter(MemberRolePurchase.id == memberRolePurchaseId)
             .first()
         )
+    
+    def findPaidExpiredPurchases(self, now):
+        return (
+            self.session.query(MemberRolePurchase)
+            .join(RoleShop, RoleShop.id == MemberRolePurchase.role_shop_id)
+            .filter(
+                MemberRolePurchase.status == RolePurchaseStatus.PAID.value,
+                MemberRolePurchase.expired_at.isnot(None),
+                MemberRolePurchase.expired_at <= now,
+            )
+            .all()
+        )
