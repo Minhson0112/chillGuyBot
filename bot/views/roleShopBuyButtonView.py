@@ -1,10 +1,12 @@
+import traceback
+
 import discord
 
 from bot.services.roleShop.roleShopPurchaseService import RoleShopPurchaseService
 
 
-ROLE_SHOP_BUY_BUTTON_CUSTOM_ID = "<a:CS_kimcuong:1460648386628944106>"
-ROLE_SHOP_SELECT_CUSTOM_ID = "<a:CS_TYM1:1463045403665633364>"
+ROLE_SHOP_BUY_BUTTON_CUSTOM_ID = "role_shop_buy_button"
+ROLE_SHOP_SELECT_CUSTOM_ID = "role_shop_select"
 ROLE_SHOP_PAYMENT_CHANNEL_URL = "https://discord.com/channels/1356994231918530690/1502964209619697765"
 
 
@@ -71,11 +73,41 @@ class RoleShopBuyButtonView(discord.ui.View):
 
         return " hoặc ".join(prices)[:100]
 
+    async def on_error(self, interaction: discord.Interaction, error: Exception, item):
+        traceback.print_exception(type(error), error, error.__traceback__)
+
+        if interaction.response.is_done():
+            await interaction.followup.send(
+                "Đã xảy ra lỗi khi xử lý nút mua role.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.send_message(
+            "Đã xảy ra lỗi khi xử lý nút mua role.",
+            ephemeral=True,
+        )
+
 
 class RoleShopSelectView(discord.ui.View):
     def __init__(self, options: list[discord.SelectOption]):
         super().__init__(timeout=180)
         self.add_item(RoleShopSelect(options))
+
+    async def on_error(self, interaction: discord.Interaction, error: Exception, item):
+        traceback.print_exception(type(error), error, error.__traceback__)
+
+        if interaction.response.is_done():
+            await interaction.followup.send(
+                "Đã xảy ra lỗi khi xử lý giao dịch mua role.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.send_message(
+            "Đã xảy ra lỗi khi xử lý giao dịch mua role.",
+            ephemeral=True,
+        )
 
 
 class RoleShopSelect(discord.ui.Select):
@@ -89,8 +121,10 @@ class RoleShopSelect(discord.ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+
         if interaction.guild is None:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Lệnh mua role chỉ dùng được trong server.",
                 ephemeral=True,
             )
@@ -100,7 +134,7 @@ class RoleShopSelect(discord.ui.Select):
         role = interaction.guild.get_role(roleId)
 
         if role is None:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Role này không còn tồn tại trong server.",
                 ephemeral=True,
             )
@@ -119,14 +153,14 @@ class RoleShopSelect(discord.ui.Select):
                 pendingRole = interaction.guild.get_role(pendingRoleId)
 
                 if pendingRole is not None:
-                    await interaction.response.send_message(
+                    await interaction.followup.send(
                         f"{result['message']}\n"
                         f"Role đang chờ thanh toán: {pendingRole.mention}",
                         ephemeral=True,
                     )
                     return
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 result["message"],
                 ephemeral=True,
             )
@@ -134,7 +168,7 @@ class RoleShopSelect(discord.ui.Select):
 
         priceText = self.buildPaymentText(result)
 
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"Bạn đã đăng kí mua role {role.mention} thành công.\n"
             f"Để hoàn tất giao dịch, bạn hãy chuyển phí giao dịch cho chúng tôi ở kênh:\n"
             f"{ROLE_SHOP_PAYMENT_CHANNEL_URL}\n\n"
