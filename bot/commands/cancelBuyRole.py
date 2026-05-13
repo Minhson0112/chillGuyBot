@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 
 from bot.config.emoji import LOGO
@@ -19,25 +20,53 @@ class CancelBuyRoleCommand(commands.Cog):
         )
 
         if not result["success"]:
-            await ctx.reply(f"{LOGO} {result['message']}")
+            await ctx.reply(
+                f"{LOGO} {result['message']}",
+                mention_author=False,
+            )
             return
 
-        roleMentions = []
+        roleTextList = []
 
         for roleId in result["cancelledRoleIds"]:
             role = ctx.guild.get_role(roleId)
 
             if role is not None:
-                roleMentions.append(role.mention)
+                roleTextList.append(role.mention)
             else:
-                roleMentions.append(f"`{roleId}`")
+                roleTextList.append(f"`{roleId}`")
 
-        roleText = ", ".join(roleMentions)
+        roleText = ", ".join(roleTextList)
 
         await ctx.reply(
-            f"{LOGO} {result['message']}\n"
-            f"Role đã hủy: {roleText}"
+            content=ctx.author.mention,
+            embed=self.buildCancelBuyRoleEmbed(
+                message=result["message"],
+                roleText=roleText,
+            ),
+            allowed_mentions=discord.AllowedMentions(
+                users=True,
+                roles=False,
+                everyone=False,
+            ),
+            mention_author=False,
         )
+
+    def buildCancelBuyRoleEmbed(
+        self,
+        message: str,
+        roleText: str,
+    ):
+        embed = discord.Embed(
+            title="Đã hủy giao dịch mua role",
+            description=(
+                f"{message}\n\n"
+                f"Role đã hủy: {roleText}"
+            ),
+            color=discord.Color.orange(),
+        )
+
+        return embed
 
 
 async def setup(bot):
