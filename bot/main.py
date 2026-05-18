@@ -179,6 +179,7 @@ async def main():
         "bot.tasks.memberDailyActivityFlushTask",
         "bot.tasks.monthlyTopChatRewardTask",
         "bot.tasks.roleShopExpireTask",
+        "bot.tasks.farmTrainEventAutoTask",
     ]
 
     for ext in extensions:

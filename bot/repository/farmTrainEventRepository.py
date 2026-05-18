@@ -66,3 +66,24 @@ class FarmTrainEventRepository:
             )
             .first()
         )
+    
+    def findLatestEvent(self):
+        return (
+            self.session.query(FarmTrainEvent)
+            .order_by(desc(FarmTrainEvent.id))
+            .first()
+        )
+
+    def closeLatestEvent(self):
+        farmTrainEvent = self.findLatestEvent()
+
+        if farmTrainEvent is None:
+            return None
+
+        farmTrainEvent.closed_at = datetime.now()
+
+        self.session.flush()
+
+        return farmTrainEvent
+    
+

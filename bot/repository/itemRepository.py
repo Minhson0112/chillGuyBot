@@ -1,5 +1,7 @@
 from bot.models.items import Item
 from sqlalchemy import asc
+from bot.models.foodRecipe import FoodRecipe
+import random
 
 
 class ItemRepository:
@@ -50,3 +52,17 @@ class ItemRepository:
             .order_by(asc(Item.id))
             .first()
         )
+    
+    def findRandomFoodItemWithRecipe(self):
+        rows = (
+            self.session.query(Item, FoodRecipe)
+            .join(FoodRecipe, FoodRecipe.result_item_id == Item.id)
+            .filter(Item.type_code == "food")
+            .filter(Item.is_active.is_(True))
+            .all()
+        )
+
+        if not rows:
+            return None
+
+        return random.choice(rows)
