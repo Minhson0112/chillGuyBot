@@ -470,9 +470,6 @@ class MyFarmView(discord.ui.View):
                 totalPage=renderResult["totalPage"],
             )
 
-            embed = view.buildShopEmbed()
-            embed.set_image(url="attachment://my_shop.png")
-
             await interaction.response.send_message(
                 content=view.buildShopContent(),
                 file=file,
