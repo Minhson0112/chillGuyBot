@@ -255,6 +255,16 @@ FARM_GAME_EMOJI = {
     "item_anchovy": "<:Anchovy:1498349050871939115>",
     "item_lobster": "<:Lobster:1498349080324083896>",
     "item_pufferfish": "<:Pufferfish:1498349049542344866>",
+
+    "item_sickle" : "<:sickle:1505936540117762248>",
+    "item_bamboo_rod" : "<:Bamboo_rod:1505936545058914366>",
+    "item_iron_rod" : "<:steel_Rod:1505936543037259856>",
+    "item_legendary_rod" : "<:legendary_Rod:1505936541653143645>",
+    "item_copper_watering_can" : "<:Copper_Watering_Can:1505936551207633008>",
+    "item_steel_watering_can" : "<:Steel_Watering_Can:1505936550029164575>",
+    "item_gold_watering_can" : "<:Gold_Watering_Can:1505936548535861279>",
+    "item_legendary_watering_can" : "<:legendary_Watering_Can:1505936547029979228>",
+    "item_milk_pail" : "<:Milk_Pail:1505936538473595010>",
 }
 
 BLACKJACK_CARD_EMOJI = {

@@ -9,6 +9,9 @@ from bot.config.emoji import FARM_GAME_EMOJI
 from bot.config.farmLevel import FARM_MAX_LEVEL, FARM_LEVEL_REQUIRED_EXP
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.farmTrainEventRepository import FarmTrainEventRepository
+from bot.enums.toolStatus import ToolStatus
+from bot.enums.toolType import ToolType
+from bot.repository.farmToolEquipmentRepository import FarmToolEquipmentRepository
 from bot.services.assetImageService import assetImageService
 
 
@@ -79,10 +82,40 @@ class FarmRenderService:
         (0, 3), (1, 3), (2, 3), (3, 3),
     ]
 
+    HOT_BAR_IMAGE_KEY = "hot_bar"
+
+    HOT_BAR_X = 620
+    HOT_BAR_Y = 940
+    HOT_BAR_SCALE_DIVISOR = 3
+
+    HOT_BAR_SLOT_COUNT = 4
+    HOT_BAR_INNER_WIDTH_RATE = 0.95
+
+    HOT_BAR_TOOL_WIDTH_RATE = 0.50
+    HOT_BAR_TOOL_HEIGHT_RATE = 0.40
+    HOT_BAR_TOOL_Y_RATE = 0.35
+
+    TOOL_DURABILITY_BAR_HEIGHT = 5
+    TOOL_DURABILITY_BAR_OFFSET_Y = 4
+    TOOL_DURABILITY_BAR_WIDTH_RATE = 0.85
+
+    TOOL_DURABILITY_BAR_BACKGROUND_FILL = (60, 45, 35, 220)
+    TOOL_DURABILITY_BAR_FILL = (80, 220, 90, 240)
+    TOOL_DURABILITY_BAR_BORDER_FILL = (255, 255, 255, 180)
+
+    HOT_BAR_TOOL_ORDER = [
+        ToolType.FISHING_ROD.value,
+        ToolType.SICKLE.value,
+        ToolType.WATERING_CAN.value,
+        ToolType.MILK_PAIL.value,
+    ]
+
     async def renderFarmByMemberId(self, memberId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmTrainEventRepository = FarmTrainEventRepository(session)
+            farmToolEquipmentRepository = FarmToolEquipmentRepository(session)
+            
 
             farm = farmRepository.findByUserIdWithRenderData(memberId)
 
@@ -93,8 +126,10 @@ class FarmRenderService:
 
             if farm.is_train_event:
                 trainEvent = farmTrainEventRepository.findOpeningEventWithItem()
+            
+            toolEquipments = farmToolEquipmentRepository.findByFarmIdWithToolData(farm.id)
 
-            image = self.renderFarmImage(farm)
+            image = self.renderFarmImage(farm, toolEquipments)
             embedData = self.buildFarmEmbedData(farm, trainEvent)
 
         avatarImage = await self.getMemberAvatarImage(memberId)
@@ -107,7 +142,7 @@ class FarmRenderService:
             "embedData": embedData,
         }
 
-    def renderFarmImage(self, farm):
+    def renderFarmImage(self, farm, toolEquipments=None):
         baseImage = assetImageService.getImage(farm.base_image_key)
 
         cropArea = farm.cropArea
@@ -155,6 +190,8 @@ class FarmRenderService:
             trainImage = assetImageService.getImage("train")
             trainImage = self.resizeByScale(trainImage, self.TRAIN_SCALE)
             self.pasteSprite(baseImage, trainImage, x=self.TRAIN_X, y=self.TRAIN_Y)
+        
+        self.renderToolHotBar(baseImage, toolEquipments)
 
         self.renderFarmStatusInfo(baseImage, farm)
 
@@ -595,6 +632,170 @@ class FarmRenderService:
         nextLevel = currentLevel + 1
 
         return FARM_LEVEL_REQUIRED_EXP.get(nextLevel)
+    
+
+    def renderToolHotBar(self, baseImage: Image.Image, toolEquipments):
+        hotBarImage = assetImageService.getImage(self.HOT_BAR_IMAGE_KEY)
+        hotBarImage = hotBarImage.resize(
+            (
+                hotBarImage.width // self.HOT_BAR_SCALE_DIVISOR,
+                hotBarImage.height // self.HOT_BAR_SCALE_DIVISOR,
+            ),
+            Image.NEAREST,
+        )
+
+        equippedToolByType = self.buildEquippedToolByType(toolEquipments)
+
+        for slotIndex, toolType in enumerate(self.HOT_BAR_TOOL_ORDER):
+            userTool = equippedToolByType.get(toolType)
+
+            if userTool is None:
+                continue
+
+            self.pasteToolToHotBar(
+                hotBarImage=hotBarImage,
+                userTool=userTool,
+                slotIndex=slotIndex,
+                slotCount=self.HOT_BAR_SLOT_COUNT,
+            )
+
+        self.pasteSprite(
+            baseImage,
+            hotBarImage,
+            x=self.HOT_BAR_X,
+            y=self.HOT_BAR_Y,
+        )
+
+    def buildEquippedToolByType(self, toolEquipments):
+        equippedToolByType = {}
+
+        if not toolEquipments:
+            return equippedToolByType
+
+        for equipment in toolEquipments:
+            userTool = equipment.user_tool
+
+            if userTool is None:
+                continue
+
+            if userTool.status == ToolStatus.BROKEN.value:
+                continue
+
+            if userTool.current_durability <= 0:
+                continue
+
+            toolTemplate = userTool.tool_template
+
+            if toolTemplate is None:
+                continue
+
+            toolType = toolTemplate.tool_type
+
+            if toolType not in self.HOT_BAR_TOOL_ORDER:
+                continue
+
+            equippedToolByType[toolType] = userTool
+
+        return equippedToolByType
+
+    def pasteToolToHotBar(
+        self,
+        hotBarImage: Image.Image,
+        userTool,
+        slotIndex: int,
+        slotCount: int,
+    ):
+        item = userTool.item
+        toolTemplate = userTool.tool_template
+
+        if item is None or toolTemplate is None:
+            return
+
+        toolImage = assetImageService.getImage(item.icon_image_key)
+
+        innerWidth = int(hotBarImage.width * self.HOT_BAR_INNER_WIDTH_RATE)
+        startX = (hotBarImage.width - innerWidth) // 2
+
+        slotWidth = innerWidth // slotCount
+        slotLeft = startX + slotIndex * slotWidth
+        slotCenterX = slotLeft + slotWidth // 2
+
+        maxToolWidth = int(slotWidth * self.HOT_BAR_TOOL_WIDTH_RATE)
+        maxToolHeight = int(hotBarImage.height * self.HOT_BAR_TOOL_HEIGHT_RATE)
+
+        toolImage = self.resizeSpriteToFit(
+            toolImage,
+            maxToolWidth,
+            maxToolHeight,
+        )
+
+        toolX = slotCenterX - toolImage.width // 2
+        toolY = int(hotBarImage.height * self.HOT_BAR_TOOL_Y_RATE)
+
+        hotBarImage.paste(toolImage, (toolX, toolY), toolImage)
+
+        self.drawToolDurabilityBar(
+            hotBarImage=hotBarImage,
+            slotCenterX=slotCenterX,
+            toolImage=toolImage,
+            toolY=toolY,
+            currentDurability=userTool.current_durability,
+            maxDurability=toolTemplate.max_durability,
+        )
+
+    def drawToolDurabilityBar(
+        self,
+        hotBarImage: Image.Image,
+        slotCenterX: int,
+        toolImage: Image.Image,
+        toolY: int,
+        currentDurability: int,
+        maxDurability: int,
+    ):
+        if maxDurability <= 0:
+            return
+
+        draw = ImageDraw.Draw(hotBarImage)
+
+        durabilityRate = currentDurability / maxDurability
+        durabilityRate = max(0, min(1, durabilityRate))
+
+        barWidth = int(toolImage.width * self.TOOL_DURABILITY_BAR_WIDTH_RATE)
+        barHeight = self.TOOL_DURABILITY_BAR_HEIGHT
+
+        barX = slotCenterX - barWidth // 2
+        barY = toolY - barHeight - self.TOOL_DURABILITY_BAR_OFFSET_Y
+
+        fillWidth = int(barWidth * durabilityRate)
+
+        draw.rectangle(
+            (barX, barY, barX + barWidth, barY + barHeight),
+            fill=self.TOOL_DURABILITY_BAR_BACKGROUND_FILL,
+        )
+
+        draw.rectangle(
+            (barX, barY, barX + fillWidth, barY + barHeight),
+            fill=self.TOOL_DURABILITY_BAR_FILL,
+        )
+
+        draw.rectangle(
+            (barX, barY, barX + barWidth, barY + barHeight),
+            outline=self.TOOL_DURABILITY_BAR_BORDER_FILL,
+            width=1,
+        )
+
+    def resizeSpriteToFit(
+        self,
+        spriteImage: Image.Image,
+        maxWidth: int,
+        maxHeight: int,
+    ):
+        scale = min(maxWidth / spriteImage.width, maxHeight / spriteImage.height)
+
+        width = int(spriteImage.width * scale)
+        height = int(spriteImage.height * scale)
+
+        return spriteImage.resize((width, height), Image.NEAREST)
 
     def resizeByScale(self, image: Image.Image, scale: float):
         width = int(image.width * scale)

@@ -17,7 +17,6 @@ from bot.services.farm.farmTrainEventQueueService import FarmTrainEventQueueServ
 from bot.views.farm.myFarmShopPaginationView import MyFarmShopPaginationView
 from bot.services.farm.farmInventoryRenderService import FarmInventoryRenderService
 from bot.views.farm.mySiloPaginationView import MySiloPaginationView
-from bot.services.farm.farmInventoryRenderService import FarmInventoryRenderService
 from bot.views.farm.myBarnPaginationView import MyBarnPaginationView
 from bot.services.farm.farmShopRenderService import FarmShopRenderService
 from bot.views.farm.farmNpcShopPaginationView import FarmNpcShopPaginationView
@@ -25,6 +24,7 @@ from bot.services.farm.farmRecipeRenderService import FarmRecipeRenderService
 from bot.views.farm.farmRecipePaginationView import FarmRecipePaginationView
 from bot.repository.userInventoryRepository import UserInventoryRepository
 from bot.views.farm.plantSeedSelectView import PlantSeedSelectView
+from bot.views.farm.myToolBagPaginationView import MyToolBagPaginationView
 from bot.config.database import getDbSession
 
 
@@ -48,7 +48,6 @@ class MyFarmView(discord.ui.View):
         self.farmPlotUnlockService = FarmPlotUnlockService()
         self.farmKitchenCollectService = FarmKitchenCollectService()
         self.farmTrainEventQueueService = FarmTrainEventQueueService()
-        self.farmInventoryRenderService = FarmInventoryRenderService()
         self.farmInventoryRenderService = FarmInventoryRenderService()
         self.farmShopRenderService = FarmShopRenderService()
         self.farmRecipeRenderService = FarmRecipeRenderService()
@@ -371,6 +370,47 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
+    @discord.ui.button(label="Túi dụng cụ", emoji="🎒", style=discord.ButtonStyle.secondary)
+    async def viewMyToolBagButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            renderResult = self.farmInventoryRenderService.renderToolBagPageToBuffer(
+                userId=self.authorId,
+                memberDisplayName=self.memberDisplayName,
+                page=1,
+            )
+
+            file = discord.File(
+                renderResult["buffer"],
+                filename="my_toolbag.png",
+            )
+
+            view = MyToolBagPaginationView(
+                authorId=self.authorId,
+                memberDisplayName=self.memberDisplayName,
+                currentPage=renderResult["currentPage"],
+                totalPage=renderResult["totalPage"],
+            )
+
+            await interaction.response.send_message(
+                file=file,
+                view=view,
+                ephemeral=True,
+            )
+
+        except FileNotFoundError as e:
+            print(f"Tool bag asset file not found: {e}")
+            await interaction.response.send_message(
+                "Không tìm thấy ảnh asset để render túi dụng cụ.",
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Render my tool bag error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi xem túi dụng cụ của bạn.",
+                ephemeral=True,
+            )
+
     @discord.ui.button(label="Shop NPC", emoji="<:store:1501945501883568331>", style=discord.ButtonStyle.secondary)
     async def viewNpcShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
@@ -434,7 +474,7 @@ class MyFarmView(discord.ui.View):
             embed.set_image(url="attachment://my_shop.png")
 
             await interaction.response.send_message(
-                embed=embed,
+                content=view.buildShopContent(),
                 file=file,
                 view=view,
                 ephemeral=True,

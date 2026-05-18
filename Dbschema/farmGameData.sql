@@ -1990,3 +1990,406 @@ ON DUPLICATE KEY UPDATE
     quantity = VALUES(quantity);
 
 COMMIT;
+
+
+# tools
+
+INSERT INTO items (
+    code,
+    name,
+    type_code,
+    icon_image_key,
+    description,
+    render_scale,
+    render_offset_y,
+    sell_price,
+    is_sellable,
+    is_usable,
+    is_active
+) VALUES
+(
+    'sickle',
+    'liềm',
+    'tool',
+    'item_sickle',
+    'trang bị liềm sẽ tăng 30% sản lượng thu hoạch',
+    1,
+    0,
+    0,
+    0,
+    1,
+    1
+),
+(
+    'bamboo_rod',
+    'cần câu tre',
+    'tool',
+    'item_bamboo_rod',
+    'tỉ lệ câu thành công là 70%',
+    1,
+    0,
+    0,
+    0,
+    1,
+    1
+),
+(
+    'iron_rod',
+    'cần câu sắt',
+    'tool',
+    'item_iron_rod',
+    'tỉ lệ câu thành công là 80%',
+    1,
+    0,
+    0,
+    0,
+    1,
+    1
+),
+(
+    'legendary_rod',
+    'cần câu huyền thoại',
+    'tool',
+    'item_legendary_rod',
+    'tỉ lệ câu thành công là 90% và giảm thời gian câu cá đi 2 phút',
+    1,
+    0,
+    0,
+    0,
+    1,
+    1
+),
+(
+    'copper_watering_can',
+    'bình tưới đồng',
+    'tool',
+    'item_copper_watering_can',
+    'giảm thời gian phát triển của cây trồng đi 4 phút',
+    1,
+    0,
+    0,
+    0,
+    1,
+    1
+),
+(
+    'steel_watering_can',
+    'bình tưới sắt',
+    'tool',
+    'item_steel_watering_can',
+    'giảm thời gian phát triển của cây trồng đi 8 phút',
+    1,
+    0,
+    0,
+    0,
+    1,
+    1
+),
+(
+    'gold_watering_can',
+    'bình tưới vàng',
+    'tool',
+    'item_gold_watering_can',
+    'giảm thời gian phát triển của cây trồng đi 15 phút',
+    1,
+    0,
+    0,
+    0,
+    1,
+    1
+),
+(
+    'legendary_watering_can',
+    'bình tưới huyền thoại',
+    'tool',
+    'item_legendary_watering_can',
+    'giảm thời gian phát triển của cây trồng đi 20 phút',
+    1,
+    0,
+    0,
+    0,
+    1,
+    1
+),
+(
+    'milk_pail',
+    'xô vắt sữa',
+    'tool',
+    'item_milk_pail',
+    'bonus thêm 1 sữa khi vắt sữa',
+    1,
+    0,
+    0,
+    0,
+    1,
+    1
+);
+
+INSERT INTO tool_templates (
+    item_id,
+    tool_type,
+    tool_level,
+    max_durability,
+    durability_cost_per_use,
+    crop_growth_reduction_seconds,
+    fishing_cooldown_reduction_seconds,
+    fishing_success_rate,
+    harvest_bonus_percent,
+    milk_bonus_quantity,
+    is_active
+)
+SELECT
+    items.id,
+    tool_data.tool_type,
+    tool_data.tool_level,
+    tool_data.max_durability,
+    tool_data.durability_cost_per_use,
+    tool_data.crop_growth_reduction_seconds,
+    tool_data.fishing_cooldown_reduction_seconds,
+    tool_data.fishing_success_rate,
+    tool_data.harvest_bonus_percent,
+    tool_data.milk_bonus_quantity,
+    tool_data.is_active
+FROM (
+    SELECT
+        'sickle' AS item_code,
+        'sickle' AS tool_type,
+        1 AS tool_level,
+        300 AS max_durability,
+        1 AS durability_cost_per_use,
+        0 AS crop_growth_reduction_seconds,
+        0 AS fishing_cooldown_reduction_seconds,
+        0.00 AS fishing_success_rate,
+        30 AS harvest_bonus_percent,
+        0 AS milk_bonus_quantity,
+        1 AS is_active
+
+    UNION ALL
+
+    SELECT
+        'bamboo_rod',
+        'fishing_rod',
+        1,
+        300,
+        1,
+        0,
+        0,
+        0.70,
+        0,
+        0,
+        1
+
+    UNION ALL
+
+    SELECT
+        'iron_rod',
+        'fishing_rod',
+        2,
+        300,
+        1,
+        0,
+        0,
+        0.80,
+        0,
+        0,
+        1
+
+    UNION ALL
+
+    SELECT
+        'legendary_rod',
+        'fishing_rod',
+        3,
+        300,
+        1,
+        0,
+        120,
+        0.90,
+        0,
+        0,
+        1
+
+    UNION ALL
+
+    SELECT
+        'copper_watering_can',
+        'watering_can',
+        1,
+        300,
+        1,
+        240,
+        0,
+        0.00,
+        0,
+        0,
+        1
+
+    UNION ALL
+
+    SELECT
+        'steel_watering_can',
+        'watering_can',
+        2,
+        300,
+        1,
+        480,
+        0,
+        0.00,
+        0,
+        0,
+        1
+
+    UNION ALL
+
+    SELECT
+        'gold_watering_can',
+        'watering_can',
+        3,
+        300,
+        1,
+        900,
+        0,
+        0.00,
+        0,
+        0,
+        1
+
+    UNION ALL
+
+    SELECT
+        'legendary_watering_can',
+        'watering_can',
+        4,
+        300,
+        1,
+        1200,
+        0,
+        0.00,
+        0,
+        0,
+        1
+
+    UNION ALL
+
+    SELECT
+        'milk_pail',
+        'milk_pail',
+        1,
+        300,
+        1,
+        0,
+        0,
+        0.00,
+        0,
+        1,
+        1
+) AS tool_data
+INNER JOIN items
+    ON items.code = tool_data.item_code;
+
+    INSERT INTO shop_items (
+    item_id,
+    buy_price,
+    required_farm_level,
+    is_visible,
+    is_active,
+    sort_order
+)
+SELECT
+    items.id,
+    shop_data.buy_price,
+    shop_data.required_farm_level,
+    shop_data.is_visible,
+    shop_data.is_active,
+    shop_data.sort_order
+FROM (
+    SELECT
+        'sickle' AS item_code,
+        30000 AS buy_price,
+        1 AS required_farm_level,
+        1 AS is_visible,
+        1 AS is_active,
+        30 AS sort_order
+
+    UNION ALL
+
+    SELECT
+        'bamboo_rod',
+        10000,
+        1,
+        1,
+        1,
+        31
+
+    UNION ALL
+
+    SELECT
+        'iron_rod',
+        30000,
+        1,
+        1,
+        1,
+        32
+
+    UNION ALL
+
+    SELECT
+        'legendary_rod',
+        100000,
+        1,
+        1,
+        1,
+        33
+
+    UNION ALL
+
+    SELECT
+        'copper_watering_can',
+        10000,
+        1,
+        1,
+        1,
+        34
+
+    UNION ALL
+
+    SELECT
+        'steel_watering_can',
+        20000,
+        1,
+        1,
+        1,
+        35
+
+    UNION ALL
+
+    SELECT
+        'gold_watering_can',
+        30000,
+        1,
+        1,
+        1,
+        36
+
+    UNION ALL
+
+    SELECT
+        'legendary_watering_can',
+        100000,
+        1,
+        1,
+        1,
+        37
+
+    UNION ALL
+
+    SELECT
+        'milk_pail',
+        5000,
+        1,
+        1,
+        1,
+        38
+) AS shop_data
+INNER JOIN items
+    ON items.code = shop_data.item_code;

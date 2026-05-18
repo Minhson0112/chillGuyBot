@@ -191,3 +191,21 @@ class FarmCropAreaRepository:
         self.session.flush()
 
         return farmCropArea
+    
+    def reduceGrowthTime(
+        self,
+        farmCropArea: FarmCropArea,
+        reductionSeconds: int,
+    ):
+        if reductionSeconds <= 0:
+            return farmCropArea
+
+        if farmCropArea.planted_at is not None:
+            farmCropArea.planted_at -= timedelta(seconds=reductionSeconds)
+
+        if farmCropArea.harvestable_at is not None:
+            farmCropArea.harvestable_at -= timedelta(seconds=reductionSeconds)
+
+        self.session.flush()
+
+        return farmCropArea

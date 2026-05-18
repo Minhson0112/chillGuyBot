@@ -2,8 +2,11 @@ from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.enums.toolStatus import ToolStatus
+from bot.enums.toolType import ToolType
 from bot.repository.farmCowShedRepository import FarmCowShedRepository
 from bot.repository.farmRepository import FarmRepository
+from bot.repository.farmToolEquipmentRepository import FarmToolEquipmentRepository
 from bot.repository.itemRepository import ItemRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
 from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
@@ -21,6 +24,7 @@ class FarmCowMilkCollectService:
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmCowShedRepository = FarmCowShedRepository(session)
+            farmToolEquipmentRepository = FarmToolEquipmentRepository(session)
             itemRepository = ItemRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
             dailyTaskProgressService = DailyTaskProgressService(session)
@@ -71,13 +75,21 @@ class FarmCowMilkCollectService:
                     "message": "Không tìm thấy item sữa bò trong hệ thống.",
                 }
 
-            milkQuantity = cowShed.cow_count
+            milkPailEquipment = farmToolEquipmentRepository.findByFarmIdAndToolTypeWithToolData(
+                farmId=farm.id,
+                toolType=ToolType.MILK_PAIL.value,
+            )
+
+            milkBonusQuantity = self.getMilkPailBonusQuantity(milkPailEquipment)
+            milkQuantity = cowShed.cow_count + milkBonusQuantity
 
             userInventoryRepository.addOrCreate(
                 userId=userId,
                 itemId=milkItem.id,
                 quantity=milkQuantity,
             )
+
+            milkPailBroken = self.consumeMilkPailDurability(milkPailEquipment)
 
             farmCowShedRepository.markMilkCollected(cowShed)
             farmRepository.increaseFarmExp(farm, self.MILK_COLLECT_EXP)
@@ -99,6 +111,12 @@ class FarmCowMilkCollectService:
 
             message = f"Bạn đã vắt được **{milkQuantity}** {milkText}."
 
+            if milkBonusQuantity > 0:
+                message += f"\nXô vắt sữa đã bonus thêm **{milkBonusQuantity}** {milkText}."
+
+            if milkPailBroken:
+                message += "\nXô vắt sữa đã hết độ bền và bị hỏng."
+
             if dailyTaskMessage is not None:
                 message += f"\n\n{dailyTaskMessage}"
 
@@ -106,6 +124,58 @@ class FarmCowMilkCollectService:
                 "success": True,
                 "message": message,
             }
+
+    def getMilkPailBonusQuantity(self, milkPailEquipment):
+        if milkPailEquipment is None:
+            return 0
+
+        userTool = milkPailEquipment.user_tool
+
+        if userTool is None:
+            return 0
+
+        if userTool.status == ToolStatus.BROKEN.value:
+            return 0
+
+        if userTool.current_durability <= 0:
+            return 0
+
+        toolTemplate = userTool.tool_template
+
+        if toolTemplate is None:
+            return 0
+
+        return max(toolTemplate.milk_bonus_quantity, 0)
+
+    def consumeMilkPailDurability(self, milkPailEquipment):
+        if milkPailEquipment is None:
+            return False
+
+        userTool = milkPailEquipment.user_tool
+
+        if userTool is None:
+            return False
+
+        if userTool.status == ToolStatus.BROKEN.value:
+            return False
+
+        if userTool.current_durability <= 0:
+            userTool.status = ToolStatus.BROKEN.value
+            return True
+
+        toolTemplate = userTool.tool_template
+
+        if toolTemplate is None:
+            return False
+
+        userTool.current_durability -= toolTemplate.durability_cost_per_use
+
+        if userTool.current_durability <= 0:
+            userTool.current_durability = 0
+            userTool.status = ToolStatus.BROKEN.value
+            return True
+
+        return False
 
     def isCowHungry(self, cowShed, now: datetime):
         if cowShed.last_fed_at is None:

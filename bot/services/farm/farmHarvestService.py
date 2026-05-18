@@ -2,9 +2,13 @@ from datetime import datetime
 
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.enums.toolStatus import ToolStatus
+from bot.enums.toolType import ToolType
 from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 from bot.repository.farmRepository import FarmRepository
+from bot.repository.farmToolEquipmentRepository import FarmToolEquipmentRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+
 
 class FarmHarvestService:
     DRY_REDUCTION_SECONDS_PER_QUANTITY = 900
@@ -15,6 +19,7 @@ class FarmHarvestService:
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmCropAreaRepository = FarmCropAreaRepository(session)
+            farmToolEquipmentRepository = FarmToolEquipmentRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
 
             farm = farmRepository.findByUserIdWithRenderData(userId)
@@ -68,11 +73,24 @@ class FarmHarvestService:
             drySeconds = self.calculateTotalDrySeconds(farmCropArea, now)
             pestSeconds = self.calculateTotalPestSeconds(farmCropArea, now)
 
-            harvestQuantity = self.calculateHarvestQuantity(
+            reducedHarvestQuantity = self.calculateHarvestQuantity(
                 baseHarvestQuantity=baseHarvestQuantity,
                 drySeconds=drySeconds,
                 pestSeconds=pestSeconds,
             )
+
+            sickleEquipment = farmToolEquipmentRepository.findByFarmIdAndToolTypeWithToolData(
+                farmId=farm.id,
+                toolType=ToolType.SICKLE.value,
+            )
+
+            sickleBonusQuantity = self.calculateSickleBonusQuantity(
+                sickleEquipment=sickleEquipment,
+                harvestQuantity=reducedHarvestQuantity,
+            )
+
+            harvestQuantity = reducedHarvestQuantity + sickleBonusQuantity
+            sickleBroken = self.consumeSickleDurability(sickleEquipment)
 
             userInventoryRepository.addOrCreate(
                 userId=userId,
@@ -81,24 +99,32 @@ class FarmHarvestService:
             )
 
             farmCropAreaRepository.clearCrop(farmCropArea)
-            farmRepository.increaseFarmExp(farm, self.HARVEST_EXP_PER_CROP * farmCropArea.unlocked_plot_count)
+            farmRepository.increaseFarmExp(
+                farm,
+                self.HARVEST_EXP_PER_CROP * farmCropArea.unlocked_plot_count,
+            )
 
             session.commit()
 
             cropItemText = self.buildItemText(cropItem)
 
-            if harvestQuantity < baseHarvestQuantity:
-                return {
-                    "success": True,
-                    "message": (
-                        f"Bạn đã thu hoạch **{harvestQuantity}** {cropItemText}. "
-                        f"Sản lượng gốc là **{baseHarvestQuantity}**, nhưng bị giảm do đất khô hoặc sâu bệnh."
-                    ),
-                }
+            message = f"Bạn đã thu hoạch **{harvestQuantity}** {cropItemText}."
+
+            if reducedHarvestQuantity < baseHarvestQuantity:
+                message += (
+                    f"\nSản lượng gốc là **{baseHarvestQuantity}**, "
+                    f"nhưng bị giảm còn **{reducedHarvestQuantity}** do đất khô hoặc sâu bệnh."
+                )
+
+            if sickleBonusQuantity > 0:
+                message += f"\nLiềm đã bonus thêm **{sickleBonusQuantity}** {cropItemText}."
+
+            if sickleBroken:
+                message += "\nLiềm đã hết độ bền và bị hỏng."
 
             return {
                 "success": True,
-                "message": f"Bạn đã thu hoạch **{harvestQuantity}** {cropItemText}.",
+                "message": message,
             }
 
     def calculateHarvestQuantity(
@@ -116,6 +142,67 @@ class FarmHarvestService:
             return 0
 
         return max(harvestQuantity, 1)
+
+    def calculateSickleBonusQuantity(
+        self,
+        sickleEquipment,
+        harvestQuantity: int,
+    ):
+        if sickleEquipment is None:
+            return 0
+
+        userTool = sickleEquipment.user_tool
+
+        if userTool is None:
+            return 0
+
+        if userTool.status == ToolStatus.BROKEN.value:
+            return 0
+
+        if userTool.current_durability <= 0:
+            return 0
+
+        toolTemplate = userTool.tool_template
+
+        if toolTemplate is None:
+            return 0
+
+        harvestBonusPercent = max(toolTemplate.harvest_bonus_percent, 0)
+
+        if harvestBonusPercent <= 0:
+            return 0
+
+        return harvestQuantity * harvestBonusPercent // 100
+
+    def consumeSickleDurability(self, sickleEquipment):
+        if sickleEquipment is None:
+            return False
+
+        userTool = sickleEquipment.user_tool
+
+        if userTool is None:
+            return False
+
+        if userTool.status == ToolStatus.BROKEN.value:
+            return False
+
+        if userTool.current_durability <= 0:
+            userTool.status = ToolStatus.BROKEN.value
+            return True
+
+        toolTemplate = userTool.tool_template
+
+        if toolTemplate is None:
+            return False
+
+        userTool.current_durability -= toolTemplate.durability_cost_per_use
+
+        if userTool.current_durability <= 0:
+            userTool.current_durability = 0
+            userTool.status = ToolStatus.BROKEN.value
+            return True
+
+        return False
 
     def calculateTotalDrySeconds(self, farmCropArea, now: datetime):
         totalDrySeconds = farmCropArea.total_dry_seconds

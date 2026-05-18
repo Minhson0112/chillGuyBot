@@ -6,6 +6,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 from bot.config.database import getDbSession
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.repository.userToolRepository import UserToolRepository
+from bot.enums.toolStatus import ToolStatus
 from bot.services.assetImageService import assetImageService
 
 
@@ -59,6 +61,12 @@ class FarmInventoryRenderService:
 
     ITEM_NAME_MAX_LENGTH = 25
     TITLE_MAX_LENGTH = 24
+
+    TOOL_STATUS_FONT_SIZE = 22
+    TOOL_DURABILITY_FONT_SIZE = 20
+
+    TOOL_STATUS_OFFSET_Y = 135
+    TOOL_DURABILITY_OFFSET_Y = 112
 
     def renderSiloPageToBuffer(
         self,
@@ -114,6 +122,38 @@ class FarmInventoryRenderService:
             image = self.renderInventoryImage(
                 title=f"Barn của {memberDisplayName}",
                 inventoryItems=inventoryItems,
+                currentPage=currentPage,
+                totalPage=totalPage,
+            )
+
+        return {
+            "buffer": self.convertImageToBuffer(image),
+            "currentPage": currentPage,
+            "totalPage": totalPage,
+        }
+    
+    def renderToolBagPageToBuffer(
+        self,
+        userId: int,
+        memberDisplayName: str,
+        page: int = 1,
+    ):
+        with getDbSession() as session:
+            userToolRepository = UserToolRepository(session)
+
+            totalToolCount = userToolRepository.countByUserId(userId)
+            totalPage = self.calculateTotalPage(totalToolCount)
+            currentPage = self.normalizePage(page, totalPage)
+
+            userTools = userToolRepository.findByUserIdAndPage(
+                userId,
+                currentPage,
+                self.PER_PAGE,
+            )
+
+            image = self.renderToolBagImage(
+                title=f"Tool Bag của {memberDisplayName}",
+                userTools=userTools,
                 currentPage=currentPage,
                 totalPage=totalPage,
             )
@@ -184,6 +224,83 @@ class FarmInventoryRenderService:
                 slotX=slotX,
                 y=slotY + self.PRICE_OFFSET_Y,
             )
+
+
+    def renderToolBagImage(
+        self,
+        title: str,
+        userTools,
+        currentPage: int,
+        totalPage: int,
+    ):
+        baseImage = assetImageService.getImage(self.BACKGROUND_KEY)
+
+        self.renderTitle(baseImage, title)
+        self.renderPageText(baseImage, currentPage, totalPage)
+
+        for index, userTool in enumerate(userTools):
+            if index >= len(self.SLOT_POSITIONS):
+                break
+
+            self.renderToolBagItem(baseImage, userTool, index)
+
+        return baseImage
+
+    def renderToolBagItem(self, baseImage: Image.Image, userTool, index: int):
+        slotX, slotY = self.SLOT_POSITIONS[index]
+
+        item = userTool.item
+        toolTemplate = userTool.tool_template
+
+        if item is None:
+            return
+
+        self.renderItemName(baseImage, item.name, slotX, slotY)
+
+        itemIcon = assetImageService.getImage(item.icon_image_key)
+        itemIcon = self.resizeItemIcon(itemIcon)
+
+        iconX = slotX + (self.SLOT_WIDTH - itemIcon.width) // 2
+        iconY = slotY + self.ITEM_ICON_OFFSET_Y
+
+        self.pasteSprite(baseImage, itemIcon, iconX, iconY)
+
+        self.drawCenteredText(
+            baseImage,
+            text=f"ID: {userTool.id}",
+            centerX=slotX + self.SLOT_WIDTH // 2,
+            y=slotY + self.ITEM_ID_OFFSET_Y,
+            fontSize=self.ITEM_ID_FONT_SIZE,
+        )
+
+        if toolTemplate is not None:
+            self.drawCenteredText(
+                baseImage,
+                text=f"{userTool.current_durability}/{toolTemplate.max_durability}",
+                centerX=slotX + self.SLOT_WIDTH // 2,
+                y=slotY + self.TOOL_DURABILITY_OFFSET_Y,
+                fontSize=self.TOOL_DURABILITY_FONT_SIZE,
+            )
+
+        self.drawCenteredText(
+            baseImage,
+            text=self.getToolStatusText(userTool.status),
+            centerX=slotX + self.SLOT_WIDTH // 2,
+            y=slotY + self.TOOL_STATUS_OFFSET_Y,
+            fontSize=self.TOOL_STATUS_FONT_SIZE,
+        )
+
+    def getToolStatusText(self, status: str):
+        if status == ToolStatus.EQUIPPED.value:
+            return "In use"
+
+        if status == ToolStatus.BROKEN.value:
+            return "Broken"
+
+        if status == ToolStatus.AVAILABLE.value:
+            return "Available"
+
+        return "Unknown"
 
     def renderItemName(
         self,

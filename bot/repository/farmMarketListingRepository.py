@@ -178,3 +178,24 @@ class FarmMarketListingRepository:
             )
             .first()
         )
+    
+    def findSoldListingsBySellerUserId(
+        self,
+        sellerUserId: int,
+        limit: int = 10,
+    ):
+        return (
+            self.session.query(FarmMarketListing)
+            .options(
+                joinedload(FarmMarketListing.item),
+                joinedload(FarmMarketListing.buyer),
+            )
+            .filter(FarmMarketListing.seller_user_id == sellerUserId)
+            .filter(FarmMarketListing.is_sold.is_(True))
+            .order_by(
+                desc(FarmMarketListing.sold_at),
+                desc(FarmMarketListing.id),
+            )
+            .limit(limit)
+            .all()
+        )

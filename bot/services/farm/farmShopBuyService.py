@@ -5,11 +5,13 @@ from bot.repository.memberRepository import MemberRepository
 from bot.repository.shopItemRepository import ShopItemRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
 from bot.services.farm.farmAnimalBuyService import FarmAnimalBuyService
+from bot.services.farm.farmToolBuyService import FarmToolBuyService
 
 
 class FarmShopBuyService:
     def __init__(self):
         self.farmAnimalBuyService = FarmAnimalBuyService()
+        self.farmToolBuyService = FarmToolBuyService()
 
     def buyShopItem(
         self,
@@ -81,6 +83,12 @@ class FarmShopBuyService:
                     "message": f"{itemText} chỉ có thể mua từng con một.",
                 }
 
+            if self.farmToolBuyService.canHandle(item) and quantity != 1:
+                return {
+                    "success": False,
+                    "message": f"{itemText} chỉ có thể mua từng dụng cụ một.",
+                }
+
             totalPrice = shopItem.buy_price * quantity
 
             if member.chill_coin < totalPrice:
@@ -114,6 +122,32 @@ class FarmShopBuyService:
                     ),
                 }
 
+            if self.farmToolBuyService.canHandle(item):
+                toolBuyResult = self.farmToolBuyService.buyTool(
+                    session=session,
+                    userId=userId,
+                    item=item,
+                )
+
+                if not toolBuyResult["success"]:
+                    return toolBuyResult
+
+                member.chill_coin -= totalPrice
+                session.commit()
+
+                userTool = toolBuyResult["userTool"]
+                toolTemplate = toolBuyResult["toolTemplate"]
+
+                return {
+                    "success": True,
+                    "message": (
+                        f"Bạn đã mua {itemText} với "
+                        f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}. "
+                        f"Độ bền: **{toolTemplate.max_durability}**. "
+                        f"ID tool: **{userTool.id}**"
+                    ),
+                }
+
             member.chill_coin -= totalPrice
 
             userInventory = userInventoryRepository.addOrCreate(
@@ -128,8 +162,8 @@ class FarmShopBuyService:
                 "success": True,
                 "message": (
                     f"Bạn đã mua **{quantity}** {itemText} với "
-                    f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}."
-                     f"ID kho: **{userInventory.id}**"
+                    f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}. "
+                    f"ID kho: **{userInventory.id}**"
                 ),
             }
 

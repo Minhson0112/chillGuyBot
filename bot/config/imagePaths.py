@@ -2,6 +2,7 @@ ASSET_IMAGE_PATHS = {
     "base": "bot/assets/images/farm/base/base.png",
     "farm_land_wet" : "bot/assets/images/farm/base/farmland_wet.png",
     "farm_land_dry" : "bot/assets/images/farm/base/farmland_dry.png",
+    "hot_bar" : "bot/assets/images/farm/ui/hot_bar.png",
 
     "crop_wheat_stage_1": "bot/assets/images/farm/crops/wheat/stage_1.png",
     "crop_wheat_stage_2": "bot/assets/images/farm/crops/wheat/stage_2.png",
@@ -266,6 +267,16 @@ ASSET_IMAGE_PATHS = {
     "item_tom_yum_soup": "bot/assets/images/farm/food/Tom_yum_Soup.png",
     "item_pepper_poppers": "bot/assets/images/farm/food/Pepper_Poppers.png",
     "item_treat": "bot/assets/images/farm/food/Treat.png",
+
+    "item_sickle" : "bot/assets/images/farm/tools/sickle.png",
+    "item_bamboo_rod" : "bot/assets/images/farm/tools/Bamboo_rod.png",
+    "item_iron_rod" : "bot/assets/images/farm/tools/steel_Rod.png",
+    "item_legendary_rod" : "bot/assets/images/farm/tools/legendary_Rod.png",
+    "item_copper_watering_can" : "bot/assets/images/farm/tools/Copper_Watering_Can.png",
+    "item_steel_watering_can" : "bot/assets/images/farm/tools/Steel_Watering_Can.png",
+    "item_gold_watering_can" : "bot/assets/images/farm/tools/Gold_Watering_Can.png",
+    "item_legendary_watering_can" : "bot/assets/images/farm/tools/legendary_Watering_Can.png",
+    "item_milk_pail" : "bot/assets/images/farm/tools/Milk_Pail.png",
 
     "currency_chill_coin": "bot/assets/images/common/cs_coin.png",
     "level": "bot/assets/images/common/level.png",

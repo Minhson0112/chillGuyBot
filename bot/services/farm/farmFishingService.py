@@ -4,8 +4,11 @@ from decimal import Decimal
 
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.enums.toolStatus import ToolStatus
+from bot.enums.toolType import ToolType
 from bot.repository.farmFishPondRepository import FarmFishPondRepository
 from bot.repository.farmRepository import FarmRepository
+from bot.repository.farmToolEquipmentRepository import FarmToolEquipmentRepository
 from bot.repository.fishingHistoryRepository import FishingHistoryRepository
 from bot.repository.itemRepository import ItemRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
@@ -19,8 +22,8 @@ class FarmFishingService:
     BUG_COST_PER_FISHING = 1
     EXP_PER_FISHING = 1
 
-    FISHING_COOLDOWN_MINUTES = 5
-    FISH_LINE_BREAK_RATE = 0.3
+    FISHING_COOLDOWN_SECONDS = 300
+    DEFAULT_FISHING_SUCCESS_RATE = 0.50
 
     MIN_WEIGHT_KG = 1
     MAX_WEIGHT_KG = 100
@@ -31,6 +34,7 @@ class FarmFishingService:
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmFishPondRepository = FarmFishPondRepository(session)
+            farmToolEquipmentRepository = FarmToolEquipmentRepository(session)
             itemRepository = ItemRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
             fishingHistoryRepository = FishingHistoryRepository(session)
@@ -52,7 +56,19 @@ class FarmFishingService:
                     "message": "Nông trại của bạn chưa có hồ câu cá.",
                 }
 
-            cooldownResult = self.checkFishingCooldown(fishPond)
+            fishingRodEquipment = farmToolEquipmentRepository.findByFarmIdAndToolTypeWithToolData(
+                farmId=farm.id,
+                toolType=ToolType.FISHING_ROD.value,
+            )
+
+            fishingCooldownReductionSeconds = self.getFishingCooldownReductionSeconds(
+                fishingRodEquipment,
+            )
+
+            cooldownResult = self.checkFishingCooldown(
+                fishPond=fishPond,
+                cooldownReductionSeconds=fishingCooldownReductionSeconds,
+            )
 
             if not cooldownResult["canFish"]:
                 return {
@@ -96,15 +112,40 @@ class FarmFishingService:
 
             farmFishPondRepository.markFished(fishPond)
 
-            if self.isFishingLineBroken():
+            fishingSuccessRate = self.getFishingSuccessRate(fishingRodEquipment)
+            fishingRodBroken = self.consumeFishingRodDurability(fishingRodEquipment)
+
+            if not self.isFishingSuccess(fishingSuccessRate):
+                completedDailyTasks = dailyTaskProgressService.addProgress(
+                    userId=userId,
+                    taskType=self.DAILY_TASK_TYPE_FISHING,
+                    amount=1,
+                    targetItemId=None,
+                )
+
+                dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
+                    completedDailyTasks,
+                )
+
                 session.commit()
+
+                message = (
+                    f"Bạn bị đứt dây câu, câu được cái nịt. "
+                    f"Đã dùng **{self.BUG_COST_PER_FISHING}** {bugText}."
+                )
+
+                if fishingRodEquipment is not None:
+                    message += f"\nTỉ lệ câu thành công hiện tại là **{int(fishingSuccessRate * 100)}%**."
+
+                if fishingRodBroken:
+                    message += "\nCần câu đã hết độ bền và bị hỏng."
+
+                if dailyTaskMessage is not None:
+                    message += f"\n\n{dailyTaskMessage}"
 
                 return {
                     "success": True,
-                    "message": (
-                        f"Bạn bị đứt dây câu, câu được cái nịt. "
-                        f"Đã dùng **{self.BUG_COST_PER_FISHING}** {bugText}."
-                    ),
+                    "message": message,
                 }
 
             seafoodItems = itemRepository.findActiveItemsByTypeCode(self.SEAFOOD_TYPE_CODE)
@@ -155,6 +196,12 @@ class FarmFishingService:
                 f"Farm EXP +{self.EXP_PER_FISHING}."
             )
 
+            if fishingRodEquipment is not None:
+                message += f"\nTỉ lệ câu thành công hiện tại là **{int(fishingSuccessRate * 100)}%**."
+
+            if fishingRodBroken:
+                message += "\nCần câu đã hết độ bền và bị hỏng."
+
             if dailyTaskMessage is not None:
                 message += f"\n\n{dailyTaskMessage}"
 
@@ -163,15 +210,24 @@ class FarmFishingService:
                 "message": message,
             }
 
-    def checkFishingCooldown(self, fishPond):
+    def checkFishingCooldown(
+        self,
+        fishPond,
+        cooldownReductionSeconds: int = 0,
+    ):
         if fishPond.last_fished_at is None:
             return {
                 "canFish": True,
                 "remainingTimeText": None,
             }
 
+        cooldownSeconds = max(
+            self.FISHING_COOLDOWN_SECONDS - cooldownReductionSeconds,
+            0,
+        )
+
         now = datetime.now()
-        nextFishAt = fishPond.last_fished_at + timedelta(minutes=self.FISHING_COOLDOWN_MINUTES)
+        nextFishAt = fishPond.last_fished_at + timedelta(seconds=cooldownSeconds)
         remainingSeconds = int((nextFishAt - now).total_seconds())
 
         if remainingSeconds <= 0:
@@ -185,8 +241,87 @@ class FarmFishingService:
             "remainingTimeText": self.formatRemainingTime(remainingSeconds),
         }
 
-    def isFishingLineBroken(self):
-        return random.random() < self.FISH_LINE_BREAK_RATE
+    def getFishingSuccessRate(self, fishingRodEquipment):
+        if fishingRodEquipment is None:
+            return self.DEFAULT_FISHING_SUCCESS_RATE
+
+        userTool = fishingRodEquipment.user_tool
+
+        if userTool is None:
+            return self.DEFAULT_FISHING_SUCCESS_RATE
+
+        if userTool.status == ToolStatus.BROKEN.value:
+            return self.DEFAULT_FISHING_SUCCESS_RATE
+
+        if userTool.current_durability <= 0:
+            return self.DEFAULT_FISHING_SUCCESS_RATE
+
+        toolTemplate = userTool.tool_template
+
+        if toolTemplate is None:
+            return self.DEFAULT_FISHING_SUCCESS_RATE
+
+        fishingSuccessRate = float(toolTemplate.fishing_success_rate)
+
+        if fishingSuccessRate <= 0:
+            return self.DEFAULT_FISHING_SUCCESS_RATE
+
+        return max(0, min(fishingSuccessRate, 1))
+
+    def getFishingCooldownReductionSeconds(self, fishingRodEquipment):
+        if fishingRodEquipment is None:
+            return 0
+
+        userTool = fishingRodEquipment.user_tool
+
+        if userTool is None:
+            return 0
+
+        if userTool.status == ToolStatus.BROKEN.value:
+            return 0
+
+        if userTool.current_durability <= 0:
+            return 0
+
+        toolTemplate = userTool.tool_template
+
+        if toolTemplate is None:
+            return 0
+
+        return max(toolTemplate.fishing_cooldown_reduction_seconds, 0)
+
+    def consumeFishingRodDurability(self, fishingRodEquipment):
+        if fishingRodEquipment is None:
+            return False
+
+        userTool = fishingRodEquipment.user_tool
+
+        if userTool is None:
+            return False
+
+        if userTool.status == ToolStatus.BROKEN.value:
+            return False
+
+        if userTool.current_durability <= 0:
+            userTool.status = ToolStatus.BROKEN.value
+            return True
+
+        toolTemplate = userTool.tool_template
+
+        if toolTemplate is None:
+            return False
+
+        userTool.current_durability -= toolTemplate.durability_cost_per_use
+
+        if userTool.current_durability <= 0:
+            userTool.current_durability = 0
+            userTool.status = ToolStatus.BROKEN.value
+            return True
+
+        return False
+
+    def isFishingSuccess(self, fishingSuccessRate: float):
+        return random.random() < fishingSuccessRate
 
     def randomSeafoodItem(self, seafoodItems):
         return random.choice(seafoodItems)
