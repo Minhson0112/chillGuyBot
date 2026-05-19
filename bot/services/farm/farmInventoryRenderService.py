@@ -265,14 +265,6 @@ class FarmInventoryRenderService:
 
         self.pasteSprite(baseImage, itemIcon, iconX, iconY)
 
-        self.drawCenteredText(
-            baseImage,
-            text=f"ID: {userTool.id}",
-            centerX=slotX + self.SLOT_WIDTH // 2,
-            y=slotY + self.ITEM_ID_OFFSET_Y,
-            fontSize=self.ITEM_ID_FONT_SIZE,
-        )
-
         if toolTemplate is not None:
             self.drawCenteredText(
                 baseImage,
@@ -284,23 +276,20 @@ class FarmInventoryRenderService:
 
         self.drawCenteredText(
             baseImage,
-            text=self.getToolStatusText(userTool.status),
+            text=self.getToolBottomText(userTool),
             centerX=slotX + self.SLOT_WIDTH // 2,
             y=slotY + self.TOOL_STATUS_OFFSET_Y,
             fontSize=self.TOOL_STATUS_FONT_SIZE,
         )
 
-    def getToolStatusText(self, status: str):
-        if status == ToolStatus.EQUIPPED.value:
+    def getToolBottomText(self, userTool):
+        if userTool.status == ToolStatus.EQUIPPED.value:
             return "In use"
 
-        if status == ToolStatus.BROKEN.value:
+        if userTool.status == ToolStatus.BROKEN.value:
             return "Broken"
 
-        if status == ToolStatus.AVAILABLE.value:
-            return "Available"
-
-        return "Unknown"
+        return f"ID: {userTool.id}"
 
     def renderItemName(
         self,
