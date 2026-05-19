@@ -11,6 +11,7 @@ from bot.repository.musicEventRepository import MusicEventRepository
 from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
 from bot.services.wordle.wordleStartupService import WordleStartupService
 from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryStartupService
+from bot.services.assetImageService import assetImageService
 
 autoResponderCacheService = AutoResponderCacheService()
 wordleStartupService = WordleStartupService()
@@ -23,7 +24,7 @@ intents.message_content = True
 intents.guilds = True
 intents.voice_states = True
 
-bot = commands.Bot(command_prefix="cg ", intents=intents)
+bot = commands.Bot(command_prefix=["cg ", "Cg "], intents=intents, help_command=None)
 
 
 @tasks.loop(minutes=10)
@@ -71,6 +72,7 @@ async def on_ready():
 
         loadedWordCount = wordleDictionaryStartupService.loadWordsToCache()
         print(f"✅ Đã load wordle dictionary: {loadedWordCount} từ")
+        assetImageService.preloadAssets()
     except Exception as e:
         print(f"❌ Lỗi sync commands: {e}")
 
@@ -117,15 +119,67 @@ async def main():
         "bot.commands.showallmusicevent",
         "bot.commands.closeMusicEvent",
         "bot.commands.memberBirthday",
+        "bot.commands.myFarm",
+        "bot.commands.shopFarm",
+        "bot.commands.cash",
+        "bot.commands.buy",
+        "bot.commands.mySilo",
+        "bot.commands.plant",
+        "bot.commands.myBarn",
+        "bot.commands.visitFarm",
+        "bot.commands.sellFarmItem",
+        "bot.commands.sellShopFarmItem",
+        "bot.commands.buyShopFarmItem",
+        "bot.commands.giveChillCoin",
+        "bot.commands.farmRecipe",
+        "bot.commands.farmCook",
+        "bot.commands.createTrainEvent",
+        "bot.commands.closeTrainEvent",
+        "bot.commands.topFishing",
+        "bot.commands.topTrain",
+        "bot.commands.topChat",
+        "bot.commands.setStaff",
+        "bot.commands.removeStaff",
+        "bot.commands.setMod",
+        "bot.commands.removeMod",
+        "bot.commands.setAdmin",
+        "bot.commands.removeAdmin",
+        "bot.commands.setAutoRes",
+        "bot.commands.removeAutoRes",
+        "bot.commands.topVoice",
+        "bot.commands.topChatStaff",
+        "bot.commands.myChatRank",
+        "bot.commands.myVoiceRank",
+        "bot.commands.daily",
+        "bot.commands.task",
+        "bot.commands.findMarketItem",
+        "bot.commands.slot",
+        "bot.commands.blackjack",
+        "bot.commands.giftcode",
+        "bot.commands.createFarm",
+        "bot.commands.sellRole",
+        "bot.commands.createRoleShop",
+        "bot.commands.cancelBuyRole",
+        "bot.commands.toolBag",
+        "bot.commands.use",
+        "bot.commands.info",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
         "bot.events.autoModerationEvent",
         "bot.events.autoResponderEvent",
         "bot.events.wordleEvent",
-        "bot.events.owoDonateEvent",
+        "bot.events.owoGiveEvent",
+        "bot.events.voiceStateUpdateEvent",
         "bot.tasks.chatCountFlushTask",
         "bot.tasks.memberBirthdayTask",
+        "bot.tasks.farmDryCheckTask",
+        "bot.tasks.farmPestCheckTask",
+        "bot.tasks.farmMarketAutoBuyTask",
+        "bot.tasks.memberDailyActivityFlushTask",
+        "bot.tasks.monthlyTopChatRewardTask",
+        "bot.tasks.roleShopExpireTask",
+        "bot.tasks.farmTrainEventAutoTask",
     ]
 
     for ext in extensions:

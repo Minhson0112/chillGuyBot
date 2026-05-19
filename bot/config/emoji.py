@@ -85,3 +85,202 @@ WORDLE_LETTER_EMOJI = {
         "Z": "<:Z_green:1487329555214766120>",
     },
 }
+
+FARM_GAME_EMOJI = {
+    "chill_coin": "<:cs_coin:1495116560191324383>",
+
+    "exp": "<:xp:1498827483749945354>",
+    "level": "<:level:1498827539911544933>",
+
+    "item_bug": "<:bug:1498089075867914281>",
+
+    "item_chicken": "<:chicken_left:1495565972692537415>",
+
+    "item_cow": "<:cow_left:1495566015164317747>",
+
+    "item_egg": "<:Egg:1495565393463349318>",
+    "item_milk": "<:Milk:1495567020601774263>",
+
+    "item_wheat_seed": "<:Wheat_seed:1495568410220953600>",
+    "item_wheat": "<:Wheat:1495568381494038559>",
+
+    "item_corn_seed" : "<:Corn_seed:1495566111674994698>",
+    "item_corn" : "<:Corn:1495566066926227497>",
+
+    "item_potato_seed" : "<:Potato_seed:1495567240878231694>",
+    "item_potato" : "<:Potato:1495567150537113691>",
+
+    "item_parsnip_seed" : "<:Parsnip_seed:1495567095360917574>",
+    "item_parsnip" : "<:Parsnip:1495567054067990578>",
+
+    "item_green_bean_seed" : "<:Green_Bean_seed:1495566575108096160>",
+    "item_green_bean" : "<:Green_Bean:1495566506279571506>",
+
+    "item_hops_seed" : "<:Hops_seed:1495566686563078235>",
+    "item_hops" : "<:Hops:1495566648588107826>",
+
+    "item_cauliflower_seed" : "<:Cauliflower_seed:1495565937112383559>",
+    "item_cauliflower" : "<:Cauliflower:1495565887837704304>",
+
+    "item_garlic_seed" : "<:Garlic_seed:1495566339329359972>",
+    "item_garlic" : "<:Garlic:1495566310594314333>",
+
+    "item_kale_seed" : "<:Kale_seed:1495566870206746765>",
+    "item_kale" : "<:Kale:1495566799964471446>",
+
+    "item_rhubarb_seed" : "<:Rhubarb_seed:1495567770534940742>",
+    "item_rhubarb" : "<:Rhubarb:1495567698199969993>",
+
+    "item_tomato_seed" : "<:Tomato_seed:1495568324858220574>",
+    "item_tomato" : "<:Tomato:1495568292297965670>",
+
+    "item_melon_seed" : "<:Melon_seed:1495566990788792384>",
+    "item_melon" : "<:Melon:1495566935604203630>",
+
+    "item_sugarcane_seed" : "<:sugarcane_seed:1498775518819127366>",
+    "item_sugarcane" : "<:sugarcane:1498775668400459927>",
+
+    "item_sunflower_seed" : "<:sunflower_seed:1498775517455978636>",
+    "item_sunflower" : "<:sunflower:1498775607624994967>",
+
+    "item_hot_pepper_seed" : "<:Hot_Pepper_seed:1501209922371715185>",
+    "item_hot_pepper" : "<:Hot_Pepper:1501209874426630287>",
+
+    "item_red_cabbage_seed" : "<:Red_Cabbage_seed:1501210008816451745>",
+    "item_red_cabbage" : "<:Red_Cabbage:1501209978436980826>",
+
+    "item_yam_seed" : "<:Yam_seed:1501210085639192708>",
+    "item_yam" : "<:Yam:1501210045520674966>",
+
+    "item_cranberry_seed" : "<:Cranberry_seed:1501210215918342264>",
+    "item_cranberry" : "<:Cranberry:1501210191822196776>",
+
+    "item_pumpkin_seed" : "<:Pumpkin_seed:1501210275402092734>",
+    "item_pumpkin" : "<:Pumpkin:1501210246046027948>",
+
+    "item_artichoke_seed" : "<:Artichoke_seed:1501210342276071525>",
+    "item_artichoke" : "<:Artichoke:1501210310558744786>",
+
+    "item_blueberry_seed" : "<:Blueberry_seed:1501210403341078598>",
+    "item_blueberry" : "<:Blueberry:1501210380473733310>",
+
+    "item_strawberry_seed" : "<:Strawberry_seed:1501210450027614259>",
+    "item_strawberry" : "<:Strawberry:1501210429815521380>",
+
+    "item_eggplant_seed" : "<:Eggplant_seed:1501210532991209562>",
+    "item_eggplant" : "<:Eggplant:1501210498119504012>",
+
+    "item_grape_seed" : "<:Grape_seed:1501210582223687730>",
+    "item_grape" : "<:Grape:1501210562330234980>",
+
+    "item_bok_choy_seed" : "<:Bok_Choy_seed:1501210621839016047>",
+    "item_bok_choy" : "<:Bok_Choy:1501210603493130380>",
+
+    "item_cheese": "<:Cheese:1498466831181021194>",
+    "item_wheat_flour": "<:Wheat_Flour:1498466829440516278>",
+    "item_oil": "<:Oil:1498466827251224627>",
+    "item_sugar": "<:Sugar:1498466825082765423>",
+    "item_fried_egg": "<:Fried_Egg:1498466822780092517>",
+    "item_omelet": "<:Omelet:1498466821278269512>",
+    "item_salad": "<:Salad:1498466820053532682>",
+    "item_cheese_cauliflower": "<:Cheese_Cauliflower:1498466818136871013>",
+    "item_parsnip_soup": "<:Parsnip_Soup:1498466816698355713>",
+    "item_fried_calamari": "<:Fried_Calamari:1498466814064066631>",
+    "item_pizza": "<:Pizza:1498466812201795614>",
+    "item_bean_hotpot": "<:Bean_Hotpot:1498466810792509480>",
+    "item_carp_surprise": "<:Carp_Surprise:1498466807768547408>",
+    "item_hashbrowns": "<:Hashbrowns:1498466806187298876>",
+    "item_pancakes": "<:Pancakes:1498466804773683371>",
+    "item_salmon_dinner": "<:Salmon_Dinner:1498466803347886161>",
+    "item_bread": "<:Bread:1498466800675979384>",
+    "item_pink_cake": "<:Pink_Cake:1498466799476277408>",
+    "item_rhubarb_pie": "<:Rhubarb_Pie:1498466798226636810>",
+    "item_cookie": "<:Cookie:1498466796423086300>",
+    "item_spaghetti": "<:Spaghetti:1498466794648899584>",
+    "item_fried_eel": "<:Fried_Eel:1498466793268711514>",
+    "item_sashimi": "<:Sashimi:1498466791217692763>",
+    "item_maki_roll": "<:Maki_Roll:1498466789972250745>",
+    "item_ice_cream": "<:Ice_Cream:1498466788013379685>",
+    "item_crab_cakes": "<:Crab_Cakes:1498466780983595108>",
+    "item_beer": "<:Beer:1498466779649806447>",
+    "item_tortilla": "<:Tortilla:1501267366917570730>",
+    "item_vinegar": "<:Vinegar:1501267375910031400>",
+    "item_mayonnaise": "<:Mayonnaise:1501267341227593798>",
+    "item_baked_fish": "<:Baked_Fish:1501267373880119307>",
+    "item_strawberry_lover_pie": "<:Strawberry_Lover_Pie:1501267333975375972>",
+    "item_fish_taco": "<:Fish_Taco:1501267335821000845>",
+    "item_escargot": "<:Escargot:1501267337569898760>",
+    "item_lobster_bisque": "<:Lobster_Bisque:1501267338815869090>",
+    "item_cranberry_candy": "<:Cranberry_Candy:1501267342921826386>",
+    "item_blackberry_cobbler": "<:Blackberry_Cobbler:1501267344826175518>",
+    "item_fruit_salad": "<:Fruit_Salad:1501267346138992710>",
+    "item_pumpkin_pie": "<:Pumpkin_Pie:1501267347770441919>",
+    "item_artichoke_dip": "<:Artichoke_Dip:1501267349217738802>",
+    "item_cranberry_sauce": "<:Cranberry_Sauce:1501267357677650213>",
+    "item_fish_burger": "<:fish_Burger:1501267353768558822>",
+    "item_stuffing": "<:Stuffing:1501267355949600789>",
+    "item_super_meal": "<:Super_Meal:1501267359082483954>",
+    "item_pumpkin_soup": "<:Pumpkin_Soup:1501267360936624332>",
+    "item_autumn_bounty": "<:Autumn_Bounty:1501267362769535117>",
+    "item_blueberry_tart": "<:Blueberry_Tart:1501267364715696138>",
+    "item_spicy_octopus": "<:Spicy_octopus:1501267368901607516>",
+    "item_tom_yum_soup": "<:Tom_yum_Soup:1501267370772136066>",
+    "item_pepper_poppers": "<:Pepper_Poppers:1501267372491935938>",
+    "item_treat": "<:Treat:1501267350748659932>",
+
+
+    "item_seaweed": "<:Seaweed:1498349087626367128>",
+    "item_snail": "<:Snail:1498349084359131321>",
+    "item_shrimp": "<:Shrimp:1498349085999235192>",
+    "item_crab": "<:Crab:1498349083004502086>",
+    "item_mussel": "<:Mussel:1498349081699811379>",
+    "item_halibut": "<:Halibut:1498349078197829663>",
+    "item_chub": "<:Chub:1498349076708856030>",
+    "item_tilapia": "<:Tilapia:1498349075383320606>",
+    "item_sturgeon": "<:Sturgeon:1498349074204852274>",
+    "item_sea_cucumber": "<:Sea_Cucumber:1498349072451375246>",
+    "item_squid": "<:Squid:1498349070962528359>",
+    "item_red_snapper": "<:Red_Snapper:1498349069532266678>",
+    "item_octopus": "<:Octopus:1498349068290883737>",
+    "item_eel": "<:Eel:1498349066768224306>",
+    "item_herring": "<:Herring:1498349065102950552>",
+    "item_catfish": "<:Catfish:1498349063815299252>",
+    "item_carp": "<:Carp:1498349061441458216>",
+    "item_perch": "<:Perch:1498349059986034699>",
+    "item_walleye": "<:Walleye:1498349058673217566>",
+    "item_salmon": "<:Salmon:1498349057255538921>",
+    "item_bream": "<:Bream:1498349055397593291>",
+    "item_sardine": "<:Sardine:1498349054009151528>",
+    "item_tuna": "<:Tuna:1498349052205731931>",
+    "item_anchovy": "<:Anchovy:1498349050871939115>",
+    "item_lobster": "<:Lobster:1498349080324083896>",
+    "item_pufferfish": "<:Pufferfish:1498349049542344866>",
+
+    "item_sickle" : "<:sickle:1505936540117762248>",
+    "item_bamboo_rod" : "<:Bamboo_rod:1505936545058914366>",
+    "item_iron_rod" : "<:steel_Rod:1505936543037259856>",
+    "item_legendary_rod" : "<:legendary_Rod:1505936541653143645>",
+    "item_copper_watering_can" : "<:Copper_Watering_Can:1505936551207633008>",
+    "item_steel_watering_can" : "<:Steel_Watering_Can:1505936550029164575>",
+    "item_gold_watering_can" : "<:Gold_Watering_Can:1505936548535861279>",
+    "item_legendary_watering_can" : "<:legendary_Watering_Can:1505936547029979228>",
+    "item_milk_pail" : "<:Milk_Pail:1505936538473595010>",
+}
+
+BLACKJACK_CARD_EMOJI = {
+    "A": ["<:club_1:1500467424254890105>", "<:diamond_1:1500467445121417357>", "<:heart_1:1500467469385728091>", "<:spade_1:1500467493842456637>"],
+    "2": ["<:club_2:1500467425857245234>", "<:diamond_2:1500467446971105290>", "<:heart_2:1500467470908260514>", "<:spade_2:1500467495469977610>"],
+    "3": ["<:club_3:1500467427782295612>", "<:diamond_3:1500467449529892915>", "<:heart_3:1500467472778657902>", "<:spade_3:1500467496887783454>"],
+    "4": ["<:club_4:1500467429271277568>", "<:diamond_4:1500467451559936182>", "<:heart_4:1500467474737659964>", "<:spade_4:1500467498208985239>"],
+    "5": ["<:club_5:1500467431087280190>", "<:diamond_5:1500467452667101235>", "<:heart_5:1500467477023559880>", "<:spade_5:1500467499483922484>"],
+    "6": ["<:club_6:1500467432303890483>", "<:diamond_6:1500467454848008226>", "<:heart_6:1500467479938596875>", "<:spade_6:1500467500431839284>"],
+    "7": ["<:club_7:1500467433851588739>", "<:diamond_7:1500467456555221112>", "<:heart_7:1500467481351946421>", "<:spade_7:1500467501979668682>"],
+    "8": ["<:club_8:1500467435554209882>", "<:diamond_8:1500467457973030993>", "<:heart_8:1500467483641905332>", "<:spade_8:1500467503221182527>"],
+    "9": ["<:club_9:1500467437684916284>", "<:diamond_9:1500467459633844325>", "<:heart_9:1500467486095708361>", "<:spade_9:1500467505230254173>"],
+    "10": ["<:club_10:1500467439132086342>", "<:diamond_10:1500467461492047963>", "<:heart_10:1500467487995723937>", "<:spade_10:1500467506593271870>"],
+    "J": ["<:club_jack:1500467440390242405>", "<:diamond_jack:1500467463090081903>", "<:heart_jack:1500467489635700937>", "<:spade_jack:1500467508665385010>"],
+    "Q": ["<:club_queen:1500467443116806185>", "<:diamond_queen:1500467467884036126>", "<:heart_queen:1500467492567384124>", "<:spade_queen:1500467511341355009>"],
+    "K": ["<:club_king:1500467441732419814>", "<:diamond_king:1500467465334030428>", "<:heart_king:1500467491195850753>", "<:spade_king:1500467509889863770>"],
+}
+
+UPSIDE_DOWN_CARD = "<:backmaroon:1500473196657250405>"

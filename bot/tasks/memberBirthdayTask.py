@@ -12,7 +12,7 @@ class MemberBirthdayTask(commands.Cog):
         self.scheduler = AsyncIOScheduler(timezone="Asia/Ho_Chi_Minh")
         self.scheduler.add_job(
             self.runBirthdayJob,
-            CronTrigger(hour=12, minute=0),
+            CronTrigger(hour=12, minute=0, second=0, timezone="Asia/Ho_Chi_Minh"),
             id="memberBirthdayJob",
             replace_existing=True,
         )

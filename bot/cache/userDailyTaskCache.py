@@ -1,0 +1,3 @@
+userDailyTaskCache = {}
+userDailyTaskProgressDeltaCache = {}
+userDailyTaskLoadedCache = set()

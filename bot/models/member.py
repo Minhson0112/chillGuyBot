@@ -20,6 +20,10 @@ class Member(Base):
     is_partner = Column(Boolean, nullable=False, default=False, comment="is partner member?")
     correct_word_guess_count = Column(Integer, nullable=False, default=0, comment="number of times the member guessed the correct word")
     chill_coin = Column(Integer, nullable=False, default=0, comment="server private currency")
+    is_staff = Column(Boolean, nullable=False, default=False, comment="is staff member")
+    is_mod = Column(Boolean, nullable=False, default=False, comment="is moderator member")
+    is_admin = Column(Boolean, nullable=False, default=False, comment="is admin member")
+    can_create_auto_res = Column(Boolean, nullable=False, default=False, comment="can create auto responder")
 
 
     chat = relationship("Chat", back_populates="member", uselist=False)
@@ -27,3 +31,27 @@ class Member(Base):
     moderationActions = relationship("MemberModerationHistory", foreign_keys="MemberModerationHistory.action_by_user_id", back_populates="actionByMember")
     moderationTargets = relationship("MemberModerationHistory", foreign_keys="MemberModerationHistory.target_user_id", back_populates="targetMember")
     musicEventEntries = relationship("MusicEventEntry", back_populates="member", cascade="all, delete-orphan")
+    farm = relationship("Farm", back_populates="member", uselist=False, cascade="all, delete-orphan")
+    inventories = relationship("UserInventory", back_populates="member", cascade="all, delete-orphan")
+    fishingHistories = relationship("FishingHistory", back_populates="member", cascade="all, delete-orphan")
+    marketListings = relationship(
+        "FarmMarketListing",
+        foreign_keys="FarmMarketListing.seller_user_id",
+        back_populates="seller",
+        cascade="all, delete-orphan",
+    )
+    marketPurchases = relationship(
+        "FarmMarketListing",
+        foreign_keys="FarmMarketListing.buyer_user_id",
+        back_populates="buyer",
+    )
+    dailyActivities = relationship(
+        "MemberDailyActivity",
+        back_populates="member",
+        cascade="all, delete-orphan",
+    )
+    dailyCheckinHistories = relationship(
+        "DailyCheckinHistory",
+        back_populates="member",
+        cascade="all, delete-orphan",
+    )

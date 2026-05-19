@@ -1,0 +1,8 @@
+FARM_MAX_LEVEL = 4
+
+FARM_LEVEL_REQUIRED_EXP = {
+    1: 0,
+    2: 300,
+    3: 5000,
+    4: 15000,
+}

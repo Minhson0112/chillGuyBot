@@ -35,16 +35,6 @@ class Unmute(commands.Cog):
             await interaction.response.send_message("Bạn không thể tự unmute chính mình.")
             return
 
-        if target.id in MOD_ADMIN_USER_IDS:
-            await interaction.response.send_message(
-                "Bạn không thể unmute member thuộc nhóm quản trị viên được bảo vệ."
-            )
-            return
-
-        if target == interaction.guild.owner:
-            await interaction.response.send_message("Không thể unmute owner của server.")
-            return
-
         if isinstance(interaction.user, discord.Member) and target.top_role >= interaction.user.top_role:
             await interaction.response.send_message(
                 "Bạn không thể unmute member có role cao hơn hoặc bằng mình."

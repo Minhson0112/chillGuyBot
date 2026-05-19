@@ -2,7 +2,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot.config.userId import CAN_CREATE_AUTO_RESPONSE_USER_ID
 from bot.services.autoResponder.setAutoResponseService import SetAutoResponseService
 from bot.validation.guildValidation import chillStationOnly
 
@@ -28,8 +27,11 @@ class SetAutoResponse(commands.Cog):
         is_exact_match: bool,
         msg_link: str,
     ):
-        if interaction.user.id not in CAN_CREATE_AUTO_RESPONSE_USER_ID:
-            await interaction.response.send_message("Bạn không có quyền dùng lệnh này.")
+        if not self.setAutoResponseService.canCreateAutoResponse(interaction.user.id):
+            await interaction.response.send_message(
+                "Bạn không có quyền dùng lệnh này.",
+                ephemeral=True,
+            )
             return
 
         msgKey = msg_key.strip().lower()

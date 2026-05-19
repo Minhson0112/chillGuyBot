@@ -3,9 +3,13 @@ from datetime import datetime, timezone
 from bot.config.database import getDbSession
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.chatRepository import ChatRepository
+from bot.services.farm.farmInitializeService import FarmInitializeService
 
 
 class MemberJoinService:
+    def __init__(self):
+        self.farmInitializeService = FarmInitializeService()
+
     def handleMemberJoin(self, discordMember):
         joinedAt = (
             discordMember.joined_at.replace(tzinfo=None)
@@ -32,5 +36,11 @@ class MemberJoinService:
 
             memberRepository.upsertOnJoin(discordMember.id, memberData)
             chatRepository.createIfNotExists(discordMember.id)
+
+            self.farmInitializeService.initializeFarmForMember(
+                session=session,
+                userId=discordMember.id,
+                isBot=discordMember.bot,
+            )
 
             session.commit()
