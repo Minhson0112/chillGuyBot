@@ -155,7 +155,7 @@ class HomiesRoleButtonView(discord.ui.View):
 
     def buildReceivedHomiesRoleEmbed(self, role: discord.Role):
         embed = discord.Embed(
-            title="Bạn đã nhận được role Homies",
+            title="Bạn đã nhận được role  ⋆｡‧˚ʚ 𝐡𝐨𝐦𝐢𝐞𝐬 ɞ˚‧｡⋆",
             description=(
                 f"Role: {role.mention}\n\n"
                 "Nếu bỏ tag server Chill Station khỏi profile, bạn sẽ mất role sau 1 ngày."

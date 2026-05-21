@@ -66,9 +66,9 @@ class SetHomiesCommand(commands.Cog):
 
     def buildHomiesRoleMessageEmbed(self):
         embed = discord.Embed(
-            title="Nhận role Homies",
+            title="<a:CS_blueblink:1507030291640881203> Nhận role ⋆｡‧˚ʚ 𝐡𝐨𝐦𝐢𝐞𝐬 ɞ˚‧｡⋆ <a:CS_pink6:1507030280932687966>",
             description=(
-                "Bấm nút bên dưới để nhận role Homies."
+                "Bấm nút bên dưới để nhận role <@&1506931736058134538>."
             ),
             color=discord.Color.blue(),
         )
