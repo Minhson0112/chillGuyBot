@@ -43,7 +43,7 @@ class HomiesRoleButtonView(discord.ui.View):
 
         if primaryGuild is None:
             await interaction.followup.send(
-                "Bạn cần để tag server của Chill Station trên profile để nhận role Homies.",
+                "Bạn cần để tag server của Chill Station trên profile để nhận role Homies error1.",
                 ephemeral=True,
             )
             return
