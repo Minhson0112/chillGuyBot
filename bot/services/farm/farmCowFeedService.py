@@ -11,7 +11,7 @@ from bot.repository.userInventoryRepository import UserInventoryRepository
 class FarmCowFeedService:
     WHEAT_ITEM_CODE = "wheat"
     HUNGRY_INTERVAL_MINUTES = 30
-    WHEAT_PER_COW = 5
+    WHEAT_PER_COW = 3
 
     def feedCow(self, userId: int):
         with getDbSession() as session:

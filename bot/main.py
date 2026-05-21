@@ -163,6 +163,7 @@ async def main():
         "bot.commands.toolBag",
         "bot.commands.use",
         "bot.commands.info",
+        "bot.commands.setHomies",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.messageCreateEvent",
