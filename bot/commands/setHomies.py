@@ -3,6 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from bot.config.channel import HOMIES_ROLE_CHANNEL_ID
+from bot.config.roles import HOMIES_ROLE_ID
 from bot.config.emoji import LOGO
 from bot.validation.guildValidation import guildOnly
 from bot.validation.isOwnerValidation import isOwner
@@ -21,6 +22,7 @@ class SetHomiesCommand(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         homiesRoleChannel = self.bot.get_channel(HOMIES_ROLE_CHANNEL_ID)
+        role = interaction.guild.get_role(HOMIES_ROLE_ID)
 
         if homiesRoleChannel is None:
             try:

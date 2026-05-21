@@ -39,19 +39,9 @@ class HomiesRoleButtonView(discord.ui.View):
             )
             return
 
-        primaryGuild = await self.resolvePrimaryGuild(interaction)
+        hasChillStationTag = await self.hasChillStationTag(interaction)
 
-        if primaryGuild is None:
-            await interaction.followup.send(
-                "Bạn cần để tag server của Chill Station trên profile để nhận role Homies error1.",
-                ephemeral=True,
-            )
-            return
-
-        identityGuildId = getattr(primaryGuild, "identity_guild_id", None)
-        identityEnabled = getattr(primaryGuild, "identity_enabled", None)
-
-        if identityGuildId != CHILL_STATION_GUILD_ID or identityEnabled is not True:
+        if not hasChillStationTag:
             await interaction.followup.send(
                 "Bạn cần để tag server của Chill Station trên profile để nhận role Homies.",
                 ephemeral=True,
@@ -98,18 +88,70 @@ class HomiesRoleButtonView(discord.ui.View):
             ephemeral=True,
         )
 
+    async def hasChillStationTag(self, interaction: discord.Interaction):
+        primaryGuild = await self.resolvePrimaryGuild(interaction)
+
+        if primaryGuild is None:
+            return False
+
+        identityGuildId = self.getPrimaryGuildId(primaryGuild)
+
+        if identityGuildId is None:
+            return False
+
+        return identityGuildId == CHILL_STATION_GUILD_ID
+
     async def resolvePrimaryGuild(self, interaction: discord.Interaction):
-        primaryGuild = getattr(interaction.user, "primary_guild", None)
-
-        if primaryGuild is not None:
-            return primaryGuild
-
         try:
             user = await interaction.client.fetch_user(interaction.user.id)
+            primaryGuild = getattr(user, "primary_guild", None)
+
+            if primaryGuild is not None:
+                return primaryGuild
         except discord.HTTPException:
+            pass
+
+        return getattr(interaction.user, "primary_guild", None)
+
+    def getPrimaryGuildId(self, primaryGuild):
+        identityGuildId = self.getPrimaryGuildValue(
+            primaryGuild=primaryGuild,
+            keyList=[
+                "identity_guild_id",
+                "guild_id",
+                "id",
+            ],
+        )
+
+        if identityGuildId is None:
             return None
 
-        return getattr(user, "primary_guild", None)
+        try:
+            return int(identityGuildId)
+        except (TypeError, ValueError):
+            return None
+
+    def getPrimaryGuildValue(
+        self,
+        primaryGuild,
+        keyList: list[str],
+    ):
+        if isinstance(primaryGuild, dict):
+            for key in keyList:
+                value = primaryGuild.get(key)
+
+                if value is not None:
+                    return value
+
+            return None
+
+        for key in keyList:
+            value = getattr(primaryGuild, key, None)
+
+            if value is not None:
+                return value
+
+        return None
 
     def buildReceivedHomiesRoleEmbed(self, role: discord.Role):
         embed = discord.Embed(
