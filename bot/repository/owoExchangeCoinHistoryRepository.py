@@ -34,3 +34,16 @@ class OwoExchangeCoinHistoryRepository:
             .filter(OwoExchangeCoinHistory.message_id == messageId)
             .first()
         )
+
+    def findBySenderUserIdTransferredAtFrom(
+        self,
+        senderUserId: int,
+        transferredAtFrom,
+    ):
+        return (
+            self.session.query(OwoExchangeCoinHistory)
+            .filter(OwoExchangeCoinHistory.sender_user_id == senderUserId)
+            .filter(OwoExchangeCoinHistory.transferred_at >= transferredAtFrom)
+            .order_by(OwoExchangeCoinHistory.transferred_at.asc())
+            .all()
+        )

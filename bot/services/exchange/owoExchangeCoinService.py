@@ -7,6 +7,9 @@ from bot.repository.owoExchangeCoinHistoryRepository import OwoExchangeCoinHisto
 
 class OwoExchangeCoinService:
     COWONCY_PER_CHILL_COIN = 200
+    WEEKLY_CHILL_COIN_LIMIT = 5000
+    EXCHANGE_LIMIT_DAYS = 7
+    CHILL_COIN_EMOJI = "<:cs_coin:1495116560191324383>"
     GMT7 = timezone(timedelta(hours=7))
 
     def exchangeCoin(
@@ -30,7 +33,7 @@ class OwoExchangeCoinService:
                 "success": False,
                 "message": (
                     f"Số cowoncy chuyển chưa đủ để đổi coin. "
-                    f"Tỉ lệ hiện tại là **{self.COWONCY_PER_CHILL_COIN:,}** cowoncy = **1** <:cs_coin:1495116560191324383> chill coin."
+                    f"Tỉ lệ hiện tại là **{self.COWONCY_PER_CHILL_COIN:,}** cowoncy = **1** {self.CHILL_COIN_EMOJI} chill coin."
                 ),
             }
 
@@ -54,6 +57,31 @@ class OwoExchangeCoinService:
                     "message": "Không tìm thấy dữ liệu member của người chuyển.",
                 }
 
+            now = self.getNowGmt7()
+            limitStartedAt = now - timedelta(days=self.EXCHANGE_LIMIT_DAYS)
+            recentHistories = owoExchangeCoinHistoryRepository.findBySenderUserIdTransferredAtFrom(
+                senderUserId=senderUserId,
+                transferredAtFrom=limitStartedAt,
+            )
+            receivedChillCoinAmount = self.calculateChillCoinAmountFromHistories(recentHistories)
+
+            if receivedChillCoinAmount + chillCoinAmount > self.WEEKLY_CHILL_COIN_LIMIT:
+                nextExchangeAt = self.getNextExchangeAt(
+                    recentHistories=recentHistories,
+                    receivedChillCoinAmount=receivedChillCoinAmount,
+                    requestedChillCoinAmount=chillCoinAmount,
+                    now=now,
+                )
+
+                return {
+                    "success": False,
+                    "message": self.buildWeeklyLimitExceededMessage(
+                        receivedChillCoinAmount=receivedChillCoinAmount,
+                        requestedChillCoinAmount=chillCoinAmount,
+                        nextExchangeAt=nextExchangeAt,
+                    ),
+                }
+
             senderMember.chill_coin += chillCoinAmount
 
             owoExchangeCoinHistoryRepository.create(
@@ -62,7 +90,7 @@ class OwoExchangeCoinService:
                 senderUserId=senderUserId,
                 receiverUserId=receiverUserId,
                 cowoncyAmount=cowoncyAmount,
-                transferredAt=self.getNowGmt7(),
+                transferredAt=now,
             )
 
             session.commit()
@@ -74,3 +102,42 @@ class OwoExchangeCoinService:
 
     def getNowGmt7(self):
         return datetime.now(self.GMT7).replace(tzinfo=None)
+
+    def calculateChillCoinAmountFromHistories(self, recentHistories):
+        return sum(
+            history.cowoncy_amount // self.COWONCY_PER_CHILL_COIN
+            for history in recentHistories
+        )
+
+    def getNextExchangeAt(
+        self,
+        recentHistories,
+        receivedChillCoinAmount: int,
+        requestedChillCoinAmount: int,
+        now,
+    ):
+        runningReceivedChillCoinAmount = receivedChillCoinAmount
+
+        for history in recentHistories:
+            runningReceivedChillCoinAmount -= history.cowoncy_amount // self.COWONCY_PER_CHILL_COIN
+            nextExchangeAt = history.transferred_at + timedelta(days=self.EXCHANGE_LIMIT_DAYS)
+
+            if runningReceivedChillCoinAmount + requestedChillCoinAmount <= self.WEEKLY_CHILL_COIN_LIMIT:
+                return nextExchangeAt
+
+        return now + timedelta(days=self.EXCHANGE_LIMIT_DAYS)
+
+    def buildWeeklyLimitExceededMessage(
+        self,
+        receivedChillCoinAmount: int,
+        requestedChillCoinAmount: int,
+        nextExchangeAt,
+    ):
+        nextExchangeAtText = nextExchangeAt.strftime("%d/%m/%Y %H:%M")
+
+        return (
+            f"Bạn đã nhận **{receivedChillCoinAmount:,}/{self.WEEKLY_CHILL_COIN_LIMIT:,}** {self.CHILL_COIN_EMOJI} "
+            f"trong {self.EXCHANGE_LIMIT_DAYS} ngày gần đây.\n"
+            f"Giao dịch này muốn đổi **{requestedChillCoinAmount:,}** {self.CHILL_COIN_EMOJI} nên đã vượt hạn mức. "
+            f"Hãy đổi tiền tiếp vào ngày **{nextExchangeAtText} (GMT+7)**."
+        )
