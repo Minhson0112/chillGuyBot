@@ -103,6 +103,29 @@ class OwoExchangeCoinService:
     def getNowGmt7(self):
         return datetime.now(self.GMT7).replace(tzinfo=None)
 
+    def getExchangeStatus(self, senderUserId: int):
+        with getDbSession() as session:
+            owoExchangeCoinHistoryRepository = OwoExchangeCoinHistoryRepository(session)
+
+            now = self.getNowGmt7()
+            limitStartedAt = now - timedelta(days=self.EXCHANGE_LIMIT_DAYS)
+            recentHistories = owoExchangeCoinHistoryRepository.findBySenderUserIdTransferredAtFrom(
+                senderUserId=senderUserId,
+                transferredAtFrom=limitStartedAt,
+            )
+            receivedChillCoinAmount = self.calculateChillCoinAmountFromHistories(recentHistories)
+            remainingChillCoinAmount = max(self.WEEKLY_CHILL_COIN_LIMIT - receivedChillCoinAmount, 0)
+            remainingCowoncyAmount = remainingChillCoinAmount * self.COWONCY_PER_CHILL_COIN
+
+            return {
+                "remainingChillCoinAmount": remainingChillCoinAmount,
+                "remainingCowoncyAmount": remainingCowoncyAmount,
+                "resetAt": self.getNextResetAt(
+                    recentHistories=recentHistories,
+                    now=now,
+                ),
+            }
+
     def calculateChillCoinAmountFromHistories(self, recentHistories):
         return sum(
             history.cowoncy_amount // self.COWONCY_PER_CHILL_COIN
@@ -126,6 +149,16 @@ class OwoExchangeCoinService:
                 return nextExchangeAt
 
         return now + timedelta(days=self.EXCHANGE_LIMIT_DAYS)
+
+    def getNextResetAt(
+        self,
+        recentHistories,
+        now,
+    ):
+        if len(recentHistories) == 0:
+            return now
+
+        return recentHistories[0].transferred_at + timedelta(days=self.EXCHANGE_LIMIT_DAYS)
 
     def buildWeeklyLimitExceededMessage(
         self,

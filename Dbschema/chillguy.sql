@@ -1332,3 +1332,38 @@ CREATE TABLE farm_tool_equipment (
         FOREIGN KEY (user_tool_id) REFERENCES user_tools(id)
         ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='equipped tools of farm';
+
+
+# doi chill coin sang cowoncy
+CREATE TABLE chill_coin_exchange_cowoncy_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'chill coin exchange cowoncy history id',
+
+    sender_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id who sent cowoncy',
+    receiver_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id who received cowoncy',
+
+    chill_coin_amount BIGINT NOT NULL COMMENT 'exchanged chill coin amount',
+    cowoncy_amount BIGINT NOT NULL COMMENT 'received cowoncy amount',
+
+    transferred_at DATETIME NOT NULL COMMENT 'transferred datetime in GMT+7',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_chill_coin_exchange_cowoncy_histories_sender_user_id (sender_user_id),
+    KEY idx_chill_coin_exchange_cowoncy_histories_receiver_user_id (receiver_user_id),
+    KEY idx_chill_coin_exchange_cowoncy_histories_transferred_at (transferred_at),
+
+    CONSTRAINT fk_chill_coin_exchange_cowoncy_histories_sender_user_id
+        FOREIGN KEY (sender_user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_chill_coin_exchange_cowoncy_histories_receiver_user_id
+        FOREIGN KEY (receiver_user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_chill_coin_exchange_cowoncy_histories_chill_coin_amount
+        CHECK (chill_coin_amount > 0),
+
+    CONSTRAINT chk_chill_coin_exchange_cowoncy_histories_cowoncy_amount
+        CHECK (cowoncy_amount > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='chill coin to cowoncy exchange histories';

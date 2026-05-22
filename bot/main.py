@@ -159,6 +159,8 @@ async def main():
         "bot.commands.createFarm",
         "bot.commands.sellRole",
         "bot.commands.createRoleShop",
+        "bot.commands.exchange",
+        "bot.commands.checkExchange",
         "bot.commands.cancelBuyRole",
         "bot.commands.toolBag",
         "bot.commands.use",
