@@ -113,22 +113,48 @@ class DailyTaskService:
         tasks,
     ):
         cacheKey = (userId, taskDate)
+        existingCachedTaskMap = self.buildCachedTaskMap(
+            userId=userId,
+            taskDate=taskDate,
+        )
 
         userDailyTaskCache[cacheKey] = [
-            {
-                "id": task.id,
-                "task_type": task.task_type,
-                "target_item_id": task.target_item_id,
-                "target_crop_id": task.target_crop_id,
-                "target_channel_id": task.target_channel_id,
-                "required_value": task.required_value,
-                "progress_value": task.progress_value,
-                "status": task.status,
-            }
+            self.buildCacheTaskData(
+                task=task,
+                existingCachedTask=existingCachedTaskMap.get(task.id),
+            )
             for task in tasks
         ]
 
         userDailyTaskLoadedCache.add(cacheKey)
+
+    def buildCacheTaskData(
+        self,
+        task,
+        existingCachedTask,
+    ):
+        progressValue = task.progress_value
+        status = task.status
+
+        if task.task_type == self.TASK_TYPE_CHAT_MESSAGE and existingCachedTask is not None:
+            progressValue = max(
+                progressValue,
+                existingCachedTask.get("progress_value", progressValue),
+            )
+
+            if existingCachedTask.get("status") == self.STATUS_COMPLETED:
+                status = self.STATUS_COMPLETED
+
+        return {
+            "id": task.id,
+            "task_type": task.task_type,
+            "target_item_id": task.target_item_id,
+            "target_crop_id": task.target_crop_id,
+            "target_channel_id": task.target_channel_id,
+            "required_value": task.required_value,
+            "progress_value": progressValue,
+            "status": status,
+        }
 
     def buildCachedTaskMap(
         self,
