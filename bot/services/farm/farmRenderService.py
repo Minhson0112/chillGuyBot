@@ -595,7 +595,7 @@ class FarmRenderService:
 
         nextTrainText = self.getNextTrainArrivalText()
         nextTrainMessage = (
-            f"\nChuyến tàu tiếp theo sẽ đến vào lúc **{nextTrainText}**, "
+            f"\nChuyến tàu tiếp theo sẽ đến vào lúc **{nextTrainText}**."
         )
 
         if trainEvent is None or trainEvent.requiredItem is None:
