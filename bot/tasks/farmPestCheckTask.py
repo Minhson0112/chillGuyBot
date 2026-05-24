@@ -9,7 +9,7 @@ from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 
 
 class FarmPestCheckTask(commands.Cog):
-    PEST_CHECK_INTERVAL_SECONDS = 390
+    PEST_CHECK_INTERVAL_SECONDS = 240
     PEST_THRESHOLD_MINUTES = 6
 
     def __init__(self, bot):

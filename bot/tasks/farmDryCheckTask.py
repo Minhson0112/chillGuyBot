@@ -9,7 +9,7 @@ from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 
 
 class FarmDryCheckTask(commands.Cog):
-    DRY_CHECK_INTERVAL_SECONDS = 520
+    DRY_CHECK_INTERVAL_SECONDS = 180
     DRY_THRESHOLD_MINUTES = 8
 
     def __init__(self, bot):
