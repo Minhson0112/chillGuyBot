@@ -24,6 +24,7 @@ class Member(Base):
     is_mod = Column(Boolean, nullable=False, default=False, comment="is moderator member")
     is_admin = Column(Boolean, nullable=False, default=False, comment="is admin member")
     can_create_auto_res = Column(Boolean, nullable=False, default=False, comment="can create auto responder")
+    is_allow_notifications = Column(Boolean, nullable=False, default=False, comment="is allowed to receive notifications")
 
 
     chat = relationship("Chat", back_populates="member", uselist=False)

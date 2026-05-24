@@ -1367,3 +1367,8 @@ CREATE TABLE chill_coin_exchange_cowoncy_histories (
     CONSTRAINT chk_chill_coin_exchange_cowoncy_histories_cowoncy_amount
         CHECK (cowoncy_amount > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='chill coin to cowoncy exchange histories';
+
+
+# add member notification permission
+ALTER TABLE member
+    ADD COLUMN is_allow_notifications TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'is allowed to receive notifications';

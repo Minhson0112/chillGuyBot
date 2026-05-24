@@ -1,5 +1,10 @@
 from bot.models.farmCowShed import FarmCowShed
 from datetime import datetime
+from datetime import timedelta
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import joinedload
+
+from bot.models.farm import Farm
 
 
 class FarmCowShedRepository:
@@ -47,6 +52,44 @@ class FarmCowShedRepository:
     
     def markMilkCollected(self, farmCowShed: FarmCowShed):
         farmCowShed.last_collected_milk_at = datetime.now()
+
+        self.session.flush()
+
+        return farmCowShed
+    
+    def findStarvedCowSheds(self, now: datetime, starvationHours: int):
+        thresholdAt = now - timedelta(hours=starvationHours)
+
+        return (
+            self.session.query(FarmCowShed)
+            .options(
+                joinedload(FarmCowShed.farm).joinedload(Farm.member),
+            )
+            .filter(FarmCowShed.cow_count > 0)
+            .filter(
+                or_(
+                    FarmCowShed.last_fed_at <= thresholdAt,
+                    and_(
+                        FarmCowShed.last_fed_at.is_(None),
+                        FarmCowShed.last_collected_milk_at <= thresholdAt,
+                    ),
+                    and_(
+                        FarmCowShed.last_fed_at.is_(None),
+                        FarmCowShed.last_collected_milk_at.is_(None),
+                        FarmCowShed.created_at <= thresholdAt,
+                    ),
+                )
+            )
+            .all()
+        )
+    
+    def clearCows(self, farmCowShed: FarmCowShed):
+        farmCowShed.cow_count = 0
+        farmCowShed.cow_image_key = None
+        farmCowShed.cow_x = None
+        farmCowShed.cow_y = None
+        farmCowShed.last_fed_at = None
+        farmCowShed.last_collected_milk_at = None
 
         self.session.flush()
 

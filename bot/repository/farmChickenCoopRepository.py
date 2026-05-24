@@ -1,5 +1,10 @@
 from bot.models.farmChickenCoop import FarmChickenCoop
 from datetime import datetime
+from datetime import timedelta
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import joinedload
+
+from bot.models.farm import Farm
 
 
 class FarmChickenCoopRepository:
@@ -50,6 +55,45 @@ class FarmChickenCoopRepository:
     
     def markEggCollected(self, farmChickenCoop: FarmChickenCoop):
         farmChickenCoop.last_collected_egg_at = datetime.now()
+        self.session.flush()
+
+        return farmChickenCoop
+    
+    def findStarvedChickenCoops(self, now: datetime, starvationHours: int):
+        thresholdAt = now - timedelta(hours=starvationHours)
+
+        return (
+            self.session.query(FarmChickenCoop)
+            .options(
+                joinedload(FarmChickenCoop.farm).joinedload(Farm.member),
+            )
+            .filter(FarmChickenCoop.chicken_count > 0)
+            .filter(
+                or_(
+                    FarmChickenCoop.last_fed_at <= thresholdAt,
+                    and_(
+                        FarmChickenCoop.last_fed_at.is_(None),
+                        FarmChickenCoop.last_collected_egg_at <= thresholdAt,
+                    ),
+                    and_(
+                        FarmChickenCoop.last_fed_at.is_(None),
+                        FarmChickenCoop.last_collected_egg_at.is_(None),
+                        FarmChickenCoop.created_at <= thresholdAt,
+                    ),
+                )
+            )
+            .all()
+        )
+    
+    def clearChickens(self, farmChickenCoop: FarmChickenCoop):
+        farmChickenCoop.chicken_count = 0
+        farmChickenCoop.chicken_1_x = None
+        farmChickenCoop.chicken_1_y = None
+        farmChickenCoop.chicken_2_x = None
+        farmChickenCoop.chicken_2_y = None
+        farmChickenCoop.last_fed_at = None
+        farmChickenCoop.last_collected_egg_at = None
+
         self.session.flush()
 
         return farmChickenCoop

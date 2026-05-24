@@ -247,3 +247,13 @@ class MemberRepository:
             return False
 
         return member.can_create_auto_res
+
+    def updateAllowNotifications(self, userId, isAllowNotifications: bool):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return None
+
+        member.is_allow_notifications = isAllowNotifications
+        self.session.flush()
+        return member

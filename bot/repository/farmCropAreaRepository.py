@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import joinedload
 
+from bot.models.farm import Farm
 from bot.models.farmCropArea import FarmCropArea
 
 
@@ -148,6 +150,9 @@ class FarmCropAreaRepository:
 
         return (
             self.session.query(FarmCropArea)
+            .options(
+                joinedload(FarmCropArea.farm).joinedload(Farm.member),
+            )
             .filter(FarmCropArea.crop_id.isnot(None))
             .filter(FarmCropArea.planted_at.isnot(None))
             .filter(FarmCropArea.harvestable_at > now)
@@ -169,6 +174,9 @@ class FarmCropAreaRepository:
 
         return (
             self.session.query(FarmCropArea)
+            .options(
+                joinedload(FarmCropArea.farm).joinedload(Farm.member),
+            )
             .filter(FarmCropArea.crop_id.isnot(None))
             .filter(FarmCropArea.planted_at.isnot(None))
             .filter(FarmCropArea.harvestable_at > now)

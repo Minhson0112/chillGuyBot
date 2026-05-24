@@ -150,6 +150,7 @@ async def main():
         "bot.commands.topChatStaff",
         "bot.commands.myChatRank",
         "bot.commands.myVoiceRank",
+        "bot.commands.noti",
         "bot.commands.daily",
         "bot.commands.task",
         "bot.commands.findMarketItem",
@@ -182,6 +183,7 @@ async def main():
         "bot.tasks.memberDailyActivityFlushTask",
         "bot.tasks.monthlyTopChatRewardTask",
         "bot.tasks.roleShopExpireTask",
+        "bot.tasks.farmAnimalStarvationTask",
         "bot.tasks.farmTrainEventAutoTask",
         "bot.tasks.homiesRoleCheckTask",
     ]

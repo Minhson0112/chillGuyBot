@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
 
@@ -66,6 +66,8 @@ class FarmRenderService:
 
     TRAIN_X = 1430
     TRAIN_Y = 150
+    TRAIN_EVENT_HOURS = [7, 12, 16, 21]
+    TRAIN_TIMEZONE = timezone(timedelta(hours=7))
 
     MAX_PLOT_COUNT = 16
 
@@ -569,15 +571,40 @@ class FarmRenderService:
             fontSize=self.EXP_FONT_SIZE,
         )
 
+    def getNextTrainArrivalText(self):
+        now = datetime.now(self.TRAIN_TIMEZONE)
+
+        for hour in self.TRAIN_EVENT_HOURS:
+            nextTrainAt = now.replace(hour=hour, minute=0, second=0, microsecond=0)
+            if nextTrainAt > now:
+                return nextTrainAt.strftime("%H:%M %d/%m/%Y")
+
+        nextTrainAt = (now + timedelta(days=1)).replace(
+            hour=self.TRAIN_EVENT_HOURS[0],
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+        return nextTrainAt.strftime("%H:%M %d/%m/%Y")
+
     def buildTrainEventEmbedData(self, farm, trainEvent):
         if not farm.is_train_event:
             return {
                 "trainEventText": "Tàu đang ở ga Chill Station, sẽ cập bến farm của bạn sớm thôi.",
             }
 
+        nextTrainText = self.getNextTrainArrivalText()
+        nextTrainMessage = (
+            f"\nChuyến tàu hiện tại sẽ được thay bằng chuyến tiếp theo lúc **{nextTrainText}**, "
+            "hãy chất đồ trước mốc này."
+        )
+
         if trainEvent is None or trainEvent.requiredItem is None:
             return {
-                "trainEventText": "Tàu hỏa đang cập bến, nhưng chưa tìm thấy dữ liệu yêu cầu.",
+                "trainEventText": (
+                    "Tàu hỏa đang cập bến, nhưng chưa tìm thấy dữ liệu yêu cầu."
+                    f"{nextTrainMessage}"
+                ),
             }
 
         requiredItem = trainEvent.requiredItem
@@ -591,6 +618,7 @@ class FarmRenderService:
                 f"{itemEmoji} **{requiredItem.name}**, "
                 f"phần thưởng **{self.formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji} "
                 f"**{self.formatNumber(trainEvent.reward_exp)}** {expEmoji}"
+                f"{nextTrainMessage}"
             ),
         }
 
