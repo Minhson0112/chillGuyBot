@@ -577,7 +577,7 @@ class FarmRenderService:
         for hour in self.TRAIN_EVENT_HOURS:
             nextTrainAt = now.replace(hour=hour, minute=0, second=0, microsecond=0)
             if nextTrainAt > now:
-                return nextTrainAt.strftime("%H:%M %d/%m/%Y")
+                return nextTrainAt.strftime("%H:%M")
 
         nextTrainAt = (now + timedelta(days=1)).replace(
             hour=self.TRAIN_EVENT_HOURS[0],
@@ -585,7 +585,7 @@ class FarmRenderService:
             second=0,
             microsecond=0,
         )
-        return nextTrainAt.strftime("%H:%M %d/%m/%Y")
+        return nextTrainAt.strftime("%H:%M")
 
     def buildTrainEventEmbedData(self, farm, trainEvent):
         if not farm.is_train_event:
@@ -595,8 +595,7 @@ class FarmRenderService:
 
         nextTrainText = self.getNextTrainArrivalText()
         nextTrainMessage = (
-            f"\nChuyến tàu hiện tại sẽ được thay bằng chuyến tiếp theo lúc **{nextTrainText}**, "
-            "hãy chất đồ trước mốc này."
+            f"\nChuyến tàu tiếp theo sẽ đến vào lúc **{nextTrainText}**, "
         )
 
         if trainEvent is None or trainEvent.requiredItem is None:
