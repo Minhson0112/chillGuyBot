@@ -141,11 +141,11 @@ class FarmInventoryRenderService:
         with getDbSession() as session:
             userToolRepository = UserToolRepository(session)
 
-            totalToolCount = userToolRepository.countByUserId(userId)
+            totalToolCount = userToolRepository.countUsableByUserId(userId)
             totalPage = self.calculateTotalPage(totalToolCount)
             currentPage = self.normalizePage(page, totalPage)
 
-            userTools = userToolRepository.findByUserIdAndPage(
+            userTools = userToolRepository.findUsableByUserIdAndPage(
                 userId,
                 currentPage,
                 self.PER_PAGE,

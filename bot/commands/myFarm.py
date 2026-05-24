@@ -22,8 +22,13 @@ from bot.services.farm.farmShopRenderService import FarmShopRenderService
 from bot.views.farm.farmNpcShopPaginationView import FarmNpcShopPaginationView
 from bot.services.farm.farmRecipeRenderService import FarmRecipeRenderService
 from bot.views.farm.farmRecipePaginationView import FarmRecipePaginationView
+from bot.repository.farmRepository import FarmRepository
+from bot.repository.farmToolEquipmentRepository import FarmToolEquipmentRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.repository.userToolRepository import UserToolRepository
 from bot.views.farm.plantSeedSelectView import PlantSeedSelectView
+from bot.views.farm.removeToolSelectView import RemoveToolSelectView
+from bot.views.farm.useToolSelectView import UseToolSelectView
 from bot.views.farm.myToolBagPaginationView import MyToolBagPaginationView
 from bot.config.database import getDbSession
 
@@ -411,6 +416,66 @@ class MyFarmView(discord.ui.View):
                 ephemeral=True,
             )
 
+    @discord.ui.button(label="Dùng công cụ", emoji="🛠️", style=discord.ButtonStyle.secondary)
+    async def useToolButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            toolOptions = self.findToolOptions()
+
+            if not toolOptions:
+                await interaction.response.send_message(
+                    "Bạn không có công cụ nào có thể lắp vào farm. Hãy bấm nút **<:store:1501945501883568331> Shop NPC** để mua công cụ.",
+                    ephemeral=True,
+                )
+                return
+
+            view = UseToolSelectView(
+                authorId=self.authorId,
+                toolOptions=toolOptions,
+            )
+
+            await interaction.response.send_message(
+                content="Các công cụ bên dưới là công cụ trong túi của bạn.",
+                view=view,
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Open use tool select error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi mở danh sách công cụ.",
+                ephemeral=True,
+            )
+
+    @discord.ui.button(label="Gỡ công cụ", emoji="🧰", style=discord.ButtonStyle.secondary)
+    async def removeToolButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        try:
+            toolOptions = self.findEquippedToolOptions()
+
+            if not toolOptions:
+                await interaction.response.send_message(
+                    "Farm của bạn hiện chưa lắp công cụ nào.",
+                    ephemeral=True,
+                )
+                return
+
+            view = RemoveToolSelectView(
+                authorId=self.authorId,
+                toolOptions=toolOptions,
+            )
+
+            await interaction.response.send_message(
+                content="Các công cụ bên dưới là công cụ đang được lắp trong farm của bạn.",
+                view=view,
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Open remove tool select error: {e}")
+            await interaction.response.send_message(
+                "Đã xảy ra lỗi khi mở danh sách công cụ đang lắp.",
+                ephemeral=True,
+            )
+
     @discord.ui.button(label="Shop NPC", emoji="<:store:1501945501883568331>", style=discord.ButtonStyle.secondary)
     async def viewNpcShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
@@ -628,6 +693,79 @@ class MyFarmView(discord.ui.View):
 
             return seedOptions
         
+    def findToolOptions(self):
+        with getDbSession() as session:
+            userToolRepository = UserToolRepository(session)
+
+            userTools = userToolRepository.findUsableByUserIdAndPage(
+                userId=self.authorId,
+                page=1,
+                perPage=25,
+            )
+
+            toolOptions = []
+
+            for userTool in userTools:
+                item = userTool.item
+
+                if item is None:
+                    continue
+
+                toolTemplate = userTool.tool_template
+                durabilityText = "-"
+
+                if toolTemplate is not None:
+                    durabilityText = f"{userTool.current_durability}/{toolTemplate.max_durability}"
+
+                toolOptions.append({
+                    "userToolId": userTool.id,
+                    "itemName": item.name,
+                    "iconImageKey": item.icon_image_key,
+                    "durabilityText": durabilityText,
+                    "status": userTool.status,
+                })
+
+            return toolOptions
+
+    def findEquippedToolOptions(self):
+        with getDbSession() as session:
+            farmRepository = FarmRepository(session)
+            farmToolEquipmentRepository = FarmToolEquipmentRepository(session)
+
+            farm = farmRepository.findByUserId(self.authorId)
+
+            if farm is None:
+                return []
+
+            equipments = farmToolEquipmentRepository.findByFarmIdWithToolData(farm.id)
+            toolOptions = []
+
+            for equipment in equipments:
+                userTool = equipment.user_tool
+
+                if userTool is None:
+                    continue
+
+                item = userTool.item
+
+                if item is None:
+                    continue
+
+                toolTemplate = userTool.tool_template
+                durabilityText = "-"
+
+                if toolTemplate is not None:
+                    durabilityText = f"{userTool.current_durability}/{toolTemplate.max_durability}"
+
+                toolOptions.append({
+                    "userToolId": userTool.id,
+                    "itemName": item.name,
+                    "iconImageKey": item.icon_image_key,
+                    "durabilityText": durabilityText,
+                })
+
+            return toolOptions
+
     def formatGrowthTime(self, totalGrowthSeconds: int):
         if totalGrowthSeconds is None:
             return "-"

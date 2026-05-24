@@ -50,6 +50,10 @@ class FarmToolEquipmentRepository:
         self.session.flush()
 
         return farmToolEquipment
+
+    def delete(self, farmToolEquipment):
+        self.session.delete(farmToolEquipment)
+        self.session.flush()
     
     def findByFarmIdWithToolData(self, farmId: int):
         return (

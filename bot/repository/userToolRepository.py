@@ -1,4 +1,5 @@
 from bot.models.userTool import UserTool
+from bot.enums.toolStatus import ToolStatus
 from sqlalchemy.orm import joinedload
 
 class UserToolRepository:
@@ -32,6 +33,14 @@ class UserToolRepository:
             .filter(UserTool.user_id == userId)
             .count()
         )
+    
+    def countUsableByUserId(self, userId: int):
+        return (
+            self.session.query(UserTool)
+            .filter(UserTool.user_id == userId)
+            .filter(UserTool.status != ToolStatus.BROKEN.value)
+            .count()
+        )
 
     def findByUserIdAndPage(
         self,
@@ -49,6 +58,29 @@ class UserToolRepository:
                 joinedload(UserTool.farm_tool_equipment),
             )
             .filter(UserTool.user_id == userId)
+            .order_by(UserTool.id.asc())
+            .offset(offset)
+            .limit(perPage)
+            .all()
+        )
+    
+    def findUsableByUserIdAndPage(
+        self,
+        userId: int,
+        page: int,
+        perPage: int,
+    ):
+        offset = (page - 1) * perPage
+
+        return (
+            self.session.query(UserTool)
+            .options(
+                joinedload(UserTool.item),
+                joinedload(UserTool.tool_template),
+                joinedload(UserTool.farm_tool_equipment),
+            )
+            .filter(UserTool.user_id == userId)
+            .filter(UserTool.status != ToolStatus.BROKEN.value)
             .order_by(UserTool.id.asc())
             .offset(offset)
             .limit(perPage)
