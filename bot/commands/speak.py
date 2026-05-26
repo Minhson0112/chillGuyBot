@@ -10,7 +10,7 @@ class Speak(commands.Cog):
         self.textToSpeechService = TextToSpeechService()
         self.voiceService = VoiceService()
 
-    @commands.command(name="speak")
+    @commands.command(name="s")
     async def speak(self, ctx, *, text: str):
         if ctx.guild is None:
             await ctx.send("Lệnh này chỉ dùng được trong server.")
