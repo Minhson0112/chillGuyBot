@@ -1372,3 +1372,141 @@ CREATE TABLE chill_coin_exchange_cowoncy_histories (
 # add member notification permission
 ALTER TABLE member
     ADD COLUMN is_allow_notifications TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'is allowed to receive notifications';
+
+
+# giveaway
+CREATE TABLE giveaway (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'giveaway id',
+
+    type VARCHAR(50) NOT NULL COMMENT 'giveaway type for tracking: daily, game, legacy, etc',
+    title VARCHAR(255) DEFAULT NULL COMMENT 'giveaway title',
+    winner_count INT NOT NULL DEFAULT 1 COMMENT 'number of winners',
+    reward_text TEXT NOT NULL COMMENT 'reward description',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'active' COMMENT 'giveaway status: active, cancelled, ended',
+
+    duration_seconds BIGINT NOT NULL COMMENT 'giveaway duration in seconds',
+    draw_at DATETIME NOT NULL COMMENT 'scheduled draw datetime',
+    ended_at DATETIME DEFAULT NULL COMMENT 'ended at',
+    cancelled_at DATETIME DEFAULT NULL COMMENT 'cancelled at',
+
+    channel_id BIGINT NOT NULL COMMENT 'discord channel id',
+    message_id BIGINT DEFAULT NULL COMMENT 'discord giveaway message id',
+    created_by_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id who created giveaway',
+    cancelled_by_user_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord user id who cancelled giveaway',
+    limit_role_id BIGINT DEFAULT NULL COMMENT 'required discord role id to join giveaway',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_giveaway_status_draw_at (status, draw_at),
+    KEY idx_giveaway_type (type),
+    KEY idx_giveaway_channel_id (channel_id),
+    KEY idx_giveaway_message_id (message_id),
+    KEY idx_giveaway_created_by_user_id (created_by_user_id),
+    KEY idx_giveaway_cancelled_by_user_id (cancelled_by_user_id),
+    KEY idx_giveaway_limit_role_id (limit_role_id),
+
+    CONSTRAINT fk_giveaway_created_by_user_id
+        FOREIGN KEY (created_by_user_id) REFERENCES member(user_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_giveaway_cancelled_by_user_id
+        FOREIGN KEY (cancelled_by_user_id) REFERENCES member(user_id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT chk_giveaway_winner_count
+        CHECK (winner_count > 0),
+
+    CONSTRAINT chk_giveaway_duration_seconds
+        CHECK (duration_seconds > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='giveaway master';
+
+
+CREATE TABLE giveaway_participants (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'giveaway participant id',
+
+    giveaway_id BIGINT NOT NULL COMMENT 'giveaway id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'active' COMMENT 'participant status: active, removed, invalid',
+    invalid_reason VARCHAR(255) DEFAULT NULL COMMENT 'invalid reason: missing_role, left_server, bot_user, manual_remove, etc',
+
+    joined_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'joined at',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_giveaway_participants_giveaway_user (giveaway_id, user_id),
+
+    KEY idx_giveaway_participants_giveaway_id (giveaway_id),
+    KEY idx_giveaway_participants_user_id (user_id),
+    KEY idx_giveaway_participants_status (status),
+    KEY idx_giveaway_participants_giveaway_status (giveaway_id, status),
+
+    CONSTRAINT fk_giveaway_participants_giveaway_id
+        FOREIGN KEY (giveaway_id) REFERENCES giveaway(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_giveaway_participants_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='giveaway participants';
+
+
+CREATE TABLE giveaway_winners (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'giveaway winner id',
+
+    giveaway_id BIGINT NOT NULL COMMENT 'giveaway id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+
+    draw_round INT NOT NULL DEFAULT 1 COMMENT 'draw or reroll round',
+    slot_number INT NOT NULL COMMENT 'winner slot number',
+    current_slot_number INT DEFAULT NULL COMMENT 'current active winner slot number, null for rerolled winners',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'selected' COMMENT 'winner status: selected, claimed, disqualified, rerolled',
+    disqualified_reason VARCHAR(255) DEFAULT NULL COMMENT 'disqualified reason: missing_role, left_server, no_response, manual_reroll, etc',
+
+    rerolled_from_winner_id BIGINT DEFAULT NULL COMMENT 'previous winner id if this row is from reroll',
+
+    selected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'selected at',
+    claimed_at DATETIME DEFAULT NULL COMMENT 'claimed at',
+    disqualified_at DATETIME DEFAULT NULL COMMENT 'disqualified at',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_giveaway_winners_giveaway_user (giveaway_id, user_id),
+    UNIQUE KEY uq_giveaway_winners_current_slot (giveaway_id, current_slot_number),
+
+    KEY idx_giveaway_winners_giveaway_id (giveaway_id),
+    KEY idx_giveaway_winners_user_id (user_id),
+    KEY idx_giveaway_winners_status (status),
+    KEY idx_giveaway_winners_giveaway_status (giveaway_id, status),
+    KEY idx_giveaway_winners_rerolled_from_winner_id (rerolled_from_winner_id),
+
+    CONSTRAINT fk_giveaway_winners_giveaway_id
+        FOREIGN KEY (giveaway_id) REFERENCES giveaway(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_giveaway_winners_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_giveaway_winners_rerolled_from_winner_id
+        FOREIGN KEY (rerolled_from_winner_id) REFERENCES giveaway_winners(id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT chk_giveaway_winners_draw_round
+        CHECK (draw_round > 0),
+
+    CONSTRAINT chk_giveaway_winners_slot_number
+        CHECK (slot_number > 0),
+
+    CONSTRAINT chk_giveaway_winners_current_slot_number
+        CHECK (current_slot_number IS NULL OR current_slot_number > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='giveaway winners';
