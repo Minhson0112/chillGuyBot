@@ -24,8 +24,8 @@ class MemberChatRankingImageService:
     NAME_BOX_LEFT = 350
     NAME_BOX_RIGHT = 600
 
-    COUNT_BOX_LEFT = 800
-    COUNT_BOX_RIGHT = 900
+    COUNT_BOX_LEFT = 825
+    COUNT_BOX_RIGHT = 925
 
     TEXT_COLOR = (255, 221, 130, 255)
     STROKE_COLOR = (58, 31, 10, 255)
