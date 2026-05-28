@@ -47,3 +47,12 @@ class GiveawayParticipantRepository:
             .filter(GiveawayParticipant.status == GiveawayParticipantStatus.ACTIVE.value)
             .count()
         )
+
+    def findActiveParticipantsByGiveawayId(self, giveawayId: int):
+        return (
+            self.session.query(GiveawayParticipant)
+            .filter(GiveawayParticipant.giveaway_id == giveawayId)
+            .filter(GiveawayParticipant.status == GiveawayParticipantStatus.ACTIVE.value)
+            .order_by(GiveawayParticipant.joined_at.asc(), GiveawayParticipant.id.asc())
+            .all()
+        )

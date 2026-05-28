@@ -43,7 +43,7 @@ class GiveawayMessageService:
             embed.set_thumbnail(url=guildIconUrl)
 
         embed.set_image(url=FOOTER_DECORATION_IMG_URL)
-        embed.set_footer(text=f"bấm nút {JOIN_BUTTON} bên dưới để tham gia")
+        embed.set_footer(text=f"Chill Station | {giveaway.winner_count} người thắng")
 
         return embed
 
@@ -165,3 +165,16 @@ class GiveawayMessageService:
                 "message": "Bạn đã tham gia giveaway thành công.",
                 "participantCount": participantCount,
             }
+
+    def findActiveParticipants(self, giveawayId: int):
+        with getDbSession() as session:
+            participantRepository = GiveawayParticipantRepository(session)
+            participants = participantRepository.findActiveParticipantsByGiveawayId(giveawayId)
+
+            return [
+                {
+                    "userId": participant.user_id,
+                    "joinedAt": participant.joined_at,
+                }
+                for participant in participants
+            ]
