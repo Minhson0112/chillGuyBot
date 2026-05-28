@@ -191,6 +191,7 @@ async def main():
         "bot.tasks.farmMarketAutoBuyTask",
         "bot.tasks.memberDailyActivityFlushTask",
         "bot.tasks.giveawayDrawTask",
+        "bot.tasks.dailyGiveawayTask",
         "bot.tasks.monthlyTopChatRewardTask",
         "bot.tasks.roleShopExpireTask",
         "bot.tasks.farmAnimalStarvationTask",

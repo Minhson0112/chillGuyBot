@@ -27,8 +27,9 @@ class GiveawayMessageService:
             description=(
                 f"- Tổ chức bởi: <@{giveaway.created_by_user_id}>\n"
                 f"- Phần thưởng: {self.buildRewardText(giveaway)}\n"
-                f"- quay thưởng⏰: {discordTimestampService.formatShortDateTime(giveaway.draw_at)}\n"
-                f"- số người tham gia: **{participantCount}**"
+                f"- Quay thưởng⏰: {discordTimestampService.formatShortDateTime(giveaway.draw_at)}, "
+                f"{discordTimestampService.formatRelativeTime(giveaway.draw_at)}\n"
+                f"- Số người tham gia: **{participantCount}**"
             ),
             color=discord.Color.gold(),
         )
