@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from bot.config.database import Base
+from bot.enums.giveawayParticipantStatus import GiveawayParticipantStatus
 
 
 class GiveawayParticipant(Base):
@@ -23,7 +24,7 @@ class GiveawayParticipant(Base):
         comment="discord user id",
     )
 
-    status = Column(String(50), nullable=False, default="active", comment="participant status: active, removed, invalid")
+    status = Column(String(50), nullable=False, default=GiveawayParticipantStatus.ACTIVE.value, comment="participant status: active, removed, invalid")
     invalid_reason = Column(String(255), nullable=True, comment="invalid reason: missing_role, left_server, bot_user, manual_remove, etc")
 
     joined_at = Column(DateTime, nullable=False, server_default=func.now(), comment="joined at")

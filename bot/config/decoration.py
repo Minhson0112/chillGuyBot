@@ -1,0 +1,1 @@
+FOOTER_DECORATION_IMG_URL = "https://cdn.discordapp.com/attachments/1357327625051443291/1509356796765143070/footer_deco.png?ex=6a18e18e&is=6a17900e&hm=2aa4cbcafc29263ecb38426704affe151b47559e7d2735ce6cf87b1a1d45be6a&"

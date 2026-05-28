@@ -8,10 +8,12 @@ from bot.commands.openMusicEvent import JoinMusicEventView
 from bot.config.config import DISCORD_TOKEN
 from bot.config.database import getDbSession
 from bot.repository.musicEventRepository import MusicEventRepository
+from bot.repository.giveawayRepository import GiveawayRepository
 from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
 from bot.services.wordle.wordleStartupService import WordleStartupService
 from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryStartupService
 from bot.services.assetImageService import assetImageService
+from bot.views.giveawayJoinButtonView import GiveawayJoinButtonView
 
 autoResponderCacheService = AutoResponderCacheService()
 wordleStartupService = WordleStartupService()
@@ -83,12 +85,18 @@ async def on_ready():
 async def registerPersistentViews():
     with getDbSession() as dbSession:
         musicEventRepository = MusicEventRepository(dbSession)
+        giveawayRepository = GiveawayRepository(dbSession)
         musicEvents = musicEventRepository.findAll()
+        giveaways = giveawayRepository.findActiveGiveawaysWithMessage()
 
         for musicEvent in musicEvents:
             bot.add_view(JoinMusicEventView(musicEvent.id))
 
+        for giveaway in giveaways:
+            bot.add_view(GiveawayJoinButtonView(giveaway.id))
+
         print(f"✅ Đã đăng ký persistent views cho {len(musicEvents)} music event")
+        print(f"✅ Đã đăng ký persistent views cho {len(giveaways)} giveaway")
 
 
 async def main():
@@ -157,6 +165,7 @@ async def main():
         "bot.commands.slot",
         "bot.commands.blackjack",
         "bot.commands.giftcode",
+        "bot.commands.createGiveaway",
         "bot.commands.createFarm",
         "bot.commands.sellRole",
         "bot.commands.createRoleShop",

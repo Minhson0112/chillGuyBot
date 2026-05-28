@@ -1378,10 +1378,13 @@ ALTER TABLE member
 CREATE TABLE giveaway (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'giveaway id',
 
-    type VARCHAR(50) NOT NULL COMMENT 'giveaway type for tracking: daily, game, legacy, etc',
+    type VARCHAR(50) NOT NULL COMMENT 'giveaway type: chill_coin, cowoncy, vnd, custom',
     title VARCHAR(255) DEFAULT NULL COMMENT 'giveaway title',
     winner_count INT NOT NULL DEFAULT 1 COMMENT 'number of winners',
-    reward_text TEXT NOT NULL COMMENT 'reward description',
+    reward_chill_coin BIGINT DEFAULT NULL COMMENT 'reward chill coin amount',
+    reward_cowoncy BIGINT DEFAULT NULL COMMENT 'reward cowoncy amount',
+    reward_vnd BIGINT DEFAULT NULL COMMENT 'reward vnd amount',
+    reward_text TEXT DEFAULT NULL COMMENT 'custom reward description',
 
     status VARCHAR(50) NOT NULL DEFAULT 'active' COMMENT 'giveaway status: active, cancelled, ended',
 
@@ -1421,7 +1424,18 @@ CREATE TABLE giveaway (
         CHECK (winner_count > 0),
 
     CONSTRAINT chk_giveaway_duration_seconds
-        CHECK (duration_seconds > 0)
+        CHECK (duration_seconds > 0),
+
+    CONSTRAINT chk_giveaway_type
+        CHECK (type IN ('chill_coin', 'cowoncy', 'vnd', 'custom')),
+
+    CONSTRAINT chk_giveaway_reward_by_type
+        CHECK (
+            (type = 'chill_coin' AND reward_chill_coin IS NOT NULL AND reward_chill_coin > 0)
+            OR (type = 'cowoncy' AND reward_cowoncy IS NOT NULL AND reward_cowoncy > 0)
+            OR (type = 'vnd' AND reward_vnd IS NOT NULL AND reward_vnd > 0)
+            OR (type = 'custom' AND reward_text IS NOT NULL)
+        )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='giveaway master';
 
 
