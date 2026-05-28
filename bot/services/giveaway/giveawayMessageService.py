@@ -43,12 +43,8 @@ class GiveawayMessageService:
             embed.set_thumbnail(url=guildIconUrl)
 
         embed.set_image(url=FOOTER_DECORATION_IMG_URL)
-        embed.set_footer(
-            text=(
-                f"Số người thắng: {giveaway.winner_count} | "
-                f"quay lúc {self.formatDateTime(giveaway.draw_at)}"
-            )
-        )
+        embed.timestamp = self.resolveEmbedTimestamp(giveaway.draw_at)
+        embed.set_footer(text=f"Số người thắng: {giveaway.winner_count}")
 
         return embed
 
@@ -110,8 +106,8 @@ class GiveawayMessageService:
 
         return f"{number:,}"
 
-    def formatDateTime(self, value):
-        return value.strftime("%d/%m/%Y %H:%M")
+    def resolveEmbedTimestamp(self, value):
+        return discordTimestampService.normalizeDatetime(value)
 
     def buildGiveawayEmbedById(self, giveawayId: int, guild: discord.Guild):
         with getDbSession() as session:
