@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import discord
 
 from bot.config.database import getDbSession
+from bot.config.emoji import CONGRATULATIONS, GIFT, STARS
 from bot.repository.giveawayParticipantRepository import GiveawayParticipantRepository
 from bot.repository.giveawayRepository import GiveawayRepository
 from bot.repository.giveawayWinnerRepository import GiveawayWinnerRepository
@@ -160,8 +161,8 @@ class GiveawayDrawService:
             winnerText = "- Không có người tham gia hợp lệ"
 
         return (
-            f"Giveaway **{giveaway.title}** do <@{giveaway.created_by_user_id}> tổ chức đã kết thúc\n"
-            "người chiến thắng\n"
+            f"{CONGRATULATIONS} Giveaway **{giveaway.title}** do <@{giveaway.created_by_user_id}> tổ chức đã kết thúc {GIFT}\n"
+            f"{STARS} Người chiến thắng\n"
             f"{winnerText}\n"
             f"phần thưởng : {rewardText}"
         )

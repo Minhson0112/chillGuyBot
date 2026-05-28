@@ -27,8 +27,7 @@ class GiveawayMessageService:
             description=(
                 f"- Tổ chức bởi: <@{giveaway.created_by_user_id}>\n"
                 f"- Phần thưởng: {self.buildRewardText(giveaway)}\n"
-                f"- Quay thưởng⏰: {discordTimestampService.formatShortDateTime(giveaway.draw_at)}, "
-                f"{discordTimestampService.formatRelativeTime(giveaway.draw_at)}\n"
+                f"- Quay thưởng⏰: {discordTimestampService.formatShortTime(giveaway.draw_at)}, {discordTimestampService.formatRelativeTime(giveaway.draw_at)}\n"
                 f"- Số người tham gia: **{participantCount}**"
             ),
             color=discord.Color.gold(),
@@ -44,7 +43,12 @@ class GiveawayMessageService:
             embed.set_thumbnail(url=guildIconUrl)
 
         embed.set_image(url=FOOTER_DECORATION_IMG_URL)
-        embed.set_footer(text=f"Chill Station | {giveaway.winner_count} người thắng")
+        embed.set_footer(
+            text=(
+                f"Số người thắng: {giveaway.winner_count} | "
+                f"quay lúc {self.formatDateTime(giveaway.draw_at)}"
+            )
+        )
 
         return embed
 
@@ -105,6 +109,9 @@ class GiveawayMessageService:
             return "0"
 
         return f"{number:,}"
+
+    def formatDateTime(self, value):
+        return value.strftime("%d/%m/%Y %H:%M")
 
     def buildGiveawayEmbedById(self, giveawayId: int, guild: discord.Guild):
         with getDbSession() as session:
