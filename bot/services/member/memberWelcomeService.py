@@ -53,8 +53,8 @@ class MemberWelcomeService:
             title=f"{WING_L} Welcome To Chill Station {WING_R}",
             description=(
                 f"{WELCOME} Chào mừng {member.mention} {WELCOME} tới với\n"
-                f"# {LOGO}\n\n"
-                f"{SUN} Hãy pick role ở https://discord.com/channels/1356994231918530690/1357332039858393110 để chúng ta hiểu nhau hơn.\n"
+                f"# {LOGO}\n\n\n"
+                f"{SUN} Hãy pick role ở https://discord.com/channels/1356994231918530690/1357332039858393110 để chúng ta hiểu nhau hơn.\n\n"
                 f"{SUN} Say hi với mọi người ở https://discord.com/channels/1356994231918530690/1356994232857923827 nào.\n\n"
                 f"{STRING} {welcomeMessage} {BLUEMOON}"
             ),
