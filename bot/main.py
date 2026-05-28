@@ -159,6 +159,7 @@ async def main():
         "bot.commands.myChatRank",
         "bot.commands.myVoiceRank",
         "bot.commands.noti",
+        "bot.commands.chat",
         "bot.commands.daily",
         "bot.commands.task",
         "bot.commands.findMarketItem",
