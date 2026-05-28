@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from bot.config.database import Base
+from bot.enums.giveawayWinnerStatus import GiveawayWinnerStatus
 
 
 class GiveawayWinner(Base):
@@ -27,7 +28,7 @@ class GiveawayWinner(Base):
     slot_number = Column(Integer, nullable=False, comment="winner slot number")
     current_slot_number = Column(Integer, nullable=True, comment="current active winner slot number, null for rerolled winners")
 
-    status = Column(String(50), nullable=False, default="selected", comment="winner status: selected, claimed, disqualified, rerolled")
+    status = Column(String(50), nullable=False, default=GiveawayWinnerStatus.SELECTED.value, comment="winner status: selected, claimed, disqualified, rerolled")
     disqualified_reason = Column(String(255), nullable=True, comment="disqualified reason: missing_role, left_server, no_response, manual_reroll, etc")
 
     rerolled_from_winner_id = Column(

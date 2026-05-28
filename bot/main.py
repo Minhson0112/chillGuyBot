@@ -2,18 +2,20 @@ import asyncio
 
 import discord
 from discord import app_commands
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 from bot.commands.openMusicEvent import JoinMusicEventView
 from bot.config.config import DISCORD_TOKEN
 from bot.config.database import getDbSession
 from bot.repository.musicEventRepository import MusicEventRepository
 from bot.repository.giveawayRepository import GiveawayRepository
+from bot.repository.giveawayWinnerRepository import GiveawayWinnerRepository
 from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
 from bot.services.wordle.wordleStartupService import WordleStartupService
 from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryStartupService
 from bot.services.assetImageService import assetImageService
 from bot.views.giveawayJoinButtonView import GiveawayJoinButtonView
+from bot.views.giveawayRerollView import GiveawayRerollView
 
 autoResponderCacheService = AutoResponderCacheService()
 wordleStartupService = WordleStartupService()
@@ -27,14 +29,6 @@ intents.guilds = True
 intents.voice_states = True
 
 bot = commands.Bot(command_prefix=["cg ", "Cg "], intents=intents, help_command=None)
-
-
-@tasks.loop(minutes=10)
-async def update_status():
-    guildCount = len(bot.guilds)
-    await bot.change_presence(
-        activity=discord.Game(name=f"trong {guildCount} server")
-    )
 
 
 @bot.tree.error
@@ -78,16 +72,15 @@ async def on_ready():
     except Exception as e:
         print(f"❌ Lỗi sync commands: {e}")
 
-    if not update_status.is_running():
-        update_status.start()
-
-
 async def registerPersistentViews():
     with getDbSession() as dbSession:
         musicEventRepository = MusicEventRepository(dbSession)
         giveawayRepository = GiveawayRepository(dbSession)
+        giveawayWinnerRepository = GiveawayWinnerRepository(dbSession)
         musicEvents = musicEventRepository.findAll()
         giveaways = giveawayRepository.findActiveGiveawaysWithMessage()
+        currentWinners = giveawayWinnerRepository.findAllCurrentWinners()
+        winnersByGiveawayId = {}
 
         for musicEvent in musicEvents:
             bot.add_view(JoinMusicEventView(musicEvent.id))
@@ -95,8 +88,15 @@ async def registerPersistentViews():
         for giveaway in giveaways:
             bot.add_view(GiveawayJoinButtonView(giveaway.id))
 
+        for winner in currentWinners:
+            winnersByGiveawayId.setdefault(winner.giveaway_id, []).append(winner)
+
+        for giveawayId, winners in winnersByGiveawayId.items():
+            bot.add_view(GiveawayRerollView(giveawayId, winners))
+
         print(f"✅ Đã đăng ký persistent views cho {len(musicEvents)} music event")
         print(f"✅ Đã đăng ký persistent views cho {len(giveaways)} giveaway")
+        print(f"✅ Đã đăng ký persistent views cho {len(winnersByGiveawayId)} giveaway reroll")
 
 
 async def main():
@@ -190,6 +190,7 @@ async def main():
         "bot.tasks.farmPestCheckTask",
         "bot.tasks.farmMarketAutoBuyTask",
         "bot.tasks.memberDailyActivityFlushTask",
+        "bot.tasks.giveawayDrawTask",
         "bot.tasks.monthlyTopChatRewardTask",
         "bot.tasks.roleShopExpireTask",
         "bot.tasks.farmAnimalStarvationTask",

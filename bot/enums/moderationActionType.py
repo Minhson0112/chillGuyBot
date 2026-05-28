@@ -8,3 +8,4 @@ class ModerationActionType(IntEnum):
     UNMUTE = 5
     DELMSG = 6
     EVENT = 7
+    GIVEAWAY = 8

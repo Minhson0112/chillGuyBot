@@ -5,8 +5,11 @@ from discord.ext import commands
 from bot.enums.giveawayType import GiveawayType
 from bot.services.giveaway.createGiveawayService import CreateGiveawayService
 from bot.services.giveaway.giveawayMessageService import GiveawayMessageService
+from bot.services.giveaway.giveawaySchedulerService import giveawaySchedulerService
 from bot.validation.guildValidation import guildOnly
 from bot.views.giveawayJoinButtonView import GiveawayJoinButtonView
+from bot.enums.moderationActionType import ModerationActionType
+from bot.validation.modPermissionValidation import hasModerationPermission
 
 
 class CreateGiveawayCommand(commands.Cog):
@@ -34,8 +37,8 @@ class CreateGiveawayCommand(commands.Cog):
             app_commands.Choice(name=GiveawayType.CHILL_COIN.value, value=GiveawayType.CHILL_COIN.value),
         ],
     )
-    @app_commands.default_permissions(administrator=True)
     @guildOnly()
+    @hasModerationPermission(ModerationActionType.GIVEAWAY)
     async def createGiveaway(
         self,
         interaction: discord.Interaction,
@@ -93,6 +96,7 @@ class CreateGiveawayCommand(commands.Cog):
             giveawayId=giveawayId,
             messageId=giveawayMessage.id,
         )
+        giveawaySchedulerService.reloadSchedule()
 
         await interaction.followup.send(
             result["message"],

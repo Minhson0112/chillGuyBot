@@ -36,6 +36,8 @@ def hasModerationPermission(actionType: ModerationActionType):
             allowedRoleIds = {staffRoleId, modRoleId, adminRoleId, ownerRoleId}
         elif actionType == ModerationActionType.EVENT:
             allowedRoleIds = {adminRoleId, ownerRoleId}
+        elif actionType == ModerationActionType.GIVEAWAY:
+            allowedRoleIds = {modRoleId, adminRoleId, ownerRoleId}
         else:
             raise app_commands.CheckFailure("Loại quyền moderation không hợp lệ.")
 

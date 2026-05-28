@@ -65,3 +65,11 @@ class GiveawayRepository:
         self.session.flush()
 
         return giveaway
+
+    def markEnded(self, giveaway, endedAt):
+        giveaway.status = GiveawayStatus.ENDED.value
+        giveaway.ended_at = endedAt
+
+        self.session.flush()
+
+        return giveaway
