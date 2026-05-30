@@ -59,7 +59,7 @@ class DailyGiveawayService:
         giveawayMessage = await channel.send(
             content=(
                 f"<@&{GIVEAWAY_ROLE_ID}> "
-                "chúc các bạn ngày mới vui vẻ cùng Chill Station"
+                "<a:CS_blueblink:1507030291640881203> Chúc các bạn ngày mới vui vẻ cùng Chill Station <a:CS_bluemoon:1507030292811091999>"
             ),
             embed=embed,
             view=GiveawayJoinButtonView(giveawayId),
@@ -82,7 +82,7 @@ class DailyGiveawayService:
         now = datetime.now(self.GMT7)
         dateText = now.strftime("%d/%m/%Y")
 
-        return f"giveaway daily ngày {dateText}"
+        return f"GA daily ngày {dateText}"
 
     async def resolveDailyGiveawayChannel(self, bot):
         channel = bot.get_channel(DAILY_GIVEAWAY_CHANNEL_ID)
