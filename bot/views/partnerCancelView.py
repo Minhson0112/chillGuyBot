@@ -27,7 +27,6 @@ class PartnerCancelConfirmView(discord.ui.View):
         if interaction.user.id != self.requestedByUserId:
             await interaction.response.send_message(
                 "Chỉ người dùng lệnh cancelpn mới có thể xác nhận hủy PN.",
-                ephemeral=True,
             )
             return
 
@@ -54,11 +53,9 @@ class PartnerCancelConfirmView(discord.ui.View):
         if interaction.response.is_done():
             await interaction.followup.send(
                 "Đã xảy ra lỗi khi hủy PN.",
-                ephemeral=True,
             )
             return
 
         await interaction.response.send_message(
             "Đã xảy ra lỗi khi hủy PN.",
-            ephemeral=True,
         )

@@ -1,4 +1,4 @@
-from datetime import date
+from sqlalchemy import asc
 
 from bot.models.partner import Partner
 
@@ -11,6 +11,13 @@ class PartnerRepository:
 
     def findById(self, partnerId):
         return self.session.query(Partner).filter(Partner.id == partnerId).first()
+
+    def findAll(self):
+        return (
+            self.session.query(Partner)
+            .order_by(asc(Partner.id))
+            .all()
+        )
 
     def create(self, partnerData):
         partner = Partner(**partnerData)
