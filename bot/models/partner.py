@@ -1,6 +1,7 @@
 from sqlalchemy import BigInteger, Column, Date, ForeignKey, String
 
 from bot.config.database import Base
+from bot.enums.partnerStatus import PartnerStatus
 
 
 class Partner(Base):
@@ -20,3 +21,5 @@ class Partner(Base):
         nullable=False
     )
     partner_at = Column(Date, nullable=False)
+    status = Column(String(50), nullable=False, default=PartnerStatus.ACTIVE.value)
+    message_id = Column(BigInteger, nullable=True)

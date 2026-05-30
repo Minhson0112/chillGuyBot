@@ -1,7 +1,8 @@
 import discord
 
-from bot.config.database import getDbSession
 from bot.config.config import NUMBER_OF_MEMBER_REQUIRED_FOR_PN
+from bot.config.database import getDbSession
+from bot.enums.partnerStatus import PartnerStatus
 from bot.repository.partnerRepository import PartnerRepository
 
 
@@ -34,8 +35,12 @@ class CheckServerService:
             resultLines.append("Server này chưa đủ thành viên quy định.")
             return "\n".join(resultLines)
 
-        if partner is not None:
+        if partner is not None and partner.status == PartnerStatus.ACTIVE.value:
             resultLines.append("Server này đã tồn tại trong danh sách partner.")
+            return "\n".join(resultLines)
+
+        if partner is not None and partner.status == PartnerStatus.CANCELLED.value:
+            resultLines.append("Server này đã từng hủy PN, không thể tạo PN lại.")
             return "\n".join(resultLines)
 
         resultLines.append(f"Server {guildName} thoả mãn các điều kiện để làm partner.")

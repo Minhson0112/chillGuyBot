@@ -2,8 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot.services.partner.createPartnerService import CreatePartnerService
 from bot.enums.moderationActionType import ModerationActionType
+from bot.services.partner.createPartnerService import CreatePartnerService
 from bot.validation.modPermissionValidation import hasModerationPermission
 
 
@@ -28,6 +28,8 @@ class CreatePartner(commands.Cog):
             await interaction.response.send_message("Lệnh này chỉ dùng được trong server.")
             return
 
+        await interaction.response.defer()
+
         result = await self.createPartnerService.createPartner(
             self.bot,
             interaction,
@@ -35,7 +37,8 @@ class CreatePartner(commands.Cog):
             representative_member,
         )
 
-        await interaction.response.send_message(result)
+        await interaction.followup.send(result)
+
 
 async def setup(bot):
     await bot.add_cog(CreatePartner(bot))

@@ -9,6 +9,9 @@ class PartnerRepository:
     def findByGuildId(self, guildId):
         return self.session.query(Partner).filter(Partner.guild_id == guildId).first()
 
+    def findById(self, partnerId):
+        return self.session.query(Partner).filter(Partner.id == partnerId).first()
+
     def create(self, partnerData):
         partner = Partner(**partnerData)
         self.session.add(partner)
@@ -21,3 +24,8 @@ class PartnerRepository:
             .filter(Partner.representative_user_id == representativeUserId)
             .first()
         )
+
+    def updateStatus(self, partner, status):
+        partner.status = status
+        self.session.flush()
+        return partner

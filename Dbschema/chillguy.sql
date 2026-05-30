@@ -1524,3 +1524,8 @@ CREATE TABLE giveaway_winners (
     CONSTRAINT chk_giveaway_winners_current_slot_number
         CHECK (current_slot_number IS NULL OR current_slot_number > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='giveaway winners';
+
+# update partner notification message tracking
+ALTER TABLE partner
+    ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'active' AFTER partner_at,
+    ADD COLUMN message_id BIGINT DEFAULT NULL AFTER status;

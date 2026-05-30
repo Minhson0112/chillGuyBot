@@ -117,6 +117,7 @@ async def main():
         "bot.commands.server.serverInfo",
         "bot.commands.partner.checkServer",
         "bot.commands.partner.createPartner",
+        "bot.commands.partner.cancelPartner",
         #"bot.commands.wordle.wordle",
         "bot.commands.wordle.wordleTop",
         "bot.commands.donate.topDonate",

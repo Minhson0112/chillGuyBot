@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 import discord
 
 from bot.config.channel import BYE_CHANNEL_ID, MOD_COMMAND_CHANNEL_ID
-from bot.config.emoji import LOGO
 from bot.config.database import getDbSession
+from bot.config.emoji import LOGO
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.partnerRepository import PartnerRepository
 
@@ -18,7 +18,9 @@ class MemberLeaveService:
             partnerRepository = PartnerRepository(session)
 
             member = memberRepository.updateLeaveAt(discordMember.id, leaveAt)
+            partnerId = None
             partnerGuildName = None
+            partneredByUserId = None
 
             if member is None:
                 session.commit()
@@ -33,7 +35,9 @@ class MemberLeaveService:
             if isPartner:
                 partner = partnerRepository.findByRepresentativeUserId(member.user_id)
                 if partner is not None:
+                    partnerId = partner.id
                     partnerGuildName = partner.guild_name
+                    partneredByUserId = partner.partnered_by_user_id
 
             session.commit()
 
@@ -64,7 +68,7 @@ class MemberLeaveService:
                 f"# {LOGO}"
             )
 
-        if isPartner and partnerGuildName is not None:
+        if isPartner and partnerId is not None and partnerGuildName is not None and partneredByUserId is not None:
             modChannel = bot.get_channel(MOD_COMMAND_CHANNEL_ID)
             if modChannel is None:
                 try:
@@ -74,5 +78,11 @@ class MemberLeaveService:
 
             if modChannel is not None:
                 await modChannel.send(
-                    f"Người đại diện của server partner {partnerGuildName} đã rời Chill Station, hãy kiểm tra lại."
+                    f"<@{partneredByUserId}> Người đại diện của server partner {partnerGuildName} đã rời Chill Station, hãy kiểm tra lại.\n"
+                    f"Nếu muốn hủy partner hãy dùng lệnh `cg cancelpn {partnerId}`",
+                    allowed_mentions=discord.AllowedMentions(
+                        users=True,
+                        roles=False,
+                        everyone=False,
+                    ),
                 )
