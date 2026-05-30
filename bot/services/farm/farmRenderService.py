@@ -659,7 +659,6 @@ class FarmRenderService:
         nextLevel = currentLevel + 1
 
         return FARM_LEVEL_REQUIRED_EXP.get(nextLevel)
-    
 
     def renderToolHotBar(self, baseImage: Image.Image, toolEquipments):
         hotBarImage = assetImageService.getImage(self.HOT_BAR_IMAGE_KEY)

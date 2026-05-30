@@ -76,12 +76,6 @@ class FarmRepository:
 
         return farm
 
-    def increaseFarmExp(self, farm: Farm, exp: int):
-        farm.farm_exp += exp
-        self.session.flush()
-
-        return farm
-
     def updateFarmLevel(self, farm: Farm, farmLevel: int):
         farm.farm_level = farmLevel
         self.session.flush()
@@ -143,13 +137,12 @@ class FarmRepository:
 
         nextLevel = currentLevel + 1
 
-        currentLevelTotalExp = FARM_LEVEL_REQUIRED_EXP.get(currentLevel)
-        nextLevelTotalExp = FARM_LEVEL_REQUIRED_EXP.get(nextLevel)
+        nextLevelRequiredExp = FARM_LEVEL_REQUIRED_EXP.get(nextLevel)
 
-        if currentLevelTotalExp is None or nextLevelTotalExp is None:
+        if nextLevelRequiredExp is None:
             return None
 
-        return nextLevelTotalExp - currentLevelTotalExp
+        return nextLevelRequiredExp
     
     def updateAllTrainEventFlag(self, isTrainEvent: bool):
         self.session.query(Farm).update(
