@@ -44,6 +44,13 @@ class AnonymousMatchService:
                     "message": "Bạn đã ở trong hàng chờ matching rồi.",
                 }
 
+            canSendDm = await self.sendDmCheckMessage(bot, user.id)
+            if not canSendDm:
+                return {
+                    "success": False,
+                    "message": "tôi không thể gửi tin nhắn dms tới bạn, hãy kiểm tra lại cài đặt",
+                }
+
             currentQueue = queueRepository.create(user.id)
             matchedQueue = self.findMatchableQueue(
                 queueRepository=queueRepository,
@@ -141,6 +148,14 @@ class AnonymousMatchService:
         try:
             user = bot.get_user(userId) or await bot.fetch_user(userId)
             await user.send(self.buildMatchedMessage(alias))
+            return True
+        except discord.HTTPException:
+            return False
+
+    async def sendDmCheckMessage(self, bot, userId):
+        try:
+            user = bot.get_user(userId) or await bot.fetch_user(userId)
+            await user.send("Tôi đã nhận được yêu cầu matching của bạn.")
             return True
         except discord.HTTPException:
             return False
