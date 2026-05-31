@@ -25,15 +25,6 @@ class AnonymousMatchStopCommand(commands.Cog):
                 self.bot,
                 result["partnerUserId"],
             )
-            return
-
-        if result["alreadyRequested"]:
-            return
-
-        await self.anonymousMatchStopService.notifyPartnerStopRequested(
-            self.bot,
-            result["partnerUserId"],
-        )
 
 
 async def setup(bot):

@@ -24,38 +24,16 @@ class AnonymousMatchStopService:
 
             partnerUserId = self.getPartnerUserId(anonymousMatchSession, user.id)
 
-            if self.hasUserRequestedEnd(anonymousMatchSession, user.id):
-                return {
-                    "success": True,
-                    "ended": False,
-                    "alreadyRequested": True,
-                    "partnerUserId": partnerUserId,
-                    "message": "Bạn đã yêu cầu kết thúc phiên này rồi. Đang chờ đối tác xác nhận bằng `cg stop`.",
-                }
-
-            sessionRepository.requestEnd(anonymousMatchSession, user.id)
-
-            if anonymousMatchSession.end_requested_by_a and anonymousMatchSession.end_requested_by_b:
-                sessionRepository.endSession(anonymousMatchSession, datetime.now())
-                session.commit()
-                self.anonymousMatchCacheService.removeByUserId(user.id)
-
-                return {
-                    "success": True,
-                    "ended": True,
-                    "alreadyRequested": False,
-                    "partnerUserId": partnerUserId,
-                    "message": "Phiên matching đã kết thúc. Bạn có thể dùng `cg match` để tìm người mới.",
-                }
-
+            self.markEndRequestedByUser(anonymousMatchSession, user.id)
+            sessionRepository.endSession(anonymousMatchSession, datetime.now())
             session.commit()
+            self.anonymousMatchCacheService.removeByUserId(user.id)
 
             return {
                 "success": True,
-                "ended": False,
-                "alreadyRequested": False,
+                "ended": True,
                 "partnerUserId": partnerUserId,
-                "message": "Đã ghi nhận yêu cầu kết thúc. Phiên sẽ kết thúc khi đối tác cũng dùng `cg stop`.",
+                "message": "Phiên matching đã kết thúc. Bạn có thể dùng `cg match` để tìm người mới.",
             }
 
     async def endMatchByMemberLeave(self, bot, userId):
@@ -68,12 +46,7 @@ class AnonymousMatchStopService:
 
             partnerUserId = self.getPartnerUserId(anonymousMatchSession, userId)
 
-            if anonymousMatchSession.user_a_id == userId:
-                anonymousMatchSession.end_requested_by_a = True
-
-            if anonymousMatchSession.user_b_id == userId:
-                anonymousMatchSession.end_requested_by_b = True
-
+            self.markEndRequestedByUser(anonymousMatchSession, userId)
             sessionRepository.endSession(anonymousMatchSession, datetime.now())
             session.commit()
 
@@ -87,18 +60,11 @@ class AnonymousMatchStopService:
 
         return True
 
-    async def notifyPartnerStopRequested(self, bot, partnerUserId):
-        await self.sendDm(
-            bot=bot,
-            userId=partnerUserId,
-            message="Đối tác của bạn muốn kết thúc phiên matching. Nếu bạn cũng muốn kết thúc, hãy dùng `cg stop`.",
-        )
-
     async def notifyPartnerEnded(self, bot, partnerUserId):
         await self.sendDm(
             bot=bot,
             userId=partnerUserId,
-            message="Phiên matching đã kết thúc. Bạn có thể dùng `cg match` để tìm người mới.",
+            message="Đối tác của bạn đã kết thúc phiên matching. Bạn có thể dùng `cg match` để tìm người mới.",
         )
 
     async def sendDm(self, bot, userId, message):
@@ -115,8 +81,9 @@ class AnonymousMatchStopService:
 
         return anonymousMatchSession.user_a_id
 
-    def hasUserRequestedEnd(self, anonymousMatchSession, userId):
+    def markEndRequestedByUser(self, anonymousMatchSession, userId):
         if anonymousMatchSession.user_a_id == userId:
-            return anonymousMatchSession.end_requested_by_a
+            anonymousMatchSession.end_requested_by_a = True
 
-        return anonymousMatchSession.end_requested_by_b
+        if anonymousMatchSession.user_b_id == userId:
+            anonymousMatchSession.end_requested_by_b = True
