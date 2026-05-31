@@ -10,6 +10,7 @@ from bot.config.database import getDbSession
 from bot.repository.musicEventRepository import MusicEventRepository
 from bot.repository.giveawayRepository import GiveawayRepository
 from bot.repository.giveawayWinnerRepository import GiveawayWinnerRepository
+from bot.services.anonymousMatch.anonymousMatchCacheService import AnonymousMatchCacheService
 from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
 from bot.services.wordle.wordleStartupService import WordleStartupService
 from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryStartupService
@@ -18,6 +19,7 @@ from bot.views.giveawayJoinButtonView import GiveawayJoinButtonView
 from bot.views.giveawayRerollView import GiveawayRerollView
 
 autoResponderCacheService = AutoResponderCacheService()
+anonymousMatchCacheService = AnonymousMatchCacheService()
 wordleStartupService = WordleStartupService()
 wordleDictionaryStartupService = WordleDictionaryStartupService()
 
@@ -58,6 +60,8 @@ async def on_ready():
         synced = await bot.tree.sync()
         print(f"🔧 Slash commands đã sync: {len(synced)} lệnh")
         autoResponderCacheService.loadKeys()
+        anonymousMatchCount = anonymousMatchCacheService.loadActiveMatches()
+        print(f"Loaded anonymous match cache: {anonymousMatchCount}")
         print("✅ Đã load auto responder keys")
 
         currentWordleGame = await wordleStartupService.loadCurrentGameToCache()
@@ -162,6 +166,8 @@ async def main():
         "bot.commands.memberActivity.myVoiceRank",
         "bot.commands.member.noti",
         "bot.commands.chat.chat",
+        "bot.commands.anonymousMatch.match",
+        "bot.commands.anonymousMatch.stop",
         "bot.commands.farm.daily",
         "bot.commands.farm.task",
         "bot.commands.farm.findMarketItem",
@@ -184,6 +190,7 @@ async def main():
         "bot.events.messageCreateEvent",
         "bot.events.autoModerationEvent",
         "bot.events.autoResponderEvent",
+        "bot.events.anonymousMatchMessageRelayEvent",
         "bot.events.wordleEvent",
         "bot.events.owoGiveEvent",
         "bot.events.voiceStateUpdateEvent",

@@ -1,3 +1,5 @@
+from bot.models.anonymousMatchQueue import AnonymousMatchQueue
+from bot.models.anonymousMatchSession import AnonymousMatchSession
 from bot.models.autoResponder import AutoResponder
 from bot.models.chat import Chat
 from bot.models.chillCoinExchangeCowoncyHistory import ChillCoinExchangeCowoncyHistory

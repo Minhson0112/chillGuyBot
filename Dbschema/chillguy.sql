@@ -1529,3 +1529,66 @@ CREATE TABLE giveaway_winners (
 ALTER TABLE partner
     ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'active' AFTER partner_at,
     ADD COLUMN message_id BIGINT DEFAULT NULL AFTER status;
+
+
+# anonymous matching
+CREATE TABLE anonymous_match_queue (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'anonymous match queue id',
+
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    status VARCHAR(50) NOT NULL DEFAULT 'waiting' COMMENT 'queue status: waiting, matched, cancelled',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    matched_at DATETIME DEFAULT NULL COMMENT 'matched at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_anonymous_match_queue_user_status (user_id, status),
+    KEY idx_anonymous_match_queue_status_created_at (status, created_at),
+
+    CONSTRAINT fk_anonymous_match_queue_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_anonymous_match_queue_status
+        CHECK (status IN ('waiting', 'matched', 'cancelled'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='anonymous match queue';
+
+
+CREATE TABLE anonymous_match_sessions (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'anonymous match session id',
+
+    user_a_id BIGINT UNSIGNED NOT NULL COMMENT 'first discord user id',
+    user_b_id BIGINT UNSIGNED NOT NULL COMMENT 'second discord user id',
+
+    user_a_alias VARCHAR(32) NOT NULL COMMENT 'first user anonymous alias',
+    user_b_alias VARCHAR(32) NOT NULL COMMENT 'second user anonymous alias',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'active' COMMENT 'session status: active, ending_requested, ended',
+
+    end_requested_by_a TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'first user requested ending',
+    end_requested_by_b TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'second user requested ending',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    ended_at DATETIME DEFAULT NULL COMMENT 'ended at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_anonymous_match_sessions_user_a_status (user_a_id, status),
+    KEY idx_anonymous_match_sessions_user_b_status (user_b_id, status),
+    KEY idx_anonymous_match_sessions_status (status),
+
+    CONSTRAINT fk_anonymous_match_sessions_user_a_id
+        FOREIGN KEY (user_a_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_anonymous_match_sessions_user_b_id
+        FOREIGN KEY (user_b_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_anonymous_match_sessions_status
+        CHECK (status IN ('active', 'ending_requested', 'ended')),
+
+    CONSTRAINT chk_anonymous_match_sessions_different_users
+        CHECK (user_a_id <> user_b_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='anonymous match sessions';
