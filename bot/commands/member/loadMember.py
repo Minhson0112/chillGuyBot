@@ -16,7 +16,7 @@ class LoadMember(commands.Cog):
     async def loadMember(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
 
-        syncedCount = self.memberSyncService.syncGuildMembers(interaction.guild)
+        syncedCount = await self.memberSyncService.syncGuildMembers(interaction.guild)
 
         await interaction.followup.send(
             f"Đã lưu hoặc cập nhật {syncedCount} member vào database.",

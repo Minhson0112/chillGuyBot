@@ -187,6 +187,7 @@ async def main():
         "bot.commands.homies.setHomies",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
+        "bot.events.memberUpdateEvent",
         "bot.events.messageCreateEvent",
         "bot.events.autoModerationEvent",
         "bot.events.autoResponderEvent",
@@ -207,6 +208,7 @@ async def main():
         "bot.tasks.farmAnimalStarvationTask",
         "bot.tasks.farmTrainEventAutoTask",
         "bot.tasks.homiesRoleCheckTask",
+        "bot.tasks.memberSyncTask",
     ]
 
     for ext in extensions:

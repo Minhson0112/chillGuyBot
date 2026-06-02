@@ -56,6 +56,22 @@ class MemberRepository:
         self.session.flush()
         return member
 
+    def upsertOnGuildSync(self, userId, memberData):
+        member = self.findByUserId(userId)
+
+        if member is None:
+            return self.create(memberData), True
+
+        member.global_name = memberData["global_name"]
+        member.username = memberData["username"]
+        member.nick = memberData["nick"]
+        member.joined_at = memberData["joined_at"]
+        member.leave_at = None
+        member.is_bot = memberData["is_bot"]
+
+        self.session.flush()
+        return member, False
+
     def updateLeaveAt(self, userId, leaveAt):
         member = self.findByUserId(userId)
 
