@@ -59,7 +59,7 @@ class Ban(commands.Cog):
 
         await interaction.response.defer()
 
-        await interaction.guild.ban(target, reason=reason, delete_message_seconds=0)
+        await interaction.guild.ban(target, reason=reason, delete_message_seconds=86400)
 
         self.banService.createBanHistory(
             actionByUserId=interaction.user.id,
