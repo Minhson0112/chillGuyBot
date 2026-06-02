@@ -36,9 +36,8 @@ class MemberSyncService:
         memberData = self.buildMemberData(discordMember)
 
         member, isCreated = memberRepository.upsertOnGuildSync(discordMember.id, memberData)
-        chatRepository.createIfNotExists(discordMember.id)
-
         if isCreated:
+            chatRepository.createIfNotExists(member.user_id)
             self.farmInitializeService.initializeFarmForMember(
                 session=session,
                 userId=member.user_id,
