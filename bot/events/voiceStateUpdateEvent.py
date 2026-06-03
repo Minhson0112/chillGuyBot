@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 
 from bot.config.channel import FARM_NOTIFICATION_CHANNEL_ID
+from bot.config.emoji import LOGO
 from bot.services.memberActivity.memberVoiceActivityService import MemberVoiceActivityService
 
 
@@ -17,6 +18,8 @@ class VoiceStateUpdateEvent(commands.Cog):
         before: discord.VoiceState,
         after: discord.VoiceState,
     ):
+        await self.sendVoiceChannelJoinMessage(member, before, after)
+
         dailyTaskMessage = self.memberVoiceActivityService.handleVoiceStateUpdate(
             member,
             before,
@@ -62,6 +65,38 @@ class VoiceStateUpdateEvent(commands.Cog):
             return None
 
         return channel
+
+    async def sendVoiceChannelJoinMessage(
+        self,
+        member: discord.Member,
+        before: discord.VoiceState,
+        after: discord.VoiceState,
+    ):
+        if after.channel is None:
+            return
+
+        if before.channel is not None and before.channel.id == after.channel.id:
+            return
+
+        if not isinstance(after.channel, discord.VoiceChannel):
+            return
+
+        try:
+            await after.channel.send(
+                content=(
+                    f"# {LOGO}\n"
+                    f"Chào mừng hành khách {member.mention} đã lên chuyến tàu {after.channel.name}."
+                ),
+                allowed_mentions=discord.AllowedMentions(
+                    users=True,
+                    roles=False,
+                    everyone=False,
+                ),
+            )
+        except discord.Forbidden:
+            return
+        except discord.HTTPException:
+            return
 
 
 async def setup(bot):
