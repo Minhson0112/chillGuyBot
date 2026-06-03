@@ -16,7 +16,7 @@ class RoleShopExpireTask(commands.Cog):
         self.scheduler.add_job(
             self.runExpiredRoleJob,
             CronTrigger(
-                hour=12,
+                hour="2,8,14,20",
                 minute=0,
                 second=0,
                 timezone="Asia/Ho_Chi_Minh",

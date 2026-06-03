@@ -16,7 +16,7 @@ class FarmMarketAutoBuyTask(commands.Cog):
 
         self.scheduler.add_job(
             self.runAutoBuyJob,
-            CronTrigger(hour=0, minute=10),
+            CronTrigger(hour="1,9,17", minute=0),
             id="farmMarketAutoBuyJob",
             replace_existing=True,
         )

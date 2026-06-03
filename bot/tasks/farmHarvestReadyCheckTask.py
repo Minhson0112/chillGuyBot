@@ -1,0 +1,127 @@
+from datetime import datetime
+
+import discord
+from discord.ext import commands, tasks
+
+from bot.config.channel import FARM_NOTIFICATION_CHANNEL_ID
+from bot.config.database import getDbSession
+from bot.config.emoji import FARM_GAME_EMOJI
+from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
+
+
+class FarmHarvestReadyCheckTask(commands.Cog):
+    HARVEST_READY_CHECK_INTERVAL_SECONDS = 180
+
+    def __init__(self, bot):
+        self.bot = bot
+        self.checkFarmHarvestReadyStatus.start()
+
+    def cog_unload(self):
+        self.checkFarmHarvestReadyStatus.cancel()
+
+    @tasks.loop(seconds=HARVEST_READY_CHECK_INTERVAL_SECONDS)
+    async def checkFarmHarvestReadyStatus(self):
+        now = datetime.now()
+        notificationSummaries = []
+
+        with getDbSession() as session:
+            farmCropAreaRepository = FarmCropAreaRepository(session)
+
+            farmCropAreas = farmCropAreaRepository.findHarvestableCropAreasNeedNotification(
+                now=now,
+            )
+
+            for farmCropArea in farmCropAreas:
+                farmCropAreaRepository.markHarvestReadyNotified(farmCropArea)
+
+                member = self.getFarmOwnerMember(farmCropArea)
+
+                if member is None:
+                    continue
+
+                if not member.is_allow_notifications:
+                    continue
+
+                crop = farmCropArea.crop
+
+                if crop is None:
+                    continue
+
+                notificationSummaries.append({
+                    "userId": member.user_id,
+                    "cropName": crop.name,
+                    "cropEmoji": self.resolveCropEmoji(crop),
+                })
+
+            session.commit()
+
+        if farmCropAreas:
+            print(f"Marked {len(farmCropAreas)} farm crop areas as harvest ready notified")
+
+        await self.sendHarvestReadyNotifications(notificationSummaries)
+
+    @checkFarmHarvestReadyStatus.before_loop
+    async def beforeCheckFarmHarvestReadyStatus(self):
+        await self.bot.wait_until_ready()
+
+    def getFarmOwnerMember(self, farmCropArea):
+        if farmCropArea.farm is None:
+            return None
+
+        return farmCropArea.farm.member
+
+    def resolveCropEmoji(self, crop):
+        if crop.cropItem is None:
+            return ""
+
+        return FARM_GAME_EMOJI.get(crop.cropItem.icon_image_key, "")
+
+    async def sendHarvestReadyNotifications(self, notificationSummaries):
+        if len(notificationSummaries) == 0:
+            return
+
+        notificationChannel = await self.resolveNotificationChannel()
+
+        if notificationChannel is None:
+            return
+
+        for notificationSummary in notificationSummaries:
+            cropText = (
+                f"{notificationSummary['cropEmoji']} {notificationSummary['cropName']}"
+            ).strip()
+
+            await notificationChannel.send(
+                content=(
+                    f"<@{notificationSummary['userId']}>\n"
+                    f"{cropText} của bạn đã sẵn sàng thu hoạch."
+                ),
+                allowed_mentions=discord.AllowedMentions(
+                    users=True,
+                    roles=False,
+                    everyone=False,
+                ),
+            )
+
+    async def resolveNotificationChannel(self):
+        channel = self.bot.get_channel(FARM_NOTIFICATION_CHANNEL_ID)
+
+        if channel is not None:
+            return channel
+
+        try:
+            channel = await self.bot.fetch_channel(FARM_NOTIFICATION_CHANNEL_ID)
+        except discord.NotFound:
+            return None
+        except discord.Forbidden:
+            return None
+        except discord.HTTPException:
+            return None
+
+        if not isinstance(channel, discord.TextChannel):
+            return None
+
+        return channel
+
+
+async def setup(bot):
+    await bot.add_cog(FarmHarvestReadyCheckTask(bot))

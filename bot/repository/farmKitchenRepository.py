@@ -1,5 +1,7 @@
-from bot.models.farmKitchen import FarmKitchen
 from sqlalchemy.orm import joinedload
+
+from bot.models.farm import Farm
+from bot.models.farmKitchen import FarmKitchen
 from bot.models.foodRecipe import FoodRecipe
 
 
@@ -80,3 +82,25 @@ class FarmKitchenRepository:
             .filter(FarmKitchen.farm_id == farmId)
             .first()
         )
+
+    def findFinishedKitchensNeedNotification(self, now):
+        return (
+            self.session.query(FarmKitchen)
+            .options(
+                joinedload(FarmKitchen.farm).joinedload(Farm.member),
+                joinedload(FarmKitchen.currentRecipe)
+                .joinedload(FoodRecipe.resultItem),
+            )
+            .filter(FarmKitchen.current_recipe_id.isnot(None))
+            .filter(FarmKitchen.cooking_quantity > 0)
+            .filter(FarmKitchen.finished_at <= now)
+            .filter(FarmKitchen.status == "cooking")
+            .all()
+        )
+
+    def markCookedReadyNotified(self, farmKitchen: FarmKitchen):
+        farmKitchen.status = "cooked_ready_notified"
+
+        self.session.flush()
+
+        return farmKitchen

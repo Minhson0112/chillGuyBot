@@ -16,7 +16,7 @@ class FarmAnimalStarvationTask(commands.Cog):
 
         self.scheduler.add_job(
             self.runAnimalStarvationJob,
-            CronTrigger(hour=15, minute=0),
+            CronTrigger(hour="*/8", minute=0),
             id="farmAnimalStarvationJob",
             replace_existing=True,
         )

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import joinedload
 
+from bot.models.crop import Crop
 from bot.models.farm import Farm
 from bot.models.farmCropArea import FarmCropArea
 
@@ -192,6 +193,27 @@ class FarmCropAreaRepository:
             )
             .all()
         )
+
+    def findHarvestableCropAreasNeedNotification(self, now: datetime):
+        return (
+            self.session.query(FarmCropArea)
+            .options(
+                joinedload(FarmCropArea.farm).joinedload(Farm.member),
+                joinedload(FarmCropArea.crop).joinedload(Crop.cropItem),
+            )
+            .filter(FarmCropArea.crop_id.isnot(None))
+            .filter(FarmCropArea.planted_at.isnot(None))
+            .filter(FarmCropArea.harvestable_at <= now)
+            .filter(FarmCropArea.status == "planted")
+            .all()
+        )
+
+    def markHarvestReadyNotified(self, farmCropArea: FarmCropArea):
+        farmCropArea.status = "harvest_ready_notified"
+
+        self.session.flush()
+
+        return farmCropArea
     
     def increaseUnlockedPlotCount(self, farmCropArea):
         farmCropArea.unlocked_plot_count += 1
