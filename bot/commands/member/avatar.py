@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+from bot.views.avatarView import AvatarView
+
 
 class Avatar(commands.Cog):
     def __init__(self, bot):
@@ -11,12 +13,13 @@ class Avatar(commands.Cog):
         if member is None:
             member = ctx.author
 
-        embed = discord.Embed(
-            title=f"Avatar của {member.display_name}"
-        )
-        embed.set_image(url=member.display_avatar.url)
+        view = AvatarView(member)
 
-        await ctx.send(embed=embed)
+        await ctx.send(
+            embed=view.buildAvatarEmbed("server"),
+            view=view,
+        )
+
 
 async def setup(bot):
     await bot.add_cog(Avatar(bot))
