@@ -19,6 +19,7 @@ class VoiceStateUpdateEvent(commands.Cog):
         after: discord.VoiceState,
     ):
         await self.sendVoiceChannelJoinMessage(member, before, after)
+        await self.sendVoiceChannelLeaveMessage(member, before, after)
 
         dailyTaskMessage = self.memberVoiceActivityService.handleVoiceStateUpdate(
             member,
@@ -86,6 +87,38 @@ class VoiceStateUpdateEvent(commands.Cog):
                 content=(
                     f"# {LOGO}\n"
                     f"Chào mừng hành khách {member.mention} đã lên chuyến tàu {after.channel.name}."
+                ),
+                allowed_mentions=discord.AllowedMentions(
+                    users=True,
+                    roles=False,
+                    everyone=False,
+                ),
+            )
+        except discord.Forbidden:
+            return
+        except discord.HTTPException:
+            return
+
+    async def sendVoiceChannelLeaveMessage(
+        self,
+        member: discord.Member,
+        before: discord.VoiceState,
+        after: discord.VoiceState,
+    ):
+        if before.channel is None:
+            return
+
+        if after.channel is not None and after.channel.id == before.channel.id:
+            return
+
+        if not isinstance(before.channel, discord.VoiceChannel):
+            return
+
+        try:
+            await before.channel.send(
+                content=(
+                    f"# {LOGO}\n"
+                    f"{member.mention} đã nhảy khỏi chuyến tàu {before.channel.name}, hẹn gặp lại."
                 ),
                 allowed_mentions=discord.AllowedMentions(
                     users=True,
