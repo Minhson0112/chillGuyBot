@@ -101,21 +101,43 @@ class DailyFortuneService:
             careerRate=careerRate,
         )
 
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                temperature=1.1,
-                max_output_tokens=500,
-            ),
-        )
+        description = ""
 
-        description = response.text.strip() if response.text is not None else ""
+        for _ in range(2):
+            response = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=1.1,
+                    max_output_tokens=1000,
+                ),
+            )
+
+            description = response.text.strip() if response.text is not None else ""
+
+            if description != "" and not self.hasForbiddenFortuneText(description):
+                break
 
         if description == "":
             raise ValueError("Gemini response is empty")
 
+        if self.hasForbiddenFortuneText(description):
+            raise ValueError("Gemini response contains forbidden fortune text")
+
         return description
+
+    def hasForbiddenFortuneText(self, description: str):
+        lowerDescription = description.lower()
+        forbiddenTexts = [
+            "chào mừng tuổi mới",
+            "bạn sinh",
+            "sinh ngày",
+            "ngày sinh",
+            "tuổi mới",
+            "cung ",
+        ]
+
+        return any(text in lowerDescription for text in forbiddenTexts)
 
     def buildFortunePrompt(
         self,
@@ -126,14 +148,13 @@ class DailyFortuneService:
     ):
         return (
             "Bạn là một thầy bói vui tính.\n"
-            "Dựa trên thông tin sau:\n"
-            f"- Ngày sinh: {dateOfBirth.strftime('%d-%m-%Y')}\n"
+            "Dựa trên metadata nội bộ và các chỉ số sau:\n"
+            f"- Birth profile key: {dateOfBirth.strftime('%d-%m-%Y')}\n"
             f"- Love rate: {loveRate}/100\n"
             f"- Luck rate: {luckRate}/100\n"
             f"- Career/study rate: {careerRate}/100\n\n"
             "Hãy viết horoscope hài hước bằng tiếng Việt khoảng 80 từ.\n"
-            "Không được quá nghiêm túc về thông tin bên trên.\n"
-            "Không đưa lời khuyên y tế, tài chính, pháp lý.\n"
-            "Không nhắc lại ngày sinh hoặc bất kỳ con số ngày sinh nào.\n"
+            "Không nhắc đến ngày sinh, tuổi mới, cung hoàng đạo, hoặc bất kỳ con số nào từ Birth profile key.\n"
+            "Không bắt đầu bằng các cụm như: Chào mừng tuổi mới, bạn sinh, sinh ngày, cung.\n"
             "Chỉ trả về nội dung horoscope, không tiêu đề, không markdown, không bullet."
         )
