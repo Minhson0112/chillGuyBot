@@ -109,7 +109,7 @@ class DailyFortuneService:
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     temperature=1.1,
-                    max_output_tokens=1000,
+                    max_output_tokens=10000,
                 ),
             )
 
@@ -148,11 +148,12 @@ class DailyFortuneService:
     ):
         return (
             "Bạn là một thầy bói vui tính.\n"
-            "Dựa trên metadata nội bộ và các chỉ số sau:\n"
-            f"- ngày sinh: {dateOfBirth.strftime('%d-%m-%Y')}\n"
+            "Dựa trên các chỉ số sau:\n"
+            f"- Ngày Sinh: {dateOfBirth.strftime('%d-%m-%Y')}\n"
             f"- Điểm tình yêu: {loveRate}/100\n"
             f"- Điểm may mắn: {luckRate}/100\n"
-            f"- công việc và học tập: {careerRate}/100\n\n"
-            "Hãy viết horoscope hài hước bằng tiếng Việt khoảng 100 từ về nội dung bên trên.\n"
-            "Chỉ trả về nội dung horoscope, không tiêu đề, không markdown, không bullet."
+            f"- Điểm công việc, học tập: {careerRate}/100\n\n"
+            "Hãy viết một đoạn bói toán hài hước bằng tiếng Việt khoảng 100 từ dựa trên chỉ số bên trên.\n"
+            "Không nhắc đến ngày sinh, tuổi mới, hoặc bất kỳ con số nào từ Ngày Sinh.\n"
+            "Chỉ trả về nội dung bói toán, không tiêu đề, không markdown, không bullet."
         )
