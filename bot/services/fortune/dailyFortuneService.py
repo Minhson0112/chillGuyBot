@@ -106,7 +106,7 @@ class DailyFortuneService:
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=1.1,
-                max_output_tokens=220,
+                max_output_tokens=500,
             ),
         )
 
@@ -134,5 +134,6 @@ class DailyFortuneService:
             "Hãy viết horoscope hài hước bằng tiếng Việt khoảng 80 từ.\n"
             "Không được quá nghiêm túc về thông tin bên trên.\n"
             "Không đưa lời khuyên y tế, tài chính, pháp lý.\n"
+            "Không nhắc lại ngày sinh hoặc bất kỳ con số ngày sinh nào.\n"
             "Chỉ trả về nội dung horoscope, không tiêu đề, không markdown, không bullet."
         )
