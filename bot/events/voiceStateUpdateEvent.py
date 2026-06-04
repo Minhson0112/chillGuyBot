@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.config.channel import FARM_NOTIFICATION_CHANNEL_ID
+from bot.config.channel import CREATE_VOICE_CHANNEL_ID, FARM_NOTIFICATION_CHANNEL_ID
 from bot.config.emoji import LOGO
 from bot.services.memberActivity.memberVoiceActivityService import MemberVoiceActivityService
 
@@ -18,6 +18,9 @@ class VoiceStateUpdateEvent(commands.Cog):
         before: discord.VoiceState,
         after: discord.VoiceState,
     ):
+        if member.bot:
+            return
+
         await self.sendVoiceChannelJoinMessage(member, before, after)
         await self.sendVoiceChannelLeaveMessage(member, before, after)
 
@@ -82,6 +85,9 @@ class VoiceStateUpdateEvent(commands.Cog):
         if not isinstance(after.channel, discord.VoiceChannel):
             return
 
+        if after.channel.id == CREATE_VOICE_CHANNEL_ID:
+            return
+
         try:
             await after.channel.send(
                 content=(
@@ -112,6 +118,9 @@ class VoiceStateUpdateEvent(commands.Cog):
             return
 
         if not isinstance(before.channel, discord.VoiceChannel):
+            return
+
+        if before.channel.id == CREATE_VOICE_CHANNEL_ID:
             return
 
         try:
