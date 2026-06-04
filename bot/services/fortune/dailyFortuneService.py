@@ -149,12 +149,10 @@ class DailyFortuneService:
         return (
             "Bạn là một thầy bói vui tính.\n"
             "Dựa trên metadata nội bộ và các chỉ số sau:\n"
-            f"- Birth profile key: {dateOfBirth.strftime('%d-%m-%Y')}\n"
-            f"- Love rate: {loveRate}/100\n"
-            f"- Luck rate: {luckRate}/100\n"
-            f"- Career/study rate: {careerRate}/100\n\n"
-            "Hãy viết horoscope hài hước bằng tiếng Việt khoảng 80 từ.\n"
-            "Không nhắc đến ngày sinh, tuổi mới, cung hoàng đạo, hoặc bất kỳ con số nào từ Birth profile key.\n"
-            "Không bắt đầu bằng các cụm như: Chào mừng tuổi mới, bạn sinh, sinh ngày, cung.\n"
+            f"- ngày sinh: {dateOfBirth.strftime('%d-%m-%Y')}\n"
+            f"- Điểm tình yêu: {loveRate}/100\n"
+            f"- Điểm may mắn: {luckRate}/100\n"
+            f"- công việc và học tập: {careerRate}/100\n\n"
+            "Hãy viết horoscope hài hước bằng tiếng Việt khoảng 100 từ về nội dung bên trên.\n"
             "Chỉ trả về nội dung horoscope, không tiêu đề, không markdown, không bullet."
         )
