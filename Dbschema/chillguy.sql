@@ -1592,3 +1592,42 @@ CREATE TABLE anonymous_match_sessions (
     CONSTRAINT chk_anonymous_match_sessions_different_users
         CHECK (user_a_id <> user_b_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='anonymous match sessions';
+
+
+# daily fortune
+CREATE TABLE member_daily_fortune (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'member daily fortune id',
+
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    fortune_date DATE NOT NULL COMMENT 'fortune date',
+
+    love_rate TINYINT UNSIGNED NOT NULL COMMENT 'love fortune rate from 0 to 100',
+    luck_rate TINYINT UNSIGNED NOT NULL COMMENT 'luck fortune rate from 0 to 100',
+    career_rate TINYINT UNSIGNED NOT NULL COMMENT 'career or study fortune rate from 0 to 100',
+
+    description TEXT NOT NULL COMMENT 'AI generated fortune description',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_member_daily_fortune_user_date (user_id, fortune_date),
+
+    KEY idx_member_daily_fortune_user_id (user_id),
+    KEY idx_member_daily_fortune_fortune_date (fortune_date),
+
+    CONSTRAINT fk_member_daily_fortune_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT chk_member_daily_fortune_love_rate
+        CHECK (love_rate <= 100),
+
+    CONSTRAINT chk_member_daily_fortune_luck_rate
+        CHECK (luck_rate <= 100),
+
+    CONSTRAINT chk_member_daily_fortune_career_rate
+        CHECK (career_rate <= 100)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily member fortune';

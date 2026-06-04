@@ -31,6 +31,7 @@ from bot.models.giveawayWinner import GiveawayWinner
 from bot.models.items import Item
 from bot.models.member import Member
 from bot.models.memberDailyActivity import MemberDailyActivity
+from bot.models.memberDailyFortune import MemberDailyFortune
 from bot.models.memberModerationHistory import MemberModerationHistory
 from bot.models.memberRolePurchase import MemberRolePurchase
 from bot.models.musicEvent import MusicEvent

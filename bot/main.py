@@ -173,6 +173,7 @@ async def main():
         "bot.commands.farm.findMarketItem",
         "bot.commands.minigame.slot",
         "bot.commands.minigame.blackjack",
+        "bot.commands.fortune.fortune",
         "bot.commands.farm.giftcode",
         "bot.commands.giveaway.createGiveaway",
         "bot.commands.farm.createFarm",

@@ -51,6 +51,11 @@ class Member(Base):
         back_populates="member",
         cascade="all, delete-orphan",
     )
+    dailyFortunes = relationship(
+        "MemberDailyFortune",
+        back_populates="member",
+        cascade="all, delete-orphan",
+    )
     dailyCheckinHistories = relationship(
         "DailyCheckinHistory",
         back_populates="member",
