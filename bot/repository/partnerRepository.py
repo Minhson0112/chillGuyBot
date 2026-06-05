@@ -36,3 +36,8 @@ class PartnerRepository:
         partner.status = status
         self.session.flush()
         return partner
+
+    def updateGuildName(self, partner, guildName):
+        partner.guild_name = guildName
+        self.session.flush()
+        return partner
