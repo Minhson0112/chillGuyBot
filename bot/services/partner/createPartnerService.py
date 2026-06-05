@@ -71,6 +71,7 @@ class CreatePartnerService:
             partnerRepository.create({
                 "guild_id": guildId,
                 "guild_name": guildName,
+                "invite_link": inviteLink,
                 "representative_user_id": representativeUserId,
                 "partnered_by_user_id": partneredByUserId,
                 "partner_at": date.today(),

@@ -218,6 +218,7 @@ async def main():
         "bot.tasks.homiesRoleCheckTask",
         "bot.tasks.memberSyncTask",
         "bot.tasks.serverInviteSyncTask",
+        "bot.tasks.partnerInviteCheckTask",
     ]
 
     for ext in extensions:

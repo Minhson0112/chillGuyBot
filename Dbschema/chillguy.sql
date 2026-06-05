@@ -1674,3 +1674,8 @@ CREATE TABLE server_invites (
     CONSTRAINT chk_server_invites_status
         CHECK (status IN ('active', 'expired', 'deleted', 'unknown'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='discord server invites';
+
+
+# add invite link to partner
+ALTER TABLE partner
+    ADD COLUMN invite_link VARCHAR(255) DEFAULT NULL COMMENT 'partner server invite link' AFTER guild_name;

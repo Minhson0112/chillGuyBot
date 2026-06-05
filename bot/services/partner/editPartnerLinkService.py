@@ -72,8 +72,12 @@ class EditPartnerLinkService:
             except discord.HTTPException:
                 return "Đã xảy ra lỗi khi sửa tin nhắn PN."
 
-            if partner.guild_name != newGuildName:
-                partnerRepository.updateGuildName(partner, newGuildName)
+            if partner.guild_name != newGuildName or partner.invite_link != inviteLink:
+                partnerRepository.updateGuildNameAndInviteLink(
+                    partner=partner,
+                    guildName=newGuildName,
+                    inviteLink=inviteLink,
+                )
 
             session.commit()
 
