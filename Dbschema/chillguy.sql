@@ -1631,3 +1631,46 @@ CREATE TABLE member_daily_fortune (
     CONSTRAINT chk_member_daily_fortune_career_rate
         CHECK (career_rate <= 100)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily member fortune';
+
+
+# server invite tracking
+CREATE TABLE server_invites (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'server invite id',
+
+    invite_code VARCHAR(32) NOT NULL COMMENT 'discord invite code',
+    invite_url VARCHAR(255) NOT NULL COMMENT 'discord invite url',
+
+    channel_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord channel id',
+    inviter_user_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord user id who created invite',
+
+    uses BIGINT NOT NULL DEFAULT 0 COMMENT 'current invite uses from discord',
+    max_uses BIGINT NOT NULL DEFAULT 0 COMMENT 'max uses, 0 means unlimited',
+    max_age BIGINT NOT NULL DEFAULT 0 COMMENT 'max age seconds, 0 means never expire',
+    temporary BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'temporary membership invite',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'active' COMMENT 'invite status: active, expired, deleted, unknown',
+
+    discord_created_at DATETIME DEFAULT NULL COMMENT 'invite created at from discord',
+    expired_at DATETIME DEFAULT NULL COMMENT 'calculated invite expired at',
+    deleted_at DATETIME DEFAULT NULL COMMENT 'invite deleted at',
+    last_fetched_at DATETIME DEFAULT NULL COMMENT 'last fetched from discord',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_server_invites_invite_code (invite_code),
+
+    KEY idx_server_invites_inviter_user_id (inviter_user_id),
+    KEY idx_server_invites_status (status),
+    KEY idx_server_invites_last_fetched_at (last_fetched_at),
+
+    CONSTRAINT fk_server_invites_inviter_user_id
+        FOREIGN KEY (inviter_user_id) REFERENCES member(user_id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+
+    CONSTRAINT chk_server_invites_status
+        CHECK (status IN ('active', 'expired', 'deleted', 'unknown'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='discord server invites';

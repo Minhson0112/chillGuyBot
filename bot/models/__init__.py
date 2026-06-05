@@ -40,6 +40,7 @@ from bot.models.owoDonateHistory import OwoDonateHistory
 from bot.models.owoExchangeCoinHistory import OwoExchangeCoinHistory
 from bot.models.partner import Partner
 from bot.models.roleShop import RoleShop
+from bot.models.serverInvite import ServerInvite
 from bot.models.shopItem import ShopItem
 from bot.models.toolTemplate import ToolTemplate
 from bot.models.tournamentEntry import TournamentEntry

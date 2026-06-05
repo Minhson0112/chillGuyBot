@@ -119,6 +119,8 @@ async def main():
         "bot.commands.voice.leaveVoice",
         "bot.commands.voice.speak",
         "bot.commands.server.serverInfo",
+        "bot.commands.server.syncInvites",
+        "bot.commands.server.topInvite",
         "bot.commands.partner.checkServer",
         "bot.commands.partner.createPartner",
         "bot.commands.partner.cancelPartner",
@@ -212,6 +214,7 @@ async def main():
         "bot.tasks.farmTrainEventAutoTask",
         "bot.tasks.homiesRoleCheckTask",
         "bot.tasks.memberSyncTask",
+        "bot.tasks.serverInviteSyncTask",
     ]
 
     for ext in extensions:
