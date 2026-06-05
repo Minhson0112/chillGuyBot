@@ -23,10 +23,12 @@ class ServerInviteSyncService:
         return discordCreatedAt + timedelta(seconds=maxAge)
 
     def resolveInviterUserId(self, memberRepository: MemberRepository, invite):
-        if invite.inviter is None:
+        inviter = getattr(invite, "inviter", None)
+
+        if inviter is None:
             return None
 
-        inviterUserId = invite.inviter.id
+        inviterUserId = inviter.id
         inviterMember = memberRepository.findByUserId(inviterUserId)
 
         if inviterMember is None:
@@ -41,7 +43,7 @@ class ServerInviteSyncService:
         return {
             "invite_code": invite.code,
             "invite_url": invite.url,
-            "channel_id": invite.channel.id if invite.channel is not None else None,
+            "channel_id": invite.channel.id if getattr(invite, "channel", None) is not None else None,
             "inviter_user_id": self.resolveInviterUserId(memberRepository, invite),
             "uses": invite.uses or 0,
             "max_uses": invite.max_uses or 0,
@@ -52,6 +54,79 @@ class ServerInviteSyncService:
             "expired_at": self.buildExpiredAt(discordCreatedAt, maxAge),
             "deleted_at": None,
             "last_fetched_at": fetchedAt,
+        }
+
+    def buildDeletedInviteData(self, memberRepository: MemberRepository, invite, deletedAt):
+        discordCreatedAt = self.normalizeDatetime(getattr(invite, "created_at", None))
+        maxAge = getattr(invite, "max_age", None) or 0
+
+        return {
+            "invite_code": invite.code,
+            "invite_url": invite.url,
+            "channel_id": invite.channel.id if getattr(invite, "channel", None) is not None else None,
+            "inviter_user_id": self.resolveInviterUserId(memberRepository, invite),
+            "uses": getattr(invite, "uses", None) or 0,
+            "max_uses": getattr(invite, "max_uses", None) or 0,
+            "max_age": maxAge,
+            "temporary": getattr(invite, "temporary", False),
+            "status": ServerInviteStatus.DELETED.value,
+            "discord_created_at": discordCreatedAt,
+            "expired_at": self.buildExpiredAt(discordCreatedAt, maxAge),
+            "deleted_at": deletedAt,
+            "last_fetched_at": deletedAt,
+        }
+
+    def syncCreatedInvite(self, invite):
+        fetchedAt = datetime.now()
+
+        with getDbSession() as session:
+            memberRepository = MemberRepository(session)
+            serverInviteRepository = ServerInviteRepository(session)
+            inviteData = self.buildInviteData(
+                memberRepository=memberRepository,
+                invite=invite,
+                fetchedAt=fetchedAt,
+            )
+            _, isCreated, isUpdated = serverInviteRepository.upsertByInviteCode(
+                inviteCode=invite.code,
+                inviteData=inviteData,
+            )
+
+            session.commit()
+
+        return {
+            "created": isCreated,
+            "updated": isUpdated,
+        }
+
+    def markDeletedInvite(self, invite):
+        deletedAt = datetime.now()
+
+        with getDbSession() as session:
+            memberRepository = MemberRepository(session)
+            serverInviteRepository = ServerInviteRepository(session)
+            serverInvite = serverInviteRepository.findByInviteCode(invite.code)
+
+            if serverInvite is None:
+                inviteData = self.buildDeletedInviteData(
+                    memberRepository=memberRepository,
+                    invite=invite,
+                    deletedAt=deletedAt,
+                )
+                serverInviteRepository.create(inviteData)
+                session.commit()
+
+                return {
+                    "created": True,
+                    "updated": False,
+                }
+
+            isUpdated = serverInviteRepository.markDeleted(serverInvite, deletedAt)
+            session.commit()
+
+        return {
+            "created": False,
+            "updated": isUpdated,
         }
 
     async def syncGuildInvites(self, guild):

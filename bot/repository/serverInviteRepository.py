@@ -1,5 +1,6 @@
 from sqlalchemy import func
 
+from bot.enums.serverInviteStatus import ServerInviteStatus
 from bot.models.serverInvite import ServerInvite
 
 
@@ -48,6 +49,17 @@ class ServerInviteRepository:
 
         return serverInvite, False, isUpdated
 
+    def markDeleted(self, serverInvite: ServerInvite, deletedAt):
+        if serverInvite.status == ServerInviteStatus.DELETED.value:
+            return False
+
+        serverInvite.status = ServerInviteStatus.DELETED.value
+        serverInvite.deleted_at = deletedAt
+
+        self.session.flush()
+
+        return True
+
     def findTopInviters(self, limit: int = 10):
         totalUses = func.sum(ServerInvite.uses).label("totalUses")
         inviteCount = func.count(ServerInvite.id).label("inviteCount")
@@ -63,5 +75,16 @@ class ServerInviteRepository:
             .having(func.sum(ServerInvite.uses) > 0)
             .order_by(totalUses.desc(), ServerInvite.inviter_user_id.asc())
             .limit(limit)
+            .all()
+        )
+
+    def findAllForList(self):
+        return (
+            self.session.query(ServerInvite)
+            .order_by(
+                ServerInvite.discord_created_at.desc(),
+                ServerInvite.created_at.desc(),
+                ServerInvite.id.desc(),
+            )
             .all()
         )
