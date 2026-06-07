@@ -1631,3 +1631,125 @@ CREATE TABLE member_daily_fortune (
     CONSTRAINT chk_member_daily_fortune_career_rate
         CHECK (career_rate <= 100)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily member fortune';
+
+
+# lotto event
+CREATE TABLE lotto_event (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'lotto event id',
+
+    name VARCHAR(255) NOT NULL COMMENT 'lotto event name',
+    ticket_price_cowoncy BIGINT NOT NULL COMMENT 'ticket price in cowoncy',
+
+    buy_deadline DATETIME NOT NULL COMMENT 'deadline to buy tickets',
+    draw_at DATETIME DEFAULT NULL COMMENT 'draw time',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'open' COMMENT 'event status: open, closed, drawn, cancelled',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'is active event',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_lotto_event_status_deadline (status, buy_deadline),
+    KEY idx_lotto_event_is_active (is_active),
+
+    CONSTRAINT chk_lotto_event_ticket_price_cowoncy
+        CHECK (ticket_price_cowoncy > 0),
+
+    CONSTRAINT chk_lotto_event_status
+        CHECK (status IN ('open', 'closed', 'drawn', 'cancelled'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='lotto events';
+
+
+CREATE TABLE lotto_ticket_purchase (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'lotto ticket purchase id',
+
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    lotto_event_id BIGINT NOT NULL COMMENT 'lotto event id',
+
+    ticket_quantity INT NOT NULL COMMENT 'ticket quantity',
+
+    status VARCHAR(50) NOT NULL COMMENT 'purchase status: pending_payment, paid, cancelled, expired',
+
+    payment_type VARCHAR(50) DEFAULT NULL COMMENT 'payment type',
+    payment_amount BIGINT DEFAULT NULL COMMENT 'payment amount',
+
+    registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'registered at',
+    paid_at DATETIME DEFAULT NULL COMMENT 'paid at',
+    expired_at DATETIME DEFAULT NULL COMMENT 'expired at',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_lotto_ticket_purchase_user_status (user_id, status),
+    KEY idx_lotto_ticket_purchase_event_status (lotto_event_id, status),
+
+    CONSTRAINT fk_lotto_ticket_purchase_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_lotto_ticket_purchase_event_id
+        FOREIGN KEY (lotto_event_id) REFERENCES lotto_event(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_lotto_ticket_purchase_quantity
+        CHECK (ticket_quantity > 0),
+
+    CONSTRAINT chk_lotto_ticket_purchase_payment_amount
+        CHECK (payment_amount IS NULL OR payment_amount > 0),
+
+    CONSTRAINT chk_lotto_ticket_purchase_status
+        CHECK (status IN ('pending_payment', 'paid', 'cancelled', 'expired'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='lotto ticket purchases';
+
+
+CREATE TABLE lotto_ticket (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'lotto ticket id',
+
+    lotto_event_id BIGINT NOT NULL COMMENT 'lotto event id',
+    lotto_ticket_purchase_id BIGINT NOT NULL COMMENT 'lotto ticket purchase id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+
+    number_1 INT NOT NULL COMMENT 'first lotto number',
+    number_2 INT NOT NULL COMMENT 'second lotto number',
+    number_3 INT NOT NULL COMMENT 'third lotto number',
+    number_4 INT NOT NULL COMMENT 'fourth lotto number',
+    number_5 INT NOT NULL COMMENT 'fifth lotto number',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_lotto_ticket_event_user (lotto_event_id, user_id),
+    KEY idx_lotto_ticket_purchase (lotto_ticket_purchase_id),
+
+    CONSTRAINT fk_lotto_ticket_event_id
+        FOREIGN KEY (lotto_event_id) REFERENCES lotto_event(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_lotto_ticket_purchase_id
+        FOREIGN KEY (lotto_ticket_purchase_id) REFERENCES lotto_ticket_purchase(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_lotto_ticket_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_lotto_ticket_number_1
+        CHECK (number_1 BETWEEN 1 AND 99),
+
+    CONSTRAINT chk_lotto_ticket_number_2
+        CHECK (number_2 BETWEEN 1 AND 99),
+
+    CONSTRAINT chk_lotto_ticket_number_3
+        CHECK (number_3 BETWEEN 1 AND 99),
+
+    CONSTRAINT chk_lotto_ticket_number_4
+        CHECK (number_4 BETWEEN 1 AND 99),
+
+    CONSTRAINT chk_lotto_ticket_number_5
+        CHECK (number_5 BETWEEN 1 AND 99)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='lotto tickets';

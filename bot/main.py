@@ -182,6 +182,7 @@ async def main():
         "bot.commands.exchange.exchange",
         "bot.commands.exchange.checkExchange",
         "bot.commands.roleShop.cancelBuyRole",
+        "bot.commands.lotto.createLottoEvent",
         "bot.commands.farm.toolBag",
         "bot.commands.farm.use",
         "bot.commands.farm.info",

@@ -29,6 +29,9 @@ from bot.models.giveaway import Giveaway
 from bot.models.giveawayParticipant import GiveawayParticipant
 from bot.models.giveawayWinner import GiveawayWinner
 from bot.models.items import Item
+from bot.models.lottoEvent import LottoEvent
+from bot.models.lottoTicket import LottoTicket
+from bot.models.lottoTicketPurchase import LottoTicketPurchase
 from bot.models.member import Member
 from bot.models.memberDailyActivity import MemberDailyActivity
 from bot.models.memberDailyFortune import MemberDailyFortune
