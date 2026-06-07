@@ -119,8 +119,12 @@ async def main():
         "bot.commands.voice.leaveVoice",
         "bot.commands.voice.speak",
         "bot.commands.server.serverInfo",
+        "bot.commands.server.listInvites",
+        "bot.commands.server.syncInvites",
+        "bot.commands.server.topInvite",
         "bot.commands.partner.checkServer",
         "bot.commands.partner.createPartner",
+        "bot.commands.partner.editPartnerLink",
         "bot.commands.partner.cancelPartner",
         "bot.commands.partner.showPartner",
         #"bot.commands.wordle.wordle",
@@ -194,6 +198,7 @@ async def main():
         "bot.events.autoModerationEvent",
         "bot.events.autoResponderEvent",
         "bot.events.anonymousMatchMessageRelayEvent",
+        "bot.events.serverInviteEvent",
         "bot.events.wordleEvent",
         "bot.events.owoGiveEvent",
         "bot.events.voiceStateUpdateEvent",
@@ -213,6 +218,8 @@ async def main():
         "bot.tasks.farmTrainEventAutoTask",
         "bot.tasks.homiesRoleCheckTask",
         "bot.tasks.memberSyncTask",
+        "bot.tasks.serverInviteSyncTask",
+        "bot.tasks.partnerInviteCheckTask",
     ]
 
     for ext in extensions:

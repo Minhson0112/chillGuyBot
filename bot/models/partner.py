@@ -10,6 +10,7 @@ class Partner(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False)
     guild_id = Column(BigInteger, unique=True, nullable=False)
     guild_name = Column("guild_name", String(255), nullable=False)
+    invite_link = Column(String(255), nullable=True)
     representative_user_id = Column(
         BigInteger,
         ForeignKey("member.user_id"),

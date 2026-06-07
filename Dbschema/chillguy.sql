@@ -1633,6 +1633,7 @@ CREATE TABLE member_daily_fortune (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily member fortune';
 
 
+<<<<<<< HEAD
 # lotto event
 CREATE TABLE lotto_event (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'lotto event id',
@@ -1645,12 +1646,36 @@ CREATE TABLE lotto_event (
 
     status VARCHAR(50) NOT NULL DEFAULT 'open' COMMENT 'event status: open, closed, drawn, cancelled',
     is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'is active event',
+=======
+# server invite tracking
+CREATE TABLE server_invites (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'server invite id',
+
+    invite_code VARCHAR(32) NOT NULL COMMENT 'discord invite code',
+    invite_url VARCHAR(255) NOT NULL COMMENT 'discord invite url',
+
+    channel_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord channel id',
+    inviter_user_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord user id who created invite',
+
+    uses BIGINT NOT NULL DEFAULT 0 COMMENT 'current invite uses from discord',
+    max_uses BIGINT NOT NULL DEFAULT 0 COMMENT 'max uses, 0 means unlimited',
+    max_age BIGINT NOT NULL DEFAULT 0 COMMENT 'max age seconds, 0 means never expire',
+    temporary BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'temporary membership invite',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'active' COMMENT 'invite status: active, expired, deleted, unknown',
+
+    discord_created_at DATETIME DEFAULT NULL COMMENT 'invite created at from discord',
+    expired_at DATETIME DEFAULT NULL COMMENT 'calculated invite expired at',
+    deleted_at DATETIME DEFAULT NULL COMMENT 'invite deleted at',
+    last_fetched_at DATETIME DEFAULT NULL COMMENT 'last fetched from discord',
+>>>>>>> 8e77d1ea4f30f65b104510fb9dfe35c00a874444
 
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
 
     PRIMARY KEY (id),
 
+<<<<<<< HEAD
     KEY idx_lotto_event_status_deadline (status, buy_deadline),
     KEY idx_lotto_event_is_active (is_active),
 
@@ -1753,3 +1778,24 @@ CREATE TABLE lotto_ticket (
     CONSTRAINT chk_lotto_ticket_number_5
         CHECK (number_5 BETWEEN 1 AND 99)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='lotto tickets';
+=======
+    UNIQUE KEY uq_server_invites_invite_code (invite_code),
+
+    KEY idx_server_invites_inviter_user_id (inviter_user_id),
+    KEY idx_server_invites_status (status),
+    KEY idx_server_invites_last_fetched_at (last_fetched_at),
+
+    CONSTRAINT fk_server_invites_inviter_user_id
+        FOREIGN KEY (inviter_user_id) REFERENCES member(user_id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+
+    CONSTRAINT chk_server_invites_status
+        CHECK (status IN ('active', 'expired', 'deleted', 'unknown'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='discord server invites';
+
+
+# add invite link to partner
+ALTER TABLE partner
+    ADD COLUMN invite_link VARCHAR(255) DEFAULT NULL COMMENT 'partner server invite link' AFTER guild_name;
+>>>>>>> 8e77d1ea4f30f65b104510fb9dfe35c00a874444

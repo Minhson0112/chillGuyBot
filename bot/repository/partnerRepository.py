@@ -1,5 +1,6 @@
 from sqlalchemy import asc
 
+from bot.enums.partnerStatus import PartnerStatus
 from bot.models.partner import Partner
 
 class PartnerRepository:
@@ -19,6 +20,13 @@ class PartnerRepository:
             .all()
         )
 
+    def findActivePartnersWithInviteLink(self):
+        return (
+            self.session.query(Partner)
+            .filter(Partner.status == PartnerStatus.ACTIVE.value)
+            .all()
+        )
+
     def create(self, partnerData):
         partner = Partner(**partnerData)
         self.session.add(partner)
@@ -34,5 +42,16 @@ class PartnerRepository:
 
     def updateStatus(self, partner, status):
         partner.status = status
+        self.session.flush()
+        return partner
+
+    def updateGuildName(self, partner, guildName):
+        partner.guild_name = guildName
+        self.session.flush()
+        return partner
+
+    def updateGuildNameAndInviteLink(self, partner, guildName, inviteLink):
+        partner.guild_name = guildName
+        partner.invite_link = inviteLink
         self.session.flush()
         return partner
