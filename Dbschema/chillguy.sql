@@ -1631,22 +1631,6 @@ CREATE TABLE member_daily_fortune (
         CHECK (career_rate <= 100)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily member fortune';
 
-
-<<<<<<< HEAD
-# lotto event
-CREATE TABLE lotto_event (
-    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'lotto event id',
-
-    name VARCHAR(255) NOT NULL COMMENT 'lotto event name',
-    ticket_price_cowoncy BIGINT NOT NULL COMMENT 'ticket price in cowoncy',
-
-    buy_deadline DATETIME NOT NULL COMMENT 'deadline to buy tickets',
-    draw_at DATETIME DEFAULT NULL COMMENT 'draw time',
-
-    status VARCHAR(50) NOT NULL DEFAULT 'open' COMMENT 'event status: open, closed, drawn, cancelled',
-    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'is active event',
-=======
-# server invite tracking
 CREATE TABLE server_invites (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'server invite id',
 
@@ -1667,14 +1651,45 @@ CREATE TABLE server_invites (
     expired_at DATETIME DEFAULT NULL COMMENT 'calculated invite expired at',
     deleted_at DATETIME DEFAULT NULL COMMENT 'invite deleted at',
     last_fetched_at DATETIME DEFAULT NULL COMMENT 'last fetched from discord',
->>>>>>> 8e77d1ea4f30f65b104510fb9dfe35c00a874444
+    UNIQUE KEY uq_server_invites_invite_code (invite_code),
+
+    KEY idx_server_invites_inviter_user_id (inviter_user_id),
+    KEY idx_server_invites_status (status),
+    KEY idx_server_invites_last_fetched_at (last_fetched_at),
+
+    CONSTRAINT fk_server_invites_inviter_user_id
+        FOREIGN KEY (inviter_user_id) REFERENCES member(user_id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+
+    CONSTRAINT chk_server_invites_status
+        CHECK (status IN ('active', 'expired', 'deleted', 'unknown'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='discord server invites';
+
+
+# add invite link to partner
+ALTER TABLE partner
+    ADD COLUMN invite_link VARCHAR(255) DEFAULT NULL COMMENT 'partner server invite link' AFTER guild_name;
+
+
+# lotto event
+CREATE TABLE lotto_event (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'lotto event id',
+
+    name VARCHAR(255) NOT NULL COMMENT 'lotto event name',
+    ticket_price_cowoncy BIGINT NOT NULL COMMENT 'ticket price in cowoncy',
+
+    buy_deadline DATETIME NOT NULL COMMENT 'deadline to buy tickets',
+    draw_at DATETIME DEFAULT NULL COMMENT 'draw time',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'open' COMMENT 'event status: open, closed, drawn, cancelled',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'is active event',
 
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
 
     PRIMARY KEY (id),
 
-<<<<<<< HEAD
     KEY idx_lotto_event_status_deadline (status, buy_deadline),
     KEY idx_lotto_event_is_active (is_active),
 
@@ -1777,27 +1792,6 @@ CREATE TABLE lotto_ticket (
     CONSTRAINT chk_lotto_ticket_number_5
         CHECK (number_5 BETWEEN 1 AND 99)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='lotto tickets';
-=======
-    UNIQUE KEY uq_server_invites_invite_code (invite_code),
-
-    KEY idx_server_invites_inviter_user_id (inviter_user_id),
-    KEY idx_server_invites_status (status),
-    KEY idx_server_invites_last_fetched_at (last_fetched_at),
-
-    CONSTRAINT fk_server_invites_inviter_user_id
-        FOREIGN KEY (inviter_user_id) REFERENCES member(user_id)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE,
-
-    CONSTRAINT chk_server_invites_status
-        CHECK (status IN ('active', 'expired', 'deleted', 'unknown'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='discord server invites';
-
-
-# add invite link to partner
-ALTER TABLE partner
-    ADD COLUMN invite_link VARCHAR(255) DEFAULT NULL COMMENT 'partner server invite link' AFTER guild_name;
->>>>>>> 8e77d1ea4f30f65b104510fb9dfe35c00a874444
 
 CREATE TABLE member_payment_transaction (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'member payment transaction id',
