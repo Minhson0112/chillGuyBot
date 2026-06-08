@@ -26,3 +26,20 @@ class LottoEventRepository:
         self.session.flush()
 
         return lottoEvent
+
+    def findById(self, lottoEventId: int):
+        return (
+            self.session.query(LottoEvent)
+            .filter(LottoEvent.id == lottoEventId)
+            .first()
+        )
+
+    def findActiveOpenEvents(self):
+        return (
+            self.session.query(LottoEvent)
+            .filter(
+                LottoEvent.is_active.is_(True),
+                LottoEvent.status == LottoEventStatus.OPEN.value,
+            )
+            .all()
+        )

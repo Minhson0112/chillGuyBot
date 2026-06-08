@@ -8,6 +8,7 @@ from bot.commands.musicEvent.openMusicEvent import JoinMusicEventView
 from bot.config.config import DISCORD_TOKEN
 from bot.config.database import getDbSession
 from bot.repository.musicEventRepository import MusicEventRepository
+from bot.repository.lottoEventRepository import LottoEventRepository
 from bot.repository.giveawayRepository import GiveawayRepository
 from bot.repository.giveawayWinnerRepository import GiveawayWinnerRepository
 from bot.services.anonymousMatch.anonymousMatchCacheService import AnonymousMatchCacheService
@@ -17,6 +18,7 @@ from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryS
 from bot.services.assetImageService import assetImageService
 from bot.views.giveawayJoinButtonView import GiveawayJoinButtonView
 from bot.views.giveawayRerollView import GiveawayRerollView
+from bot.views.lottoBuyTicketView import LottoBuyTicketView
 
 autoResponderCacheService = AutoResponderCacheService()
 anonymousMatchCacheService = AnonymousMatchCacheService()
@@ -81,9 +83,11 @@ async def registerPersistentViews():
         musicEventRepository = MusicEventRepository(dbSession)
         giveawayRepository = GiveawayRepository(dbSession)
         giveawayWinnerRepository = GiveawayWinnerRepository(dbSession)
+        lottoEventRepository = LottoEventRepository(dbSession)
         musicEvents = musicEventRepository.findAll()
         giveaways = giveawayRepository.findActiveGiveawaysWithMessage()
         currentWinners = giveawayWinnerRepository.findAllCurrentWinners()
+        lottoEvents = lottoEventRepository.findActiveOpenEvents()
         winnersByGiveawayId = {}
 
         for musicEvent in musicEvents:
@@ -91,6 +95,9 @@ async def registerPersistentViews():
 
         for giveaway in giveaways:
             bot.add_view(GiveawayJoinButtonView(giveaway.id))
+
+        for lottoEvent in lottoEvents:
+            bot.add_view(LottoBuyTicketView(lottoEvent.id))
 
         for winner in currentWinners:
             winnersByGiveawayId.setdefault(winner.giveaway_id, []).append(winner)
@@ -100,6 +107,7 @@ async def registerPersistentViews():
 
         print(f"✅ Đã đăng ký persistent views cho {len(musicEvents)} music event")
         print(f"✅ Đã đăng ký persistent views cho {len(giveaways)} giveaway")
+        print(f"✅ Đã đăng ký persistent views cho {len(lottoEvents)} lotto event")
         print(f"✅ Đã đăng ký persistent views cho {len(winnersByGiveawayId)} giveaway reroll")
 
 
@@ -187,6 +195,8 @@ async def main():
         "bot.commands.exchange.checkExchange",
         "bot.commands.roleShop.cancelBuyRole",
         "bot.commands.lotto.createLottoEvent",
+        "bot.commands.lotto.openLottoEvent",
+        "bot.commands.lotto.cancelLotto",
         "bot.commands.farm.toolBag",
         "bot.commands.farm.use",
         "bot.commands.farm.info",
