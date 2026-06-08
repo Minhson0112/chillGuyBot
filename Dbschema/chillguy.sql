@@ -1817,13 +1817,7 @@ CREATE TABLE member_payment_transaction (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
 
-    active_user_id BIGINT UNSIGNED GENERATED ALWAYS AS (
-        CASE WHEN status = 'pending_payment' THEN user_id ELSE NULL END
-    ) STORED COMMENT 'user id only when payment is pending',
-
     PRIMARY KEY (id),
-
-    UNIQUE KEY uq_member_payment_one_pending_user (active_user_id),
 
     KEY idx_member_payment_user_status (user_id, status),
     KEY idx_member_payment_target (payment_target_type, payment_target_id),
