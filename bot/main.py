@@ -197,6 +197,8 @@ async def main():
         "bot.commands.lotto.createLottoEvent",
         "bot.commands.lotto.openLottoEvent",
         "bot.commands.lotto.cancelLotto",
+        "bot.commands.lotto.myLotto",
+        "bot.commands.lotto.closeLottoEvent",
         "bot.commands.farm.toolBag",
         "bot.commands.farm.use",
         "bot.commands.farm.info",

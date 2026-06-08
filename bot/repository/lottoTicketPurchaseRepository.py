@@ -37,3 +37,10 @@ class LottoTicketPurchaseRepository:
             )
             .all()
         )
+
+    def findById(self, lottoTicketPurchaseId: int):
+        return (
+            self.session.query(LottoTicketPurchase)
+            .filter(LottoTicketPurchase.id == lottoTicketPurchaseId)
+            .first()
+        )

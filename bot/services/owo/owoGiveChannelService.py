@@ -6,6 +6,7 @@ from bot.enums.memberPaymentTargetType import MemberPaymentTargetType
 from bot.services.donate.donateRewardService import DonateRewardService
 from bot.services.exchange.owoExchangeCoinService import OwoExchangeCoinService
 from bot.services.memberPayment.memberPaymentService import MemberPaymentService
+from bot.services.owo.owoLottoTicketPaymentChannelService import OwoLottoTicketPaymentChannelService
 from bot.services.owo.owoRoleShopPaymentChannelService import OwoRoleShopPaymentChannelService
 
 
@@ -14,6 +15,7 @@ class OwoGiveChannelService:
         self.donateRewardService = DonateRewardService()
         self.owoExchangeCoinService = OwoExchangeCoinService()
         self.memberPaymentService = MemberPaymentService()
+        self.lottoTicketPaymentChannelService = OwoLottoTicketPaymentChannelService()
         self.roleShopPaymentChannelService = OwoRoleShopPaymentChannelService()
 
     async def handleDonateChannel(
@@ -140,6 +142,14 @@ class OwoGiveChannelService:
 
         if paymentTargetType == MemberPaymentTargetType.ROLE_SHOP.value:
             return await self.roleShopPaymentChannelService.handleRoleShopPayment(
+                message=message,
+                senderMember=senderMember,
+                memberPaymentTransactionId=pendingPaymentResult["memberPaymentTransactionId"],
+                cowoncyAmount=cowoncyAmount,
+            )
+
+        if paymentTargetType == MemberPaymentTargetType.LOTTO_TICKET.value:
+            return await self.lottoTicketPaymentChannelService.handleLottoTicketPayment(
                 message=message,
                 senderMember=senderMember,
                 memberPaymentTransactionId=pendingPaymentResult["memberPaymentTransactionId"],

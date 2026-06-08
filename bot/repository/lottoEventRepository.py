@@ -43,3 +43,14 @@ class LottoEventRepository:
             )
             .all()
         )
+
+    def findLatestEvent(self):
+        return (
+            self.session.query(LottoEvent)
+            .order_by(LottoEvent.id.desc())
+            .first()
+        )
+
+    def closeEvent(self, lottoEvent):
+        lottoEvent.status = LottoEventStatus.CLOSED.value
+        return lottoEvent
