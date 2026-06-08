@@ -1,13 +1,15 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
+from bot.enums.memberPaymentStatus import MemberPaymentStatus
 from bot.enums.paymentType import PaymentType
 from bot.enums.rolePurchaseStatus import RolePurchaseStatus
+from bot.repository.memberPaymentTransactionRepository import MemberPaymentTransactionRepository
 from bot.repository.memberRolePurchaseRepository import MemberRolePurchaseRepository
 
 
 class RoleShopPaymentService:
-    def verifyPayment(self, userId: int, paymentType: str, paymentAmount: int):
+    def verifyPayment(self, memberPaymentTransactionId: int, paymentType: str, paymentAmount: int):
         if paymentAmount <= 0:
             return {
                 "success": False,
@@ -15,13 +17,34 @@ class RoleShopPaymentService:
             }
 
         with getDbSession() as session:
+            memberPaymentTransactionRepository = MemberPaymentTransactionRepository(session)
             memberRolePurchaseRepository = MemberRolePurchaseRepository(session)
-            pendingPurchase = memberRolePurchaseRepository.findPendingPurchaseByUserId(userId)
+            pendingPayment = memberPaymentTransactionRepository.findById(memberPaymentTransactionId)
+
+            if pendingPayment is None:
+                return {
+                    "success": False,
+                    "message": "Không tìm thấy giao dịch thanh toán.",
+                }
+
+            if pendingPayment.status != MemberPaymentStatus.PENDING_PAYMENT.value:
+                return {
+                    "success": False,
+                    "message": "Giao dịch thanh toán này không còn ở trạng thái chờ thanh toán.",
+                }
+
+            pendingPurchase = memberRolePurchaseRepository.findById(pendingPayment.payment_target_id)
 
             if pendingPurchase is None:
                 return {
                     "success": False,
-                    "message": "Bạn hiện không có giao dịch mua role nào đang chờ thanh toán.",
+                    "message": "Không tìm thấy giao dịch mua role.",
+                }
+
+            if pendingPurchase.status != RolePurchaseStatus.PENDING_PAYMENT.value:
+                return {
+                    "success": False,
+                    "message": "Giao dịch mua role này không còn ở trạng thái chờ thanh toán.",
                 }
 
             roleShop = pendingPurchase.role_shop
@@ -33,7 +56,7 @@ class RoleShopPaymentService:
                 }
 
             requiredAmount = self.getRequiredAmount(
-                roleShop=roleShop,
+                pendingPayment=pendingPayment,
                 paymentType=paymentType,
             )
 
@@ -55,6 +78,7 @@ class RoleShopPaymentService:
 
             return {
                 "success": True,
+                "memberPaymentTransactionId": pendingPayment.id,
                 "memberRolePurchaseId": pendingPurchase.id,
                 "roleId": roleShop.role_id,
                 "validDays": roleShop.valid_days,
@@ -63,12 +87,27 @@ class RoleShopPaymentService:
                 "paymentType": paymentType,
             }
 
-    def completePayment(self, memberRolePurchaseId: int, paymentType: str, paymentAmount: int):
+    def completePayment(self, memberPaymentTransactionId: int, paymentType: str, paymentAmount: int):
         now = datetime.now()
 
         with getDbSession() as session:
+            memberPaymentTransactionRepository = MemberPaymentTransactionRepository(session)
             memberRolePurchaseRepository = MemberRolePurchaseRepository(session)
-            memberRolePurchase = memberRolePurchaseRepository.findById(memberRolePurchaseId)
+            memberPaymentTransaction = memberPaymentTransactionRepository.findById(memberPaymentTransactionId)
+
+            if memberPaymentTransaction is None:
+                return {
+                    "success": False,
+                    "message": "Không tìm thấy giao dịch thanh toán.",
+                }
+
+            if memberPaymentTransaction.status != MemberPaymentStatus.PENDING_PAYMENT.value:
+                return {
+                    "success": False,
+                    "message": "Giao dịch thanh toán này không còn ở trạng thái chờ thanh toán.",
+                }
+
+            memberRolePurchase = memberRolePurchaseRepository.findById(memberPaymentTransaction.payment_target_id)
 
             if memberRolePurchase is None:
                 return {
@@ -96,6 +135,11 @@ class RoleShopPaymentService:
             memberRolePurchase.paid_at = now
             memberRolePurchase.expired_at = now + timedelta(days=roleShop.valid_days)
 
+            memberPaymentTransaction.status = MemberPaymentStatus.PAID.value
+            memberPaymentTransaction.paid_payment_type = paymentType
+            memberPaymentTransaction.paid_amount = paymentAmount
+            memberPaymentTransaction.paid_at = now
+
             session.commit()
 
             return {
@@ -104,11 +148,11 @@ class RoleShopPaymentService:
                 "expiredAt": memberRolePurchase.expired_at,
             }
 
-    def getRequiredAmount(self, roleShop, paymentType: str):
+    def getRequiredAmount(self, pendingPayment, paymentType: str):
         if paymentType == PaymentType.COWONCY.value:
-            return roleShop.price_cowoncy
+            return pendingPayment.required_cowoncy_amount
 
         if paymentType == PaymentType.CHILL_COIN.value:
-            return roleShop.price_chill_coin
+            return pendingPayment.required_chill_coin_amount
 
         return None

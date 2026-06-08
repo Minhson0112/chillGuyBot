@@ -2,13 +2,14 @@ from datetime import datetime, time, timedelta
 
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.enums.chillCoinTransactionType import ChillCoinTransactionType
 from bot.repository.chillCoinTransactionRepository import ChillCoinTransactionRepository
 from bot.repository.memberRepository import MemberRepository
 
 
 class ChillCoinGiveService:
-    DAILY_RECEIVE_LIMIT = 1000
-    TRANSACTION_TYPE = "transfer"
+    DAILY_RECEIVE_LIMIT = 5000
+    TRANSACTION_TYPE = ChillCoinTransactionType.TRANSFER.value
 
     def giveCoin(
         self,

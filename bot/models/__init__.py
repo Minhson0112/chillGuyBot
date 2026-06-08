@@ -36,6 +36,7 @@ from bot.models.member import Member
 from bot.models.memberDailyActivity import MemberDailyActivity
 from bot.models.memberDailyFortune import MemberDailyFortune
 from bot.models.memberModerationHistory import MemberModerationHistory
+from bot.models.memberPaymentTransaction import MemberPaymentTransaction
 from bot.models.memberRolePurchase import MemberRolePurchase
 from bot.models.musicEvent import MusicEvent
 from bot.models.musicEventEntry import MusicEventEntry

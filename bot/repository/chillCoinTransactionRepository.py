@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import asc, desc, func
 from sqlalchemy.orm import joinedload
 
+from bot.enums.chillCoinTransactionType import ChillCoinTransactionType
 from bot.models.chillCoinTransaction import ChillCoinTransaction
 
 
@@ -15,7 +16,7 @@ class ChillCoinTransactionRepository:
         fromUserId: int,
         toUserId: int,
         amount: int,
-        transactionType: str = "transfer",
+        transactionType: str = ChillCoinTransactionType.TRANSFER.value,
         note: str = None,
     ):
         transaction = ChillCoinTransaction(
@@ -36,7 +37,7 @@ class ChillCoinTransactionRepository:
         userId: int,
         startAt: datetime,
         endAt: datetime,
-        transactionType: str = "transfer",
+        transactionType: str = ChillCoinTransactionType.TRANSFER.value,
     ):
         totalAmount = (
             self.session.query(func.coalesce(func.sum(ChillCoinTransaction.amount), 0))

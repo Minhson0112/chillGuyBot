@@ -1205,7 +1205,6 @@ CREATE TABLE member_role_purchase (
     UNIQUE KEY uq_member_role_purchase_user_role (user_id, role_shop_id)
 );
 
-
 # dụng cụ
 
 CREATE TABLE tool_templates (
@@ -1799,3 +1798,62 @@ CREATE TABLE lotto_ticket (
 ALTER TABLE partner
     ADD COLUMN invite_link VARCHAR(255) DEFAULT NULL COMMENT 'partner server invite link' AFTER guild_name;
 >>>>>>> 8e77d1ea4f30f65b104510fb9dfe35c00a874444
+
+CREATE TABLE member_payment_transaction (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'member payment transaction id',
+
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+
+    payment_target_type VARCHAR(50) NOT NULL COMMENT 'payment target type: role_shop, lotto_ticket',
+    payment_target_id BIGINT NOT NULL COMMENT 'target purchase record id',
+
+    status VARCHAR(50) NOT NULL COMMENT 'payment status: pending_payment, paid, cancelled, expired',
+
+    required_cowoncy_amount BIGINT DEFAULT NULL COMMENT 'required cowoncy amount',
+    required_chill_coin_amount BIGINT DEFAULT NULL COMMENT 'required chill coin amount',
+
+    paid_payment_type VARCHAR(50) DEFAULT NULL COMMENT 'actual paid payment type',
+    paid_amount BIGINT DEFAULT NULL COMMENT 'actual paid amount',
+
+    registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'registered at',
+    paid_at DATETIME DEFAULT NULL COMMENT 'paid at',
+    cancelled_at DATETIME DEFAULT NULL COMMENT 'cancelled at',
+    expired_at DATETIME DEFAULT NULL COMMENT 'expired at',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    active_user_id BIGINT UNSIGNED GENERATED ALWAYS AS (
+        CASE WHEN status = 'pending_payment' THEN user_id ELSE NULL END
+    ) STORED COMMENT 'user id only when payment is pending',
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_member_payment_one_pending_user (active_user_id),
+
+    KEY idx_member_payment_user_status (user_id, status),
+    KEY idx_member_payment_target (payment_target_type, payment_target_id),
+    KEY idx_member_payment_status_created_at (status, created_at),
+
+    CONSTRAINT fk_member_payment_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_member_payment_status
+        CHECK (status IN ('pending_payment', 'paid', 'cancelled', 'expired')),
+
+    CONSTRAINT chk_member_payment_target_type
+        CHECK (payment_target_type IN ('role_shop', 'lotto_ticket')),
+
+    CONSTRAINT chk_member_payment_required_cowoncy_amount
+        CHECK (required_cowoncy_amount IS NULL OR required_cowoncy_amount > 0),
+
+    CONSTRAINT chk_member_payment_required_chill_coin_amount
+        CHECK (required_chill_coin_amount IS NULL OR required_chill_coin_amount > 0),
+
+    CONSTRAINT chk_member_payment_required_amount
+        CHECK (required_cowoncy_amount IS NOT NULL OR required_chill_coin_amount IS NOT NULL),
+
+    CONSTRAINT chk_member_payment_paid_amount
+        CHECK (paid_amount IS NULL OR paid_amount > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='member payment transactions';

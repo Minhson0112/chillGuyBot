@@ -26,6 +26,7 @@ class MemberRolePurchaseRepository:
         )
 
         self.session.add(memberRolePurchase)
+        self.session.flush()
         return memberRolePurchase
 
     def findPendingPurchasesByUserId(self, userId: int):
