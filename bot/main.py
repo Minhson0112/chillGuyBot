@@ -203,6 +203,7 @@ async def main():
         "bot.commands.farm.use",
         "bot.commands.farm.info",
         "bot.commands.homies.setHomies",
+        "bot.commands.ticket.createTicket",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.memberUpdateEvent",
