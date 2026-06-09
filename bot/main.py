@@ -129,6 +129,7 @@ async def main():
         "bot.commands.server.serverInfo",
         "bot.commands.server.listInvites",
         "bot.commands.server.syncInvites",
+        "bot.commands.server.stealEmoji",
         "bot.commands.server.topInvite",
         "bot.commands.partner.checkServer",
         "bot.commands.partner.createPartner",
