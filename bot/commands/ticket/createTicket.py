@@ -66,8 +66,9 @@ class CreateTicketCommand(commands.Cog):
 
     def buildTicketEmbed(self, guild: discord.Guild):
         embed = discord.Embed(
-            title=f"{LOGO} - Ticket",
+            title=f"Chill Station - Ticket",
             description=(
+                f"# {LOGO}\n\n"
                 f"{TYM_ARROW} Hãy ấn mở ticket khi cần hỗ trợ, chúng tớ sẽ hỗ trợ hết mình trong khả năng \n\n"
                 f"{SATURN} Có thể sẽ mất một khoảng thời gian cho đến khi ai đó trả lời, đợi xíu nhé."
             ),
