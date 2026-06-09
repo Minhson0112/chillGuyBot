@@ -79,7 +79,7 @@ class CreateTicketCommand(commands.Cog):
             embed.set_thumbnail(url=guild.icon.url)
 
         embed.set_image(url=TICKET_DECORATION_IMG_URL)
-        embed.set_footer(text="Chill Station - Ticket")
+        embed.set_footer(text="Chill Station - Ticket | Tạo ticket không lý do sẽ bị phạt")
 
         return embed
 
