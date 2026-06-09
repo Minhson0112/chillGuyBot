@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, CheckConstraint, Column, Computed, DateTime, ForeignKey, Index, String, UniqueConstraint, func
+from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.mysql import BIGINT
 from sqlalchemy.orm import relationship
 
@@ -30,13 +30,6 @@ class MemberPaymentTransaction(Base):
 
     created_at = Column(DateTime, nullable=False, server_default=func.now(), comment="created at")
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now(), comment="updated at")
-
-    active_user_id = Column(
-        BIGINT(unsigned=True),
-        Computed("CASE WHEN status = 'pending_payment' THEN user_id ELSE NULL END", persisted=True),
-        nullable=True,
-        comment="user id only when payment is pending",
-    )
 
     member = relationship("Member")
 
