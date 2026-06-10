@@ -92,10 +92,10 @@ class VoiceStateUpdateEvent(commands.Cog):
             await after.channel.send(
                 content=(
                     f"# {LOGO}\n"
-                    f"Chào mừng hành khách {member.mention} đã lên chuyến tàu {after.channel.name}."
+                    f"Chào mừng hành khách {member.display_name} đã lên chuyến tàu {after.channel.name}."
                 ),
                 allowed_mentions=discord.AllowedMentions(
-                    users=True,
+                    users=False,
                     roles=False,
                     everyone=False,
                 ),
@@ -127,10 +127,10 @@ class VoiceStateUpdateEvent(commands.Cog):
             await before.channel.send(
                 content=(
                     f"# {LOGO}\n"
-                    f"{member.mention} đã nhảy khỏi chuyến tàu {before.channel.name}, hẹn gặp lại."
+                    f"{member.display_name} đã nhảy khỏi chuyến tàu {before.channel.name}, hẹn gặp lại."
                 ),
                 allowed_mentions=discord.AllowedMentions(
-                    users=True,
+                    users=False,
                     roles=False,
                     everyone=False,
                 ),
