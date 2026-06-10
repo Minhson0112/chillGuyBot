@@ -9,7 +9,7 @@ from bot.config.config import (
     AUTO_MUTE_WARNING_THRESHOLD,
     BANNED_WORDS,
 )
-from bot.config.channel import MOD_COMMAND_CHANNEL_ID
+from bot.config.channel import AUTO_BAN_CHANNEL_ID, MOD_COMMAND_CHANNEL_ID
 from bot.config.roles import OWNER_ROLE_ID
 from bot.config.database import getDbSession
 from bot.enums.moderationActionType import ModerationActionType
@@ -18,6 +18,8 @@ from bot.repository.memberRepository import MemberRepository
 
 
 class AutoModerationService:
+    AUTO_BAN_DELETE_MESSAGE_SECONDS = 86400
+
     def __init__(self):
         self.bannedWordSet = {word.lower() for word in BANNED_WORDS}
         self.wordPattern = re.compile(r"\w+", flags=re.UNICODE)
@@ -33,6 +35,9 @@ class AutoModerationService:
             return
 
         if self.hasOwnerRole(message.author):
+            return
+
+        if await self.handleAutoBanChannelMessage(bot, message):
             return
 
         if await self.handleEveryoneMention(bot, message):
@@ -114,19 +119,26 @@ class AutoModerationService:
                     embed=embed,
                 )
 
+    async def handleAutoBanChannelMessage(self, bot, message: discord.Message):
+        if message.channel.id != AUTO_BAN_CHANNEL_ID:
+            return False
+
+        banReason = "người dùng đã gửi tin nhắn vào kênh auto ban (chống spam tool)"
+        return await self.banMemberForAutoModeration(bot, message, banReason)
+
     async def handleEveryoneMention(self, bot, message: discord.Message):
         if not self.isEveryoneMentionViolation(message):
             return False
 
+        banReason = "người dùng đã tag everyone hoặc here (chống raid server)"
+        return await self.banMemberForAutoModeration(bot, message, banReason)
+
+    async def banMemberForAutoModeration(self, bot, message: discord.Message, banReason: str):
         with getDbSession() as session:
             memberRepository = MemberRepository(session)
             memberModerationHistoryRepository = MemberModerationHistoryRepository(session)
 
             member = memberRepository.findByUserId(message.author.id)
-            if member is None:
-                return False
-
-            banReason = "người dùng đã tag everyone hoặc here (chống raid server)"
 
             try:
                 await message.delete()
@@ -135,15 +147,19 @@ class AutoModerationService:
             except discord.NotFound:
                 pass
 
-            await message.author.ban(reason=banReason, delete_message_days=1)
+            await message.author.ban(
+                reason=banReason,
+                delete_message_seconds=self.AUTO_BAN_DELETE_MESSAGE_SECONDS,
+            )
 
-            memberModerationHistoryRepository.create({
-                "action_by_user_id": bot.user.id,
-                "target_user_id": message.author.id,
-                "action_type": ModerationActionType.BAN.value,
-                "reason": banReason,
-                "duration_minutes": None,
-            })
+            if member is not None:
+                memberModerationHistoryRepository.create({
+                    "action_by_user_id": bot.user.id,
+                    "target_user_id": message.author.id,
+                    "action_type": ModerationActionType.BAN.value,
+                    "reason": banReason,
+                    "duration_minutes": None,
+                })
 
             session.commit()
 
