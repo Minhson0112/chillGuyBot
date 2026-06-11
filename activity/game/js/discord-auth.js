@@ -28,6 +28,17 @@
         return `${window.location.origin}/`;
     }
 
+    function withTimeout(promise, timeoutMs, timeoutMessage) {
+        return Promise.race([
+            promise,
+            new Promise((_, reject) => {
+                setTimeout(() => {
+                    reject(new Error(timeoutMessage));
+                }, timeoutMs);
+            }),
+        ]);
+    }
+
     function normalizeError(error) {
         if (!error) {
             return null;
@@ -97,17 +108,20 @@
             });
 
             await logAuthStep("Discord Activity authorize started.", {
-                prompt: "consent",
+                prompt: "default",
                 redirectUri,
             });
-            const { code } = await discordSdk.commands.authorize({
-                client_id: clientId,
-                redirect_uri: redirectUri,
-                response_type: "code",
-                state: "",
-                prompt: "consent",
-                scope: ["identify", "guilds"],
-            });
+            const { code } = await withTimeout(
+                discordSdk.commands.authorize({
+                    client_id: clientId,
+                    redirect_uri: redirectUri,
+                    response_type: "code",
+                    state: "",
+                    scope: ["identify", "guilds"],
+                }),
+                30000,
+                "Discord authorize timed out after 30 seconds",
+            );
             await logAuthStep("Discord Activity authorize completed.", {
                 hasCode: Boolean(code),
             });
