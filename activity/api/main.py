@@ -1,5 +1,4 @@
 import os
-import json
 from typing import Optional
 
 import mysql.connector
@@ -15,12 +14,6 @@ app = FastAPI(title="Chill Guy Merge Game API")
 
 class DiscordTokenRequest(BaseModel):
     code: str
-    redirect_uri: Optional[str] = None
-
-
-class ClientLogRequest(BaseModel):
-    message: str
-    data: Optional[dict] = None
 
 
 class GameOverRequest(BaseModel):
@@ -63,18 +56,6 @@ def healthCheck():
     return {"status": "ok"}
 
 
-@app.post("/api/client-log")
-def saveClientLog(request: ClientLogRequest):
-    logData = {
-        "message": request.message,
-        "data": request.data if request.data is not None else {},
-    }
-
-    print(f"[client-log] {json.dumps(logData, ensure_ascii=False)}", flush=True)
-
-    return {"status": "ok"}
-
-
 @app.post("/api/discord/token")
 def exchangeDiscordToken(request: DiscordTokenRequest):
     clientId = os.getenv("DISCORD_CLIENT_ID")
@@ -89,9 +70,6 @@ def exchangeDiscordToken(request: DiscordTokenRequest):
         "grant_type": "authorization_code",
         "code": request.code,
     }
-
-    if request.redirect_uri:
-        tokenData["redirect_uri"] = request.redirect_uri
 
     response = requests.post(
         "https://discord.com/api/oauth2/token",
