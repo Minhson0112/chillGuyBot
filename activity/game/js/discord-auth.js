@@ -76,6 +76,84 @@
         }
     }
 
+    async function authorizeDiscordActivity(discordSdk, clientId, redirectUri) {
+        await logAuthStep("Discord Activity authorize started.", {
+            prompt: "consent",
+            redirectUri,
+        });
+
+        const { code } = await withTimeout(
+            discordSdk.commands.authorize({
+                client_id: clientId,
+                redirect_uri: redirectUri,
+                response_type: "code",
+                state: "",
+                prompt: "consent",
+                scope: ["identify", "guilds"],
+            }),
+            30000,
+            "Discord authorize timed out after 30 seconds",
+        );
+
+        await logAuthStep("Discord Activity authorize completed.", {
+            hasCode: Boolean(code),
+        });
+
+        await logAuthStep("Discord Activity token exchange request started.");
+        const tokenResponse = await fetch("/api/discord/token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                code,
+                redirect_uri: redirectUri,
+            }),
+        });
+        await logAuthStep("Discord Activity token exchange response received.", {
+            ok: tokenResponse.ok,
+            status: tokenResponse.status,
+        });
+
+        if (!tokenResponse.ok) {
+            throw new Error("Discord token exchange failed");
+        }
+
+        const { access_token: accessToken } = await tokenResponse.json();
+        await logAuthStep("Discord Activity token exchange completed.", {
+            hasAccessToken: Boolean(accessToken),
+        });
+
+        await logAuthStep("Discord Activity authenticate started.");
+        const auth = await discordSdk.commands.authenticate({
+            access_token: accessToken,
+        });
+
+        if (!auth) {
+            throw new Error("Discord authenticate command failed");
+        }
+
+        await logAuthStep("Discord Activity authenticate completed.", {
+            userId: auth.user?.id || null,
+        });
+
+        authState.ready = true;
+        authState.accessToken = accessToken;
+        authState.user = auth.user || null;
+        authState.guildId = discordSdk.guildId || null;
+        authState.channelId = discordSdk.channelId || null;
+        authState.sdk = discordSdk;
+        authState.error = null;
+
+        await logAuthStep("Discord Activity auth init completed.", {
+            userId: authState.user?.id || null,
+            guildId: authState.guildId,
+            channelId: authState.channelId,
+        });
+
+        return authState;
+    }
+
     async function initDiscordAuth() {
         await logAuthStep("Discord Activity auth init started.");
 
@@ -107,77 +185,9 @@
                 channelId: discordSdk.channelId || null,
             });
 
-            await logAuthStep("Discord Activity authorize started.", {
-                prompt: "default",
-                redirectUri,
-            });
-            const { code } = await withTimeout(
-                discordSdk.commands.authorize({
-                    client_id: clientId,
-                    redirect_uri: redirectUri,
-                    response_type: "code",
-                    state: "",
-                    scope: ["identify", "guilds"],
-                }),
-                30000,
-                "Discord authorize timed out after 30 seconds",
-            );
-            await logAuthStep("Discord Activity authorize completed.", {
-                hasCode: Boolean(code),
-            });
-
-            await logAuthStep("Discord Activity token exchange request started.");
-            const tokenResponse = await fetch("/api/discord/token", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    code,
-                    redirect_uri: redirectUri,
-                }),
-            });
-            await logAuthStep("Discord Activity token exchange response received.", {
-                ok: tokenResponse.ok,
-                status: tokenResponse.status,
-            });
-
-            if (!tokenResponse.ok) {
-                throw new Error("Discord token exchange failed");
-            }
-
-            const { access_token: accessToken } = await tokenResponse.json();
-            await logAuthStep("Discord Activity token exchange completed.", {
-                hasAccessToken: Boolean(accessToken),
-            });
-
-            await logAuthStep("Discord Activity authenticate started.");
-            const auth = await discordSdk.commands.authenticate({
-                access_token: accessToken,
-            });
-
-            if (!auth) {
-                throw new Error("Discord authenticate command failed");
-            }
-
-            await logAuthStep("Discord Activity authenticate completed.", {
-                userId: auth.user?.id || null,
-            });
-
-            authState.ready = true;
-            authState.accessToken = accessToken;
-            authState.user = auth.user || null;
-            authState.guildId = discordSdk.guildId || null;
-            authState.channelId = discordSdk.channelId || null;
             authState.sdk = discordSdk;
 
-            await logAuthStep("Discord Activity auth init completed.", {
-                userId: authState.user?.id || null,
-                guildId: authState.guildId,
-                channelId: authState.channelId,
-            });
-
-            return authState;
+            return await authorizeDiscordActivity(discordSdk, clientId, redirectUri);
         } catch (error) {
             authState.error = error;
             console.warn("Discord Activity auth is not ready:", error);
