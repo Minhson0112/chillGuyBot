@@ -1,142 +1,81 @@
-/* ゲーム全体のスタイル */
+html,
 body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100vh;
-    background-image: url('../assets/ballTexture/webBackground.png');
+    width: 100%;
+    height: 100%;
 }
 
-#header {
-    height: 50px;
-    background-color: rgba(255, 255, 255, 0.5);
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #0b1020;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
 }
 
 #main {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+    width: 100vw;
     height: 100vh;
-}
-
-#gameRule {
-    height: auto;
-    width: 400px;
     display: flex;
-    flex-direction: column;
-    margin-right: 100px;
+    align-items: center;
+    justify-content: center;
 }
 
-#gameDetail {
-    background-color:rgba(255, 255, 255, 0.5);
-    border: 3px solid rgb(243, 53, 246);
-    border-radius: 15px;
-    margin-top: 30px;
-    font-size: 25px;
-    color: rgb(255, 255, 255);
-    text-shadow: 1px 1px #815a2b, -1px 1px #815a2b, 1px -1px #815a2b, -1px -1px #815a2b, 1px 1px 0px #815a2b;
-    text-align: center;
-    cursor: pointer;
-    font-family: 'Noto Sans JP', sans-serif;
+#gameShell {
+    width: min(100vw, calc(100vh * 430 / 720));
+    height: min(100vh, calc(100vw * 720 / 430));
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #gameContainer {
     position: relative;
-    width: 430px;
-    height: 720px;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 430 / 720;
+    overflow: hidden;
     background-color: rgb(255, 218, 185);
 }
 
-#gameNote {
-    height: auto;
-    width: 400px;
-    margin-left: 100px;
-    text-align: center;
-}
-
-#introduction {
-    background-color:rgba(255, 255, 255, 0.5);
-    font-family: 'Noto Sans JP', sans-serif;
-    border-radius: 15px;
-    border: 3px solid rgb(243, 53, 246);
-    border-bottom: 4px solid rgb(126, 33, 127);
-    font-size: 25px;
-    color: rgb(255, 255, 255);
-    text-shadow: 1px 1px #815a2b, -1px 1px #815a2b, 1px -1px #815a2b, -1px -1px #815a2b, 1px 1px 0px #815a2b;
-    text-align: center;
-}
-
-.planets {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    text-align: center;
-    padding: 0;
-}
-
-.planet {
-    flex: 0 0 auto;
-    width: 48%;
-    position: relative;
-    display: flex;
-}
-
-.planets li {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    font-family: 'Noto Sans JP', sans-serif;
-    color: rgb(60, 9, 243);
-    font-weight: bold;
-    font-size: 13px;
-    margin-top: 15px;
-    line-height: 1.8em;
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 35px;
-    border: 3px solid rgb(243, 53, 246);
-    align-items: center;
-}
-
-.planets li img {
-    width: 40px;
-    height: 40px;
-}
-
-.planets li span {
+#gameArea,
+#effectCanvas,
+#comboCanvas {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
 }
-/* スコアカウンター */
+
+#effectCanvas,
+#comboCanvas {
+    z-index: 2;
+    pointer-events: none;
+}
+
 .bodyCounter {
     position: absolute;
-    top: -20px;
-    left: 10%;
-    transform: translateX(-50%);
-    width: 70px;
-    height: 30px;
+    top: 8px;
+    left: 10px;
+    z-index: 3;
+    min-width: 70px;
+    margin: 0;
     text-align: center;
-    color: yellow;
+    color: #ffef47;
     font-size: 25px;
     font-weight: bold;
-    text-shadow: -1px -1px 0 lightblue, 1px -1px 0 lightblue, -1px 1px 0 lightblue, 1px 1px 0 lightblue;
+    line-height: 30px;
+    text-shadow: -1px -1px 0 #6fb9ff, 1px -1px 0 #6fb9ff, -1px 1px 0 #6fb9ff, 1px 1px 0 #6fb9ff;
 }
 
-/* 次のボール表示 */
 #nextBallContainer {
     position: absolute;
-    top: 45px;
-    left: 10%;
-    transform: translateX(-50%);
+    top: 46px;
+    left: 10px;
+    z-index: 3;
     width: 70px;
     height: 30px;
-    background: #02B389;
+    background: #02b389;
     color: white;
     font-size: 10px;
     font-weight: bold;
@@ -149,120 +88,23 @@ body {
     gap: 5px;
 }
 
-/* 次のボール */
 #nextBall {
     width: 20px;
     height: 20px;
+    flex: 0 0 20px;
     border-radius: 50%;
     background: white;
 }
 
-/* モーダルボックスの幅を設定 */
 .game-over-modal .tingle-modal-box {
-    width: 400px;
+    width: min(400px, calc(100vw - 32px));
 }
 
-/* コンテンツとフッター内のテキストを中央揃え */
 .game-over-modal .tingle-modal-box__content,
 .game-over-modal .tingle-modal-box__footer {
     text-align: center;
 }
 
-/* ボタンの角を丸く */
 .game-over-modal .tingle-btn.tingle-btn--primary {
-    border-radius:10px 10px 10px 10px;
-}
-
-#effectCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    pointer-events: none;
-}
-
-#overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    z-index: 10;
-}
-
-#gameDialog {
-    width: 800px;
-    height: 420px;
-    background-image: url('../assets/ballTexture/background.png');
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 20px;
     border-radius: 10px;
-    display: none;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-    color: rgb(255, 255, 255);
-    z-index: 11;
-}
-
-.dialog-content {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.dialog-content img {
-    width: 280px;
-    height: 280px;
-    object-fit: cover;
-}
-
-#rule-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    font-size: 20px;
-}
-#rule-content p {
-    margin: 10px 0;
-}
-
-#dialog-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-}
-
-#closeDialog {
-    width: 50px;
-    height: 50px;
-    background-size: cover;
-    border: none;
-    cursor: pointer;
-    background-color: transparent;
-    padding: 0;
-    outline: none;
-    position: absolute;
-    top: -40px;
-    left: 770px;
-}
-#dialog-title {
-    width: 250px;
-    height: 100px;
-    background-color: rgb(39, 33, 80);
-    border-radius: 30px;
-    display: flex;
-    position: absolute;
-    top: -50px;
-    left: 0px;
-    align-items: center;
-}
-
-.show {
-    display: block !important;
 }

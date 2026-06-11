@@ -23,7 +23,6 @@ function loadClassicScript(src) {
 async function bootstrap() {
     await import("./discord-auth.js");
     await loadClassicScript("js/ball-game.js");
-    await loadClassicScript("js/common.js");
 }
 
 bootstrap();

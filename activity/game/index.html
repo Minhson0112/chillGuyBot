@@ -7,69 +7,22 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="header"></div>
-
-    <div id="main">
-        <div id="gameRule">
-            <img src="assets/ballTexture/stoneGame.png" alt="Tiêu đề">
-            <img src="assets/ballTexture/evolution.png" alt="Tiến hóa">
-            <button id="gameDetail">Luật chơi</button>
-        </div>
-
-        <div id="gameContainer">
-            <canvas id="gameArea" width="430" height="720"></canvas>
-            <p class="bodyCounter">
-                <span>0</span>
-            </p>
-            <div id="nextBallContainer">
-                <span>NEXT</span>
-                <div id="nextBall"></div>
-            </div>
-            <canvas id="effectCanvas"></canvas>
-            <canvas id="comboCanvas"></canvas>
-        </div>
-
-        <div id="gameNote">
-            <h2 id="introduction">Giới thiệu hành tinh</h2>
-            <ul class="planets">
-                <li class="planet"><img src="assets/ballTexture/stone.png" alt=""><span>Đá</span></li>
-                <li class="planet"><img src="assets/ballTexture/moon.png" alt=""><span>Mặt trăng</span></li>
-                <li class="planet"><img src="assets/ballTexture/mercury.png" alt=""><span>Thủy tinh</span></li>
-                <li class="planet"><img src="assets/ballTexture/mars.png" alt=""><span>Hỏa tinh</span></li>
-                <li class="planet"><img src="assets/ballTexture/venus.png" alt=""><span>Kim tinh</span></li>
-                <li class="planet"><img src="assets/ballTexture/earth.png" alt=""><span>Trái Đất</span></li>
-                <li class="planet"><img src="assets/ballTexture/neptune.png" alt=""><span>Hải vương</span></li>
-                <li class="planet"><img src="assets/ballTexture/uranus.png" alt=""><span>Thiên vương</span></li>
-                <li class="planet"><img src="assets/ballTexture/saturn.png" alt=""><span>Thổ tinh</span></li>
-                <li class="planet"><img src="assets/ballTexture/jupiter.png" alt=""><span>Mộc tinh</span></li>
-                <li class="planet"><img src="assets/ballTexture/sun.png" alt=""><span>Mặt trời</span></li>
-            </ul>
-        </div>
-    </div>
-
-    <div id="overlay"></div>
-
-    <div id="gameDialog">
-        <div id="dialog-header">
-            <div id="dialog-title">
-                <img src="assets/ballTexture/telescope.png" alt="">
-                <h2>Luật chơi</h2>
-            </div>
-            <button id="closeDialog">
-                <img src="assets/ballTexture/closeButton.png" alt="">
-            </button>
-        </div>
-        <div class="dialog-content">
-            <img src="assets/ballTexture/evolution.png" alt="Luật chơi">
-            <div id="rule-content">
-                <p>Giới thiệu trò chơi!</p>
-                <p>🌟 Mục tiêu: Hợp nhất các hành tinh để tạo ra Mặt Trời!</p>
-                <p>🪐 Ghép 2 hành tinh giống nhau để tiến hóa thành hành tinh lớn hơn!</p>
-                <p>💥 Nếu các hành tinh chạm vạch over, trò chơi kết thúc!</p>
-                <p>🚀 Bạn có thể trở thành người tạo ra vũ trụ không!?</p>
+    <main id="main">
+        <div id="gameShell">
+            <div id="gameContainer">
+                <canvas id="gameArea" width="430" height="720"></canvas>
+                <p class="bodyCounter">
+                    <span>0</span>
+                </p>
+                <div id="nextBallContainer">
+                    <span>NEXT</span>
+                    <div id="nextBall"></div>
+                </div>
+                <canvas id="effectCanvas"></canvas>
+                <canvas id="comboCanvas"></canvas>
             </div>
         </div>
-    </div>
+    </main>
 
     <script type="module" src="js/main.js"></script>
 </body>

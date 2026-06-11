@@ -981,6 +981,12 @@ setInterval(() => {
 
 let isDragging = false;
 
+function getGameAreaOffsetX(event) {
+    const rect = gameArea.getBoundingClientRect();
+    const scaleX = gameArea.width / rect.width;
+    return (event.clientX - rect.left) * scaleX;
+}
+
 /**
  * mousedown: マウスのクリックでドラッグ開始し、クリック位置にボールのx座標を更新
  */
@@ -988,7 +994,7 @@ gameArea.addEventListener("mousedown", (event) => {
     try {
         if (!gameOver && currentBall) {
             isDragging = true;
-            const { offsetX } = event;
+            const offsetX = getGameAreaOffsetX(event);
             const currentBallRadius = currentBall.circleRadius;
             const newX = Math.max(
                 Math.min(offsetX, gameArea.width - 10 - currentBallRadius),
@@ -1010,7 +1016,7 @@ gameArea.addEventListener("mousedown", (event) => {
 gameArea.addEventListener("mousemove", (event) => {
     try {
         if (isDragging && canMoveBall && currentBall) {
-            const { offsetX } = event;
+            const offsetX = getGameAreaOffsetX(event);
             const currentBallRadius = currentBall.circleRadius;
             const newX = Math.max(
                 Math.min(offsetX, gameArea.width - 10 - currentBallRadius),
