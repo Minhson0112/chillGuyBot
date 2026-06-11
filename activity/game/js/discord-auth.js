@@ -65,7 +65,7 @@
         };
     }
 
-    async function logAuthStep(message, data = {}) {
+    function logAuthStep(message, data = {}) {
         const payload = {
             seq: ++logSequence,
             ...getDiscordQueryContext(),
@@ -74,20 +74,18 @@
 
         console.info(message, payload);
 
-        try {
-            await fetch("/api/client-log", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    message,
-                    data: payload,
-                }),
-            });
-        } catch (error) {
+        fetch("/api/client-log", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                message,
+                data: payload,
+            }),
+        }).catch((error) => {
             console.warn("Discord Activity client log failed:", error);
-        }
+        });
     }
 
     async function authorizeDiscordActivity(discordSdk, clientId, redirectUri) {
