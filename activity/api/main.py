@@ -15,6 +15,7 @@ app = FastAPI(title="Chill Guy Merge Game API")
 
 class DiscordTokenRequest(BaseModel):
     code: str
+    redirect_uri: Optional[str] = None
 
 
 class ClientLogRequest(BaseModel):
@@ -82,15 +83,20 @@ def exchangeDiscordToken(request: DiscordTokenRequest):
     if not clientId or not clientSecret:
         raise HTTPException(status_code=500, detail="Discord OAuth credentials are not configured")
 
+    tokenData = {
+        "client_id": clientId,
+        "client_secret": clientSecret,
+        "grant_type": "authorization_code",
+        "code": request.code,
+    }
+
+    if request.redirect_uri:
+        tokenData["redirect_uri"] = request.redirect_uri
+
     response = requests.post(
         "https://discord.com/api/oauth2/token",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
-        data={
-            "client_id": clientId,
-            "client_secret": clientSecret,
-            "grant_type": "authorization_code",
-            "code": request.code,
-        },
+        data=tokenData,
         timeout=10,
     )
 

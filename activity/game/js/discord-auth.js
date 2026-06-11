@@ -24,6 +24,10 @@
         };
     }
 
+    function getRedirectUri() {
+        return `${window.location.origin}/`;
+    }
+
     function normalizeError(error) {
         if (!error) {
             return null;
@@ -73,6 +77,12 @@
         await logAuthStep("Discord Activity client id is configured.");
 
         try {
+            const redirectUri = getRedirectUri();
+
+            await logAuthStep("Discord Activity redirect uri resolved.", {
+                redirectUri,
+            });
+
             await logAuthStep("Discord Activity SDK import started.");
             const { DiscordSDK } = await import("@discord/embedded-app-sdk");
 
@@ -89,6 +99,7 @@
             await logAuthStep("Discord Activity authorize started.");
             const { code } = await discordSdk.commands.authorize({
                 client_id: clientId,
+                redirect_uri: redirectUri,
                 response_type: "code",
                 state: "",
                 prompt: "none",
@@ -104,7 +115,10 @@
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ code }),
+                body: JSON.stringify({
+                    code,
+                    redirect_uri: redirectUri,
+                }),
             });
             await logAuthStep("Discord Activity token exchange response received.", {
                 ok: tokenResponse.ok,
