@@ -16,7 +16,14 @@ class DiscordTokenRequest(BaseModel):
     code: str
 
 
+class GameProgressRequest(BaseModel):
+    id: Optional[int] = Field(default=None, ge=1)
+    score: int = Field(ge=0)
+    sun_time: Optional[int] = Field(default=None, ge=0)
+
+
 class GameOverRequest(BaseModel):
+    id: Optional[int] = Field(default=None, ge=1)
     score: int = Field(ge=0)
     sun_time: Optional[int] = Field(default=None, ge=0)
 
@@ -49,6 +56,95 @@ def getDiscordUser(accessToken: str):
         raise HTTPException(status_code=401, detail="Invalid Discord token")
 
     return response.json()
+
+
+def saveGameProgressRecord(request: GameProgressRequest, userId: int):
+    try:
+        connection = getDbConnection()
+        cursor = connection.cursor(dictionary=True)
+
+        if request.id is None:
+            cursor.execute(
+                """
+                INSERT INTO merge_game_play_history (
+                    user_id,
+                    score,
+                    sun_time
+                ) VALUES (
+                    %s,
+                    %s,
+                    %s
+                )
+                """,
+                (userId, request.score, request.sun_time),
+            )
+            playHistoryId = cursor.lastrowid
+        else:
+            cursor.execute(
+                """
+                SELECT id
+                FROM merge_game_play_history
+                WHERE id = %s
+                    AND user_id = %s
+                """,
+                (request.id, userId),
+            )
+
+            if cursor.fetchone() is None:
+                raise HTTPException(status_code=404, detail="Game play history not found")
+
+            cursor.execute(
+                """
+                UPDATE merge_game_play_history
+                SET
+                    score = %s,
+                    sun_time = CASE
+                        WHEN %s IS NULL THEN sun_time
+                        WHEN sun_time IS NULL THEN %s
+                        WHEN %s < sun_time THEN %s
+                        ELSE sun_time
+                    END
+                WHERE id = %s
+                    AND user_id = %s
+                """,
+                (
+                    request.score,
+                    request.sun_time,
+                    request.sun_time,
+                    request.sun_time,
+                    request.sun_time,
+                    request.id,
+                    userId,
+                ),
+            )
+
+            playHistoryId = request.id
+
+        connection.commit()
+
+        cursor.execute(
+            """
+            SELECT
+                id,
+                user_id,
+                score,
+                sun_time
+            FROM merge_game_play_history
+            WHERE id = %s
+            """,
+            (playHistoryId,),
+        )
+        savedPlayHistory = cursor.fetchone()
+
+    except mysql.connector.IntegrityError as error:
+        raise HTTPException(status_code=400, detail="Member does not exist") from error
+    finally:
+        if "cursor" in locals():
+            cursor.close()
+        if "connection" in locals() and connection.is_connected():
+            connection.close()
+
+    return savedPlayHistory
 
 
 @app.get("/health")
@@ -84,42 +180,26 @@ def exchangeDiscordToken(request: DiscordTokenRequest):
     return response.json()
 
 
+@app.post("/api/game-progress")
+def saveGameProgress(request: GameProgressRequest, authorization: Optional[str] = Header(default=None)):
+    accessToken = getBearerToken(authorization)
+    discordUser = getDiscordUser(accessToken)
+    userId = int(discordUser["id"])
+
+    return saveGameProgressRecord(request, userId)
+
+
 @app.post("/api/game-over")
 def saveGameOver(request: GameOverRequest, authorization: Optional[str] = Header(default=None)):
     accessToken = getBearerToken(authorization)
     discordUser = getDiscordUser(accessToken)
     userId = int(discordUser["id"])
 
-    try:
-        connection = getDbConnection()
-        cursor = connection.cursor()
-        cursor.execute(
-            """
-            INSERT INTO merge_game_play_history (
-                user_id,
-                score,
-                sun_time
-            ) VALUES (
-                %s,
-                %s,
-                %s
-            )
-            """,
-            (userId, request.score, request.sun_time),
-        )
-        connection.commit()
-        playHistoryId = cursor.lastrowid
-    except mysql.connector.IntegrityError as error:
-        raise HTTPException(status_code=400, detail="Member does not exist") from error
-    finally:
-        if "cursor" in locals():
-            cursor.close()
-        if "connection" in locals() and connection.is_connected():
-            connection.close()
-
-    return {
-        "id": playHistoryId,
-        "user_id": userId,
-        "score": request.score,
-        "sun_time": request.sun_time,
-    }
+    return saveGameProgressRecord(
+        GameProgressRequest(
+            id=request.id,
+            score=request.score,
+            sun_time=request.sun_time,
+        ),
+        userId,
+    )

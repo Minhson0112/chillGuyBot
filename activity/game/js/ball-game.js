@@ -1,26 +1,26 @@
 /**
- * matter.jsの基本モジュール取得
+ * Get the core Matter.js modules
  */
 const { Engine, Render, Runner, World, Body, Bodies, Composite, Mouse, Events } =
     Matter;
 
 /**
- * 定数定義
+ * Constants
  */
 
-// 重力加速度
+// Gravity acceleration
 const GRAVITY = 2;
 
-// ゲームエリアの幅と高さ（ピクセル単位）
+// Game area width and height in pixels
 const GAME_AREA_WIDTH = 430;
 const GAME_AREA_HEIGHT = 720;
 
-// ゲームで使用する色の定義
+// Colors used by the game
 const COLOR = {
     red: "#FF0000"
 };
 
-// ボールタイプ一覧
+// Ball type definitions
 const BALL_TYPES = [
     { name: "stone", size: 15, color: "rgb(233,52,97)", texture: "assets/ballTexture/stone.png" },
     { name: "moon", size: 24, color: "rgb(233,52,97)", texture: "assets/ballTexture/moon.png"},
@@ -36,73 +36,73 @@ const BALL_TYPES = [
     { name: "blackhole", size: 90, color: "rgb(0, 0, 0)", texture: "assets/ballTexture/blackhole.png" },
 ];
 
-// ボールプレビュー表示サイズ
+// Ball preview display size
 const DISPLAY_BALL_SIZE = "20px";
 
-// ボールの密度（質量に影響）
+// Ball density, which affects mass
 const DENSITY = 0.001;
 
-// 空気抵抗（値が大きいほど落下が遅くなる）
+// Air friction; higher values make falling slower
 const FRICTION_AIR = 0.03;
 
-// 反発係数（0 に近いほど弾まない）
+// Restitution; values closer to 0 bounce less
 const RESTITUTION = 0.4;
 
-// 摩擦係数（床や壁との摩擦）
+// Surface friction against the floor and walls
 const FRICTION = 0.1;
 
-// 衝突時の誤差許容範囲（小さいほど正確な判定）
+// Collision slop tolerance; smaller values are more precise
 const SLOP = 0.3;
 
-// 衝突処理などの間隔
+// General collision and timing interval
 const INTERVAL_TIME = 1000;
 
-// アニメーションフレーム更新の間隔
+// Animation frame update interval
 const ANIMATION_TIMEOUT = 16;
 
-// 静止判定の速度しきい値
+// Velocity threshold for stillness checks
 const STILLNESS_VELOCITY = 0.1;
 
-// 壁の位置とサイズ
+// Wall positions and dimensions
 const WALL_X = {
     left: -9,
     right: 439,
 };
 
-// 壁の中央Y座標
+// Wall center Y coordinate
 const WALL_Y = 370;
 
-// 壁の高さ
+// Wall height
 const WALL_HEIGHT = 740;
 
-// 壁の厚さ
+// Wall thickness
 const THICKNESS = 20;
 
-// 床のX座標
+// Floor X coordinate
 const FLOOR_X = 215;
 
-// 床のY座標
+// Floor Y coordinate
 const FLOOR_Y = 729;
 
-// 床の幅
+// Floor width
 const FLOOR_WIDTH = 430;
 
-// 天井のY座標
+// Ceiling Y coordinate
 const CELLING_Y = -9;
 
-// ゲームオーバーラインのY座標
+// Game-over line Y coordinate
 const GAME_OVER_LINE_Y = 110;
 
-// 感知線のY座標
+// Sensor line Y coordinate
 const SENS_LINE_Y = 160;
 
-// 感知線のY座標
+// Sensor line thickness
 const LINE_THICKNESS = 1;
 
-// スコアテーブル
+// Score table
 const SCORE_TABLE = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55];
 
-// ボール出現率の配列
+// Ball spawn rate table
 const SPAWN_RATE = [
     0, 0, 0, 0, 0,  // stone 30%
     1, 1, 1, 1,     // moon 25%
@@ -111,54 +111,58 @@ const SPAWN_RATE = [
     4               // venus 10%
 ];
 
-// ボールのテクスチャサイズ
+// Ball texture sizes
 const TEXTURESIZE = {};
 
 /**
- * 変数定義
+ * State variables
  */
 
-// ゲーム内のすべてのボールを格納する配列
+// All balls currently in the game
 let balls = [];
 
-// 現在操作中のボール
+// The ball currently controlled by the player
 let currentBall = null;
 
-// ゲームオーバーラインの点滅を管理するためのインターバルID
+// Interval ID for blinking the game-over line
 let blinkInterval;
 
-// プレイヤーのスコア
+// Player score
 let score = 0;
 
 let sunCreateTime = null;
 let gameStartTime = null;
+let mergeGamePlayHistoryId = null;
+let gameProgressSaveInterval = null;
+let isSavingGameProgress = false;
+let gameProgressSavePromise = null;
 
-// ゲームオーバーのアラートを表示したかどうかを管理するフラグ
+// Tracks whether the game-over alert has already been shown
 let alertFlag = false;
 
-// ゲーム内で生成されたボールの総数
+// Total number of balls spawned in this game
 let ballCount = 0;
 
-// 次に出現するボールのインデックス （BALL_TYPESの配列インデックス）
+// Index of the next ball to spawn in BALL_TYPES
 let nextBallIndex = 0;
 
-// ボールを移動可能かどうかを制御するフラグ
+// Whether the current ball can be moved
 let canMoveBall = true;
 
-// ゲームオーバーになったかどうかの状態管理
+// Game-over state
 let gameOver = false;
 
-// エフェクトを描画するキャンバス要素を取得
+// Effect canvas element
 let $effectCanvas = $("#effectCanvas");
 
-//キャンバスの描画コンテキスト
+// Canvas drawing context
 let effectCtx = $effectCanvas[0].getContext("2d");
 
-// エフェクト用キャンバスのサイズをゲームエリアに合わせて設定
+// Match the effect canvas size to the game area
 $effectCanvas.attr({ width: GAME_AREA_WIDTH, height: GAME_AREA_HEIGHT });
 
 /**
- * ボールのテクスチャリソースを事前にロードする
+ * Preload ball texture assets
  */
 const preloadTextures = (() => {
     return new Promise((resolve) => {
@@ -201,8 +205,103 @@ function getDiscordGuildIdFromAuth() {
     return window.chillGuyDiscordAuth?.guildId || null;
 }
 
+function getGameProgressRequestHeaders() {
+    let accessToken = window.chillGuyDiscordAuth?.accessToken;
+
+    if (!accessToken) {
+        return null;
+    }
+
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+    };
+}
+
+function buildGameProgressPayload() {
+    let payload = {
+        score: score,
+        sun_time: sunCreateTime,
+    };
+
+    if (mergeGamePlayHistoryId !== null) {
+        payload.id = mergeGamePlayHistoryId;
+    }
+
+    return payload;
+}
+
+function saveGameProgress(force = false) {
+    let requestHeaders = getGameProgressRequestHeaders();
+
+    if (requestHeaders === null) {
+        return Promise.resolve(null);
+    }
+
+    if (isSavingGameProgress) {
+        if (!force) {
+            return gameProgressSavePromise || Promise.resolve(null);
+        }
+
+        return (gameProgressSavePromise || Promise.resolve(null)).then(() => saveGameProgress(false));
+    }
+
+    isSavingGameProgress = true;
+
+    gameProgressSavePromise = fetch("/api/game-progress", {
+        method: "POST",
+        headers: requestHeaders,
+        body: JSON.stringify(buildGameProgressPayload()),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Game progress save failed: " + response.status);
+        }
+
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.id) {
+            mergeGamePlayHistoryId = data.id;
+        }
+
+        return data;
+    })
+    .catch(error => {
+        console.error("Error saving game progress:", error);
+        return null;
+    })
+    .finally(() => {
+        isSavingGameProgress = false;
+        gameProgressSavePromise = null;
+    });
+
+    return gameProgressSavePromise;
+}
+
+function startGameProgressAutoSave() {
+    if (gameProgressSaveInterval !== null) {
+        return;
+    }
+
+    gameProgressSaveInterval = setInterval(() => {
+        if (!gameOver) {
+            saveGameProgress();
+        }
+    }, 20000);
+}
+
+function stopGameProgressAutoSave() {
+    if (gameProgressSaveInterval === null) {
+        return;
+    }
+
+    clearInterval(gameProgressSaveInterval);
+    gameProgressSaveInterval = null;
+}
+
 /**
- * EngineとWorldの初期化
+ * Initialize the engine and world
  */
 let engine, world;
 try {
@@ -214,7 +313,7 @@ try {
 }
 
 /**
- * DOM要素とRenderの初期化
+ * Initialize DOM elements and renderer
  */
 let gameArea, render, ctx;
 try {
@@ -238,13 +337,13 @@ try {
 }
 
 /**
- * ゲーム内のオブジェクトを管理するコンテナ
+ * Container for game objects
  */
 const gameWorld = World.create();
 World.add(engine.world, gameWorld);
 
 /**
- * 静的オブジェクト（壁、床、天井、ゲームオーバーライン、感知線）の生成
+ * Create static objects: walls, floor, ceiling, game-over line, and sensor line
  */
 try {
     World.add(engine.world, [
@@ -296,11 +395,11 @@ try {
 }
 
 /**
- * 関数定義
+ * Function definitions
  */
 
 /**
- * 次に表示するボールのプレビュー表示を更新する
+ * Update the next-ball preview
  *
  * @function updateNextDisplay
  */
@@ -319,10 +418,10 @@ const updateNextDisplay = () => {
 };
 
 /**
- * 指定したボールタイプの移動可能なボールを生成する
+ * Create a movable ball of the given type
  *
  * @function createMovingBall
- * @param {number} typeIndex // BALL_TYPES配列内のインデックス
+ * @param {number} typeIndex Index in the BALL_TYPES array
  */
 function createMovingBall(typeIndex) {
     try {
@@ -356,7 +455,7 @@ function createMovingBall(typeIndex) {
 }
 
 /**
- * ゲームオーバーラインの点滅を開始する
+ * Start blinking the game-over line
  *
  * @function startBlinking
  */
@@ -380,7 +479,7 @@ function startBlinking() {
 }
 
 /**
- * ゲームオーバーラインの点滅を停止する
+ * Stop blinking the game-over line
  *
  * @function stopBlinking
  */
@@ -397,10 +496,10 @@ function stopBlinking() {
 }
 
 /**
- * プレビュー用ボールを指定のx座標に描画する
+ * Draw the preview ball at the given x coordinate
  *
  * @function drawPreviewBall
- * @param {number} x // プレビュー表示するボールのx座標
+ * @param {number} x X coordinate for the preview ball
  */
 function drawPreviewBall(x) {
     try {
@@ -418,7 +517,7 @@ function drawPreviewBall(x) {
 }
 
 /**
- * ゲームを再スタート（ページリロード）する
+ * Restart the game by reloading the page
  *
  * @function restartGame
  */
@@ -431,10 +530,10 @@ function restartGame() {
 }
 
 /**
- * スコアを更新する
+ * Update the score
  *
  * @function updateScore
- * @param {number} [points=0] // 加算するスコア
+ * @param {number} [points=0] Points to add
  */
 const updateScore = (points = 0) => {
     try {
@@ -446,10 +545,10 @@ const updateScore = (points = 0) => {
 };
 
 /**
- * 指定されたサウンドファイルを再生する
+ * Play the specified sound file
  *
  * @function playSound
- * @param {string} soundFile // 再生するサウンドファイルのパス
+ * @param {string} soundFile Path to the sound file to play
  */
 function playSound(soundFile) {
     let audio = new Audio(soundFile);
@@ -458,11 +557,11 @@ function playSound(soundFile) {
 }
 
 /**
- * RGB形式の文字列をオブジェクトに変換する
+ * Convert an RGB string to an object
  *
  * @function rgbStringToObject
- * @param {string} rgbString // RGBカラー形式の文字列
- * @returns {object} { r: 赤, g: 緑, b: 青 } のオブジェクト
+ * @param {string} rgbString RGB color string
+ * @returns {object} Object with r, g, and b values
  */
 function rgbStringToObject(rgbString) {
     let match = rgbString.match(/\d+/g);
@@ -477,11 +576,11 @@ function rgbStringToObject(rgbString) {
 }
 
 /**
- * 同じ惑星が衝突した際の合体アニメーション
+ * Merge animation for colliding matching planets
  *
  * @function mergeAnimation
- * @param {object} newer 一つ目の衝突した惑星（上側の惑星）
- * @param {object} older 二つ目の衝突した惑星（下側の惑星）
+ * @param {object} newer First colliding planet, usually the upper one
+ * @param {object} older Second colliding planet, usually the lower one
  */
 function mergeAnimation (newer, older) {
     Matter.Body.setStatic(newer, true);
@@ -506,12 +605,12 @@ function mergeAnimation (newer, older) {
 }
 
 /**
- * 指定した座標に花火アニメーションを作成する
+ * Create a firework animation at the given coordinates
  *
  * @function fireworkAnimation
- * @param {number} x // エフェクトの発生位置 (X座標)
- * @param {number} y // エフェクトの発生位置 (Y座標)
- * @param {string|object} color // エフェクトの色
+ * @param {number} x Effect origin X coordinate
+ * @param {number} y Effect origin Y coordinate
+ * @param {string|object} color Effect color
  */
 function fireworkAnimation(x, y, color) {
     if (typeof color === "string") {
@@ -556,11 +655,11 @@ function fireworkAnimation(x, y, color) {
 }
 
 /**
- * 惑星を合体した後の新惑星の拡大アニメーション
+ * Zoom animation for the newly merged planet
  *
  * @function zoomAnimation
- * @param {object} newBall // 惑星を合体した後の新惑星
- * @param {number} finalSize // 新惑星のサイズ
+ * @param {object} newBall New planet created by merging
+ * @param {number} finalSize Final size of the new planet
  */
 function zoomAnimation (newBall, finalSize) {
     let growAnimation = setInterval(() => {
@@ -577,11 +676,11 @@ function zoomAnimation (newBall, finalSize) {
 }
 
 /**
- * 太陽を合体した後のブラックホールアニメーション
+ * Black hole animation after merging suns
  *
  * @function blackHoleAnimation
- * @param {object} newer 吸い込まれる1つ目の太陽
- * @param {object} older 吸い込まれる2つ目の太陽
+ * @param {object} newer First sun pulled into the black hole
+ * @param {object} older Second sun pulled into the black hole
  */
 function blackHoleAnimation(newer, older) {
     Matter.Body.setStatic(newer, true);
@@ -654,11 +753,11 @@ function blackHoleAnimation(newer, older) {
 }
 
 /**
- * 衝突イベントハンドラ
+ * Collision event handlers
  */
 
 /**
- * 衝突開始時に同一ラベルのボール同士を統合するかスコアを更新する
+ * Merge matching balls and update score when collisions start
  *
  * @event collisionStart
  */
@@ -701,7 +800,7 @@ Events.on(engine, "collisionStart", (event) => {
                         blackHoleAnimation(newer, older);
                         return;
                     }
-                    // 惑星を合体エフェクト作成
+                    // Create the merge effect
                     mergeAnimation(newer, older);
 
                     setTimeout(() => {
@@ -737,9 +836,9 @@ Events.on(engine, "collisionStart", (event) => {
                             playSound("assets/soundEffect/plong.mp3");
                             World.add(engine.world, newBall);
                             updateScore(SCORE_TABLE[newIndex]);
-                            // 花火アニメーション
+                            // Firework animation
                             fireworkAnimation(older.position.x, older.position.y, BALL_TYPES[newIndex].color);
-                            // 新惑星の拡大アニメーション
+                            // Zoom animation for the new planet
                             zoomAnimation(newBall, finalSize);
                         } catch (delayError) {
                             console.error(
@@ -765,7 +864,7 @@ let touchingSens = new Set();
 let touchingLimit = new Set();
 
 /**
- * 衝突継続中に感知線や制限線に接触しているボールを追跡する
+ * Track balls touching the sensor or limit lines while collisions remain active
  *
  * @event collisionActive
  */
@@ -813,7 +912,7 @@ Events.on(engine, "collisionActive", (event) => {
 });
 
 /**
- * 衝突終了時に接触追跡を解除し、必要に応じて点滅を停止する
+ * Clear contact tracking after collisions end and stop blinking when needed
  *
  * @event collisionEnd
  */
@@ -861,7 +960,7 @@ Events.on(engine, "collisionEnd", (event) => {
 });
 
 /**
- * センサーに触れているボールが十分に静止している場合、点滅を開始する
+ * Start blinking when a ball touching the sensor line is still enough
  */
 setInterval(() => {
     try {
@@ -891,7 +990,7 @@ setInterval(() => {
 }, INTERVAL_TIME);
 
 /**
- * 制限線に触れているボールが十分に静止している場合、ゲームオーバーのアラートを表示する
+ * Show the game-over alert when a ball touching the limit line is still enough
  */
 setInterval(() => {
     try {
@@ -906,28 +1005,9 @@ setInterval(() => {
                     );
                     if (velocity < STILLNESS_VELOCITY && !alertFlag) {
                         alertFlag = true;
-                        let discordId = getDiscordIdFromAuth();
-                        let discordName = getDiscordUserNameFromAuth();
-                        let guildId = getDiscordGuildIdFromAuth();
-                        let accessToken = window.chillGuyDiscordAuth?.accessToken;
-                        let requestHeaders = {
-                            "Content-Type": "application/json",
-                        };
-                        if (accessToken) {
-                            requestHeaders.Authorization = `Bearer ${accessToken}`;
-                        }
-                        fetch("/api/game-over", {
-                            method: "POST",
-                            headers: requestHeaders,
-                            body: JSON.stringify({
-                                discord_id: discordId,
-                                username: discordName,
-                                score: score,
-                                sun_time: sunCreateTime,
-                                guild_id: guildId,
-                            }),
-                        })
-                        .then(response => response.json())
+                        gameOver = true;
+                        stopGameProgressAutoSave();
+                        saveGameProgress(true)
                         .then(data => {
                             console.log("✅ Game data sent successfully:", data);
                         })
@@ -1027,7 +1107,7 @@ function releaseCurrentBall() {
 }
 
 /**
- * mousedown: マウスのクリックでドラッグ開始し、クリック位置にボールのx座標を更新
+ * mousedown: start dragging and move the ball to the clicked x coordinate
  */
 gameArea.addEventListener("mousedown", (event) => {
     try {
@@ -1042,7 +1122,7 @@ gameArea.addEventListener("mousedown", (event) => {
 });
 
 /**
- * mousemove: マウスムーブ中にドラッグ状態ならボールのx位置を追従
+ * mousemove: follow the cursor x position while dragging
  */
 window.addEventListener("mousemove", (event) => {
     try {
@@ -1055,7 +1135,7 @@ window.addEventListener("mousemove", (event) => {
 });
 
 /**
- * mouseup: マウスボタンを離すとボールをリリースして落下させる
+ * mouseup: release the ball and let it fall
  */
 window.addEventListener("mouseup", () => {
     try {
@@ -1066,19 +1146,20 @@ window.addEventListener("mouseup", () => {
 });
 
 /**
- * 初期設定
+ * Initial setup
  */
 preloadTextures.then(() => {
     try {
         updateNextDisplay();
         createMovingBall(nextBallIndex);
         gameStartTime = Date.now();
+        startGameProgressAutoSave();
     } catch (error) {
         console.error("Error during initial setup:", error);
     }
 });
 /**
- * エンジンとレンダラーの開始
+ * Start the engine and renderer
  */
 try {
     const runner = Runner.create();
@@ -1090,7 +1171,7 @@ try {
 
 
 /**
- * グローバルエラーハンドラ
+ * Global error handler
  */
 window.addEventListener("error", (event) => {
     console.error("Global error caught:", event.error);
