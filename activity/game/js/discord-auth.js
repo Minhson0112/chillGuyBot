@@ -215,24 +215,6 @@
                 commands: Object.keys(discordSdk.commands || {}),
             });
 
-            if (typeof discordSdk.commands?.getInstanceConnectedParticipants === "function") {
-                try {
-                    const participants = await withTimeout(
-                        discordSdk.commands.getInstanceConnectedParticipants(),
-                        5000,
-                        "Discord participants request timed out after 5 seconds",
-                    );
-
-                    await logAuthStep("Discord Activity participants loaded.", {
-                        participants,
-                    });
-                } catch (error) {
-                    await logAuthStep("Discord Activity participants failed.", {
-                        error: normalizeError(error),
-                    });
-                }
-            }
-
             authState.sdk = discordSdk;
 
             return await authorizeDiscordActivity(discordSdk, clientId, redirectUri);
