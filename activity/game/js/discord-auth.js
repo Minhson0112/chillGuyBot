@@ -217,6 +217,8 @@
 
             authState.sdk = discordSdk;
 
+            await logAuthStep("Discord Activity before authorize call.");
+
             return await authorizeDiscordActivity(discordSdk, clientId, redirectUri);
         } catch (error) {
             authState.error = error;
