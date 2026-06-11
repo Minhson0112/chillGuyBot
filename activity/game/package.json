@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build && cp -R assets js css dist/",
+    "build": "vite build && cp -R assets css dist/ && mkdir -p dist/js && cp js/ball-game.js js/common.js dist/js/",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
     "@discord/embedded-app-sdk": "^1.10.0",
+    "jquery": "^3.7.1",
+    "matter-js": "^0.20.0",
+    "tingle.js": "^0.16.0",
     "vite": "^6.0.7"
   },
   "devDependencies": {}
