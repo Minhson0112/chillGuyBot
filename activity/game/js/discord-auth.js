@@ -92,6 +92,7 @@
         await logAuthStep("Discord Activity authorize started.", {
             prompt: "none",
             redirectUri,
+            usesRedirectUri: false,
         });
 
         const stopAuthorizeWatchdog = startWatchdog(
@@ -105,7 +106,6 @@
             const authorizeResult = await withTimeout(
                 discordSdk.commands.authorize({
                     client_id: clientId,
-                    redirect_uri: redirectUri,
                     response_type: "code",
                     state: "",
                     prompt: "none",
@@ -130,10 +130,7 @@
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                code,
-                redirect_uri: redirectUri,
-            }),
+            body: JSON.stringify({ code }),
         });
         await logAuthStep("Discord Activity token exchange response received.", {
             ok: tokenResponse.ok,
