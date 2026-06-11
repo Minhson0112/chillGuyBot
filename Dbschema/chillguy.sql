@@ -1845,3 +1845,30 @@ CREATE TABLE member_payment_transaction (
     CONSTRAINT chk_member_payment_paid_amount
         CHECK (paid_amount IS NULL OR paid_amount > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='member payment transactions';
+
+# update merge game play history
+CREATE TABLE merge_game_play_history (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'merge game play history id',
+
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+
+    score INT UNSIGNED NOT NULL COMMENT 'game score',
+    sun_time BIGINT UNSIGNED DEFAULT NULL COMMENT 'milliseconds until creating sun',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_merge_game_play_user_created_at (user_id, created_at),
+    KEY idx_merge_game_play_score (score),
+
+    CONSTRAINT fk_merge_game_play_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_merge_game_play_score
+        CHECK (score >= 0),
+
+    CONSTRAINT chk_merge_game_play_sun_time
+        CHECK (sun_time IS NULL OR sun_time >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='merge game play histories';

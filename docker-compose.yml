@@ -10,6 +10,33 @@ services:
       - .:/app
       - /app/__pycache__
 
+  game-api:
+    build: ./activity/api
+    container_name: chill-guy-game-api
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: chill_station
+      DB_USER: root
+      DB_PASSWORD: root
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+  game-web:
+    image: nginx:alpine
+    container_name: chill-guy-game-web
+    depends_on:
+      - game-api
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./activity/game:/usr/share/nginx/html:ro
+      - ./activity/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
   mysql:
     image: mysql:8.0
     container_name: chill-guy-db

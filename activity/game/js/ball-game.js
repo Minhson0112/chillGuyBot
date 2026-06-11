@@ -22,18 +22,18 @@ const COLOR = {
 
 // ボールタイプ一覧
 const BALL_TYPES = [
-    { name: "stone", size: 15, color: "rgb(233,52,97)", texture: "/assets/ballTexture/stone.png" },
-    { name: "moon", size: 24, color: "rgb(233,52,97)", texture: "/assets/ballTexture/moon.png"},
-    { name: "mercury", size: 32, color: "rgb(224,119,249)", texture: "/assets/ballTexture/mercury.png" },
-    { name: "mars", size: 35, color: "rgb(255,166,57)", texture: "/assets/ballTexture/mars.png" },
-    { name: "venus", size: 44, color: "rgb(229,139,85)", texture: "/assets/ballTexture/venus.png" },
-    { name: "earth", size: 55, color: "rgb(255,124,126)", texture: "/assets/ballTexture/earth.png" },
-    { name: "neptune", size: 56, color: "rgb(255, 255, 124)", texture: "/assets/ballTexture/neptune.png" },
-    { name: "uranus", size: 77, color: "rgb(239,126,231)", texture: "/assets/ballTexture/uranus.png" },
-    { name: "saturn", size: 90, color: "rgb(252,243,14)", texture: "/assets/ballTexture/saturn.png" },
-    { name: "jupiter", size: 124, color: "rgb(213,255,56)", texture: "/assets/ballTexture/jupiter.png" },
-    { name: "sun", size: 129, color: "rgb(114,207,0)", texture: "/assets/ballTexture/sun.png" },
-    { name: "blackhole", size: 90, color: "rgb(0, 0, 0)", texture: "/assets/ballTexture/blackhole.png" },
+    { name: "stone", size: 15, color: "rgb(233,52,97)", texture: "assets/ballTexture/stone.png" },
+    { name: "moon", size: 24, color: "rgb(233,52,97)", texture: "assets/ballTexture/moon.png"},
+    { name: "mercury", size: 32, color: "rgb(224,119,249)", texture: "assets/ballTexture/mercury.png" },
+    { name: "mars", size: 35, color: "rgb(255,166,57)", texture: "assets/ballTexture/mars.png" },
+    { name: "venus", size: 44, color: "rgb(229,139,85)", texture: "assets/ballTexture/venus.png" },
+    { name: "earth", size: 55, color: "rgb(255,124,126)", texture: "assets/ballTexture/earth.png" },
+    { name: "neptune", size: 56, color: "rgb(255, 255, 124)", texture: "assets/ballTexture/neptune.png" },
+    { name: "uranus", size: 77, color: "rgb(239,126,231)", texture: "assets/ballTexture/uranus.png" },
+    { name: "saturn", size: 90, color: "rgb(252,243,14)", texture: "assets/ballTexture/saturn.png" },
+    { name: "jupiter", size: 124, color: "rgb(213,255,56)", texture: "assets/ballTexture/jupiter.png" },
+    { name: "sun", size: 129, color: "rgb(114,207,0)", texture: "assets/ballTexture/sun.png" },
+    { name: "blackhole", size: 90, color: "rgb(0, 0, 0)", texture: "assets/ballTexture/blackhole.png" },
 ];
 
 // ボールプレビュー表示サイズ
@@ -229,7 +229,7 @@ try {
             width: GAME_AREA_WIDTH,
             height: GAME_AREA_HEIGHT,
             wireframes: false,
-            background: "/assets/ballTexture/background.png",
+            background: "assets/ballTexture/background.png",
         },
     });
     ctx = gameArea.getContext("2d");
@@ -734,7 +734,7 @@ Events.on(engine, "collisionStart", (event) => {
                                 (ball) => ball !== older && ball !== newer,
                             );
                             balls.push(newBall);
-                            playSound("/assets/soundEffect/plong.mp3");
+                            playSound("assets/soundEffect/plong.mp3");
                             World.add(engine.world, newBall);
                             updateScore(SCORE_TABLE[newIndex]);
                             // 花火アニメーション
