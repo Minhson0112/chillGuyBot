@@ -22,18 +22,18 @@ const COLOR = {
 
 // ボールタイプ一覧
 const BALL_TYPES = [
-    { name: "stone", size: 15, color: "rgb(233,52,97)", texture: "/game/BallTexture/stone.png" },
-    { name: "moon", size: 24, color: "rgb(233,52,97)", texture: "/game/BallTexture/moon.png"},
-    { name: "mercury", size: 32, color: "rgb(224,119,249)", texture: "/game/BallTexture/mercury.png" },
-    { name: "mars", size: 35, color: "rgb(255,166,57)", texture: "/game/BallTexture/mars.png" },
-    { name: "venus", size: 44, color: "rgb(229,139,85)", texture: "/game/BallTexture/venus.png" },
-    { name: "earth", size: 55, color: "rgb(255,124,126)", texture: "/game/BallTexture/earth.png" },
-    { name: "neptune", size: 56, color: "rgb(255, 255, 124)", texture: "/game/BallTexture/neptune.png" },
-    { name: "uranus", size: 77, color: "rgb(239,126,231)", texture: "/game/BallTexture/uranus.png" },
-    { name: "saturn", size: 90, color: "rgb(252,243,14)", texture: "/game/BallTexture/saturn.png" },
-    { name: "jupiter", size: 124, color: "rgb(213,255,56)", texture: "/game/BallTexture/jupiter.png" },
-    { name: "sun", size: 129, color: "rgb(114,207,0)", texture: "/game/BallTexture/sun.png" },
-    { name: "blackhole", size: 90, color: "rgb(0, 0, 0)", texture: "/game/BallTexture/blackhole.png" },
+    { name: "stone", size: 15, color: "rgb(233,52,97)", texture: "/assets/ballTexture/stone.png" },
+    { name: "moon", size: 24, color: "rgb(233,52,97)", texture: "/assets/ballTexture/moon.png"},
+    { name: "mercury", size: 32, color: "rgb(224,119,249)", texture: "/assets/ballTexture/mercury.png" },
+    { name: "mars", size: 35, color: "rgb(255,166,57)", texture: "/assets/ballTexture/mars.png" },
+    { name: "venus", size: 44, color: "rgb(229,139,85)", texture: "/assets/ballTexture/venus.png" },
+    { name: "earth", size: 55, color: "rgb(255,124,126)", texture: "/assets/ballTexture/earth.png" },
+    { name: "neptune", size: 56, color: "rgb(255, 255, 124)", texture: "/assets/ballTexture/neptune.png" },
+    { name: "uranus", size: 77, color: "rgb(239,126,231)", texture: "/assets/ballTexture/uranus.png" },
+    { name: "saturn", size: 90, color: "rgb(252,243,14)", texture: "/assets/ballTexture/saturn.png" },
+    { name: "jupiter", size: 124, color: "rgb(213,255,56)", texture: "/assets/ballTexture/jupiter.png" },
+    { name: "sun", size: 129, color: "rgb(114,207,0)", texture: "/assets/ballTexture/sun.png" },
+    { name: "blackhole", size: 90, color: "rgb(0, 0, 0)", texture: "/assets/ballTexture/blackhole.png" },
 ];
 
 // ボールプレビュー表示サイズ
@@ -190,14 +190,15 @@ const preloadTextures = (() => {
     });
 })();
 
-function getDiscordIdFromBlade() {
-    return typeof DISCORD_ID !== "undefined" ? DISCORD_ID : null;
+function getDiscordIdFromAuth() {
+    return window.chillGuyDiscordAuth?.user?.id || null;
 }
-function getDiscordUserNameFromBlade() {
-    return typeof USERNAME !== "undefined" ? USERNAME : null;
+function getDiscordUserNameFromAuth() {
+    const user = window.chillGuyDiscordAuth?.user;
+    return user?.global_name || user?.username || null;
 }
-function getDiscordGuildIdFromBlade() {
-    return typeof GUILD_ID !== "undefined" ? GUILD_ID : null;
+function getDiscordGuildIdFromAuth() {
+    return window.chillGuyDiscordAuth?.guildId || null;
 }
 
 /**
@@ -228,7 +229,7 @@ try {
             width: GAME_AREA_WIDTH,
             height: GAME_AREA_HEIGHT,
             wireframes: false,
-            background: "/game/BallTexture/background.png",
+            background: "/assets/ballTexture/background.png",
         },
     });
     ctx = gameArea.getContext("2d");
@@ -733,7 +734,7 @@ Events.on(engine, "collisionStart", (event) => {
                                 (ball) => ball !== older && ball !== newer,
                             );
                             balls.push(newBall);
-                            playSound("/game/SoundEffect/plong.mp3");
+                            playSound("/assets/soundEffect/plong.mp3");
                             World.add(engine.world, newBall);
                             updateScore(SCORE_TABLE[newIndex]);
                             // 花火アニメーション
@@ -905,14 +906,19 @@ setInterval(() => {
                     );
                     if (velocity < STILLNESS_VELOCITY && !alertFlag) {
                         alertFlag = true;
-                        let discordId = getDiscordIdFromBlade();
-                        let discordName = getDiscordUserNameFromBlade();
-                        let guildId = getDiscordGuildIdFromBlade();
+                        let discordId = getDiscordIdFromAuth();
+                        let discordName = getDiscordUserNameFromAuth();
+                        let guildId = getDiscordGuildIdFromAuth();
+                        let accessToken = window.chillGuyDiscordAuth?.accessToken;
+                        let requestHeaders = {
+                            "Content-Type": "application/json",
+                        };
+                        if (accessToken) {
+                            requestHeaders.Authorization = `Bearer ${accessToken}`;
+                        }
                         fetch("/api/game-over", {
                             method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
+                            headers: requestHeaders,
                             body: JSON.stringify({
                                 discord_id: discordId,
                                 username: discordName,
