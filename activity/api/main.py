@@ -16,6 +16,11 @@ class DiscordTokenRequest(BaseModel):
     code: str
 
 
+class ClientLogRequest(BaseModel):
+    message: str
+    data: Optional[dict] = None
+
+
 class GameOverRequest(BaseModel):
     score: int = Field(ge=0)
     sun_time: Optional[int] = Field(default=None, ge=0)
@@ -53,6 +58,18 @@ def getDiscordUser(accessToken: str):
 
 @app.get("/health")
 def healthCheck():
+    return {"status": "ok"}
+
+
+@app.post("/api/client-log")
+def saveClientLog(request: ClientLogRequest):
+    print(
+        "[client-log]",
+        request.message,
+        request.data if request.data is not None else {},
+        flush=True,
+    )
+
     return {"status": "ok"}
 
 
