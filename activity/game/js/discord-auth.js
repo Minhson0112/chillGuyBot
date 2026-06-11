@@ -10,6 +10,20 @@
 
     window.chillGuyDiscordAuth = authState;
 
+    let logSequence = 0;
+
+    function getDiscordQueryContext() {
+        const queryParams = new URLSearchParams(window.location.search);
+
+        return {
+            frameId: queryParams.get("frame_id"),
+            guildId: queryParams.get("guild_id"),
+            channelId: queryParams.get("channel_id"),
+            platform: queryParams.get("platform"),
+            href: window.location.href,
+        };
+    }
+
     function normalizeError(error) {
         if (!error) {
             return null;
@@ -22,49 +36,57 @@
         };
     }
 
-    function logAuthStep(message, data = {}) {
-        console.info(message, data);
+    async function logAuthStep(message, data = {}) {
+        const payload = {
+            seq: ++logSequence,
+            ...getDiscordQueryContext(),
+            ...data,
+        };
 
-        fetch("/api/client-log", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                message,
-                data,
-            }),
-        }).catch((error) => {
+        console.info(message, payload);
+
+        try {
+            await fetch("/api/client-log", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    message,
+                    data: payload,
+                }),
+            });
+        } catch (error) {
             console.warn("Discord Activity client log failed:", error);
-        });
+        }
     }
 
     async function initDiscordAuth() {
-        logAuthStep("Discord Activity auth init started.");
+        await logAuthStep("Discord Activity auth init started.");
 
         const clientId = import.meta.env?.VITE_DISCORD_CLIENT_ID || "";
         if (!clientId) {
-            logAuthStep("Discord Activity auth skipped: DISCORD_CLIENT_ID is not configured.");
+            await logAuthStep("Discord Activity auth skipped: DISCORD_CLIENT_ID is not configured.");
             return authState;
         }
 
-        logAuthStep("Discord Activity client id is configured.");
+        await logAuthStep("Discord Activity client id is configured.");
 
         try {
-            logAuthStep("Discord Activity SDK import started.");
+            await logAuthStep("Discord Activity SDK import started.");
             const { DiscordSDK } = await import("@discord/embedded-app-sdk");
 
-            logAuthStep("Discord Activity SDK import completed.");
+            await logAuthStep("Discord Activity SDK import completed.");
             const discordSdk = new DiscordSDK(clientId);
 
-            logAuthStep("Discord Activity SDK ready wait started.");
+            await logAuthStep("Discord Activity SDK ready wait started.");
             await discordSdk.ready();
-            logAuthStep("Discord Activity SDK ready completed.", {
+            await logAuthStep("Discord Activity SDK ready completed.", {
                 guildId: discordSdk.guildId || null,
                 channelId: discordSdk.channelId || null,
             });
 
-            logAuthStep("Discord Activity authorize started.");
+            await logAuthStep("Discord Activity authorize started.");
             const { code } = await discordSdk.commands.authorize({
                 client_id: clientId,
                 response_type: "code",
@@ -72,11 +94,11 @@
                 prompt: "none",
                 scope: ["identify", "guilds"],
             });
-            logAuthStep("Discord Activity authorize completed.", {
+            await logAuthStep("Discord Activity authorize completed.", {
                 hasCode: Boolean(code),
             });
 
-            logAuthStep("Discord Activity token exchange request started.");
+            await logAuthStep("Discord Activity token exchange request started.");
             const tokenResponse = await fetch("/api/discord/token", {
                 method: "POST",
                 headers: {
@@ -84,7 +106,7 @@
                 },
                 body: JSON.stringify({ code }),
             });
-            logAuthStep("Discord Activity token exchange response received.", {
+            await logAuthStep("Discord Activity token exchange response received.", {
                 ok: tokenResponse.ok,
                 status: tokenResponse.status,
             });
@@ -94,11 +116,11 @@
             }
 
             const { access_token: accessToken } = await tokenResponse.json();
-            logAuthStep("Discord Activity token exchange completed.", {
+            await logAuthStep("Discord Activity token exchange completed.", {
                 hasAccessToken: Boolean(accessToken),
             });
 
-            logAuthStep("Discord Activity authenticate started.");
+            await logAuthStep("Discord Activity authenticate started.");
             const auth = await discordSdk.commands.authenticate({
                 access_token: accessToken,
             });
@@ -107,7 +129,7 @@
                 throw new Error("Discord authenticate command failed");
             }
 
-            logAuthStep("Discord Activity authenticate completed.", {
+            await logAuthStep("Discord Activity authenticate completed.", {
                 userId: auth.user?.id || null,
             });
 
@@ -118,7 +140,7 @@
             authState.channelId = discordSdk.channelId || null;
             authState.sdk = discordSdk;
 
-            logAuthStep("Discord Activity auth init completed.", {
+            await logAuthStep("Discord Activity auth init completed.", {
                 userId: authState.user?.id || null,
                 guildId: authState.guildId,
                 channelId: authState.channelId,
@@ -128,7 +150,7 @@
         } catch (error) {
             authState.error = error;
             console.warn("Discord Activity auth is not ready:", error);
-            logAuthStep("Discord Activity auth is not ready.", {
+            await logAuthStep("Discord Activity auth is not ready.", {
                 error: normalizeError(error),
             });
             return authState;

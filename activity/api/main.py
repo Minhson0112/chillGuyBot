@@ -1,4 +1,5 @@
 import os
+import json
 from typing import Optional
 
 import mysql.connector
@@ -63,12 +64,12 @@ def healthCheck():
 
 @app.post("/api/client-log")
 def saveClientLog(request: ClientLogRequest):
-    print(
-        "[client-log]",
-        request.message,
-        request.data if request.data is not None else {},
-        flush=True,
-    )
+    logData = {
+        "message": request.message,
+        "data": request.data if request.data is not None else {},
+    }
+
+    print(f"[client-log] {json.dumps(logData, ensure_ascii=False)}", flush=True)
 
     return {"status": "ok"}
 
