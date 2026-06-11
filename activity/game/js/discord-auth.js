@@ -39,6 +39,20 @@
         ]);
     }
 
+    function startWatchdog(label, intervals) {
+        const timeoutIds = intervals.map((interval) => {
+            return setTimeout(() => {
+                logAuthStep(`${label} still pending.`, {
+                    elapsedMs: interval,
+                });
+            }, interval);
+        });
+
+        return () => {
+            timeoutIds.forEach((timeoutId) => clearTimeout(timeoutId));
+        };
+    }
+
     function normalizeError(error) {
         if (!error) {
             return null;
@@ -82,18 +96,31 @@
             redirectUri,
         });
 
-        const { code } = await withTimeout(
-            discordSdk.commands.authorize({
-                client_id: clientId,
-                redirect_uri: redirectUri,
-                response_type: "code",
-                state: "",
-                prompt: "none",
-                scope: ["identify", "guilds"],
-            }),
-            30000,
-            "Discord authorize timed out after 30 seconds",
+        const stopAuthorizeWatchdog = startWatchdog(
+            "Discord Activity authorize",
+            [5000, 15000, 30000],
         );
+
+        let code;
+
+        try {
+            const authorizeResult = await withTimeout(
+                discordSdk.commands.authorize({
+                    client_id: clientId,
+                    redirect_uri: redirectUri,
+                    response_type: "code",
+                    state: "",
+                    prompt: "none",
+                    scope: ["identify", "guilds"],
+                }),
+                45000,
+                "Discord authorize timed out after 45 seconds",
+            );
+
+            code = authorizeResult.code;
+        } finally {
+            stopAuthorizeWatchdog();
+        }
 
         await logAuthStep("Discord Activity authorize completed.", {
             hasCode: Boolean(code),
@@ -184,6 +211,27 @@
                 guildId: discordSdk.guildId || null,
                 channelId: discordSdk.channelId || null,
             });
+            await logAuthStep("Discord Activity SDK commands discovered.", {
+                commands: Object.keys(discordSdk.commands || {}),
+            });
+
+            if (typeof discordSdk.commands?.getInstanceConnectedParticipants === "function") {
+                try {
+                    const participants = await withTimeout(
+                        discordSdk.commands.getInstanceConnectedParticipants(),
+                        5000,
+                        "Discord participants request timed out after 5 seconds",
+                    );
+
+                    await logAuthStep("Discord Activity participants loaded.", {
+                        participants,
+                    });
+                } catch (error) {
+                    await logAuthStep("Discord Activity participants failed.", {
+                        error: normalizeError(error),
+                    });
+                }
+            }
 
             authState.sdk = discordSdk;
 
