@@ -78,7 +78,7 @@
 
     async function authorizeDiscordActivity(discordSdk, clientId, redirectUri) {
         await logAuthStep("Discord Activity authorize started.", {
-            prompt: "consent",
+            prompt: "none",
             redirectUri,
         });
 
@@ -88,7 +88,7 @@
                 redirect_uri: redirectUri,
                 response_type: "code",
                 state: "",
-                prompt: "consent",
+                prompt: "none",
                 scope: ["identify", "guilds"],
             }),
             30000,
