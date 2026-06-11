@@ -96,13 +96,16 @@
                 channelId: discordSdk.channelId || null,
             });
 
-            await logAuthStep("Discord Activity authorize started.");
+            await logAuthStep("Discord Activity authorize started.", {
+                prompt: "consent",
+                redirectUri,
+            });
             const { code } = await discordSdk.commands.authorize({
                 client_id: clientId,
                 redirect_uri: redirectUri,
                 response_type: "code",
                 state: "",
-                prompt: "none",
+                prompt: "consent",
                 scope: ["identify", "guilds"],
             });
             await logAuthStep("Discord Activity authorize completed.", {
