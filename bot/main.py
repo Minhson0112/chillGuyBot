@@ -5,7 +5,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from bot.commands.musicEvent.openMusicEvent import JoinMusicEventView
-from bot.config.config import DISCORD_TOKEN
+from bot.config.config import CHILL_STATION_GUILD_ID, DISCORD_TOKEN
 from bot.config.database import getDbSession
 from bot.repository.musicEventRepository import MusicEventRepository
 from bot.repository.lottoEventRepository import LottoEventRepository
@@ -59,8 +59,10 @@ async def on_ready():
     print(f"✅ Bot đã đăng nhập với tên: {bot.user}")
 
     try:
-        synced = await bot.tree.sync()
-        print(f"🔧 Slash commands đã sync: {len(synced)} lệnh")
+        chillStationGuild = discord.Object(id=CHILL_STATION_GUILD_ID)
+        bot.tree.copy_global_to(guild=chillStationGuild)
+        synced = await bot.tree.sync(guild=chillStationGuild)
+        print(f"🔧 Slash commands đã sync vào Chill Station: {len(synced)} lệnh")
         autoResponderCacheService.loadKeys()
         anonymousMatchCount = anonymousMatchCacheService.loadActiveMatches()
         print(f"Loaded anonymous match cache: {anonymousMatchCount}")
