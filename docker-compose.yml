@@ -42,7 +42,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: chill-guy-cloudflared
-    command: ${CLOUDFLARED_COMMAND:-tunnel --no-autoupdate run}
+    command: tunnel --no-autoupdate --url http://game-web:80
     depends_on:
       - game-web
     restart: unless-stopped

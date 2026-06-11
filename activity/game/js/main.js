@@ -8,8 +8,6 @@ window.jQuery = $;
 window.Matter = Matter;
 window.tingle = tingle;
 
-await import("./discord-auth.js");
-
 function loadClassicScript(src) {
     return new Promise((resolve, reject) => {
         const script = document.createElement("script");
@@ -20,5 +18,10 @@ function loadClassicScript(src) {
     });
 }
 
-await loadClassicScript("js/ball-game.js");
-await loadClassicScript("js/common.js");
+async function bootstrap() {
+    await import("./discord-auth.js");
+    await loadClassicScript("js/ball-game.js");
+    await loadClassicScript("js/common.js");
+}
+
+bootstrap();
