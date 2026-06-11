@@ -987,23 +987,54 @@ function getGameAreaOffsetX(event) {
     return (event.clientX - rect.left) * scaleX;
 }
 
+function moveCurrentBallToEventX(event) {
+    const offsetX = getGameAreaOffsetX(event);
+    const currentBallRadius = currentBall.circleRadius;
+    const newX = Math.max(
+        Math.min(offsetX, gameArea.width - 10 - currentBallRadius),
+        10 + currentBallRadius,
+    );
+    Body.setPosition(currentBall, {
+        x: newX,
+        y: currentBall.position.y,
+    });
+}
+
+function releaseCurrentBall() {
+    if (!gameOver && currentBall && isDragging) {
+        isDragging = false;
+        canMoveBall = false;
+        Body.setVelocity(currentBall, { x: 0, y: 0 });
+        Body.setAngularVelocity(currentBall, 0);
+        Body.setStatic(currentBall, false);
+        currentBall = null;
+        ballCount++;
+        setTimeout(() => {
+            try {
+                const currentIndex = nextBallIndex;
+                nextBallIndex = ballCount < 2 ? 0 : SPAWN_RATE[Math.floor(Math.random() * SPAWN_RATE.length)];
+                updateNextDisplay();
+                createMovingBall(currentIndex);
+                canMoveBall = true;
+            } catch (timeoutError) {
+                console.error(
+                    "Error in setTimeout callback after mouseup:",
+                    timeoutError,
+                );
+            }
+        }, INTERVAL_TIME / 2);
+    }
+}
+
 /**
  * mousedown: マウスのクリックでドラッグ開始し、クリック位置にボールのx座標を更新
  */
 gameArea.addEventListener("mousedown", (event) => {
     try {
         if (!gameOver && currentBall) {
+            event.preventDefault();
             isDragging = true;
-            const offsetX = getGameAreaOffsetX(event);
-            const currentBallRadius = currentBall.circleRadius;
-            const newX = Math.max(
-                Math.min(offsetX, gameArea.width - 10 - currentBallRadius),
-                10 + currentBallRadius,
-            );
-            Body.setPosition(currentBall, {
-                x: newX,
-                y: currentBall.position.y,
-            });
+            moveCurrentBallToEventX(event);
         }
     } catch (error) {
         console.error("Error in mousedown event:", error);
@@ -1013,19 +1044,10 @@ gameArea.addEventListener("mousedown", (event) => {
 /**
  * mousemove: マウスムーブ中にドラッグ状態ならボールのx位置を追従
  */
-gameArea.addEventListener("mousemove", (event) => {
+window.addEventListener("mousemove", (event) => {
     try {
         if (isDragging && canMoveBall && currentBall) {
-            const offsetX = getGameAreaOffsetX(event);
-            const currentBallRadius = currentBall.circleRadius;
-            const newX = Math.max(
-                Math.min(offsetX, gameArea.width - 10 - currentBallRadius),
-                10 + currentBallRadius,
-            );
-            Body.setPosition(currentBall, {
-                x: newX,
-                y: currentBall.position.y,
-            });
+            moveCurrentBallToEventX(event);
         }
     } catch (error) {
         console.error("Error in mousemove event:", error);
@@ -1035,31 +1057,9 @@ gameArea.addEventListener("mousemove", (event) => {
 /**
  * mouseup: マウスボタンを離すとボールをリリースして落下させる
  */
-gameArea.addEventListener("mouseup", (event) => {
+window.addEventListener("mouseup", () => {
     try {
-        if (!gameOver && currentBall && isDragging) {
-            isDragging = false;
-            canMoveBall = false;
-            Body.setVelocity(currentBall, { x: 0, y: 0 });
-            Body.setAngularVelocity(currentBall, 0);
-            Body.setStatic(currentBall, false);
-            currentBall = null;
-            ballCount++;
-            setTimeout(() => {
-                try {
-                    const currentIndex = nextBallIndex;
-                    nextBallIndex = ballCount < 2 ? 0 : SPAWN_RATE[Math.floor(Math.random() * SPAWN_RATE.length)];
-                    updateNextDisplay();
-                    createMovingBall(currentIndex);
-                    canMoveBall = true;
-                } catch (timeoutError) {
-                    console.error(
-                        "Error in setTimeout callback after mouseup:",
-                        timeoutError,
-                    );
-                }
-            }, INTERVAL_TIME / 2);
-        }
+        releaseCurrentBall();
     } catch (error) {
         console.error("Error in mouseup event:", error);
     }
