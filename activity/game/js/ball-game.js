@@ -1,7 +1,7 @@
 /**
  * matter.jsの基本モジュール取得
  */
-const { Engine, Render, World, Body, Bodies, Composite, Mouse, Events } =
+const { Engine, Render, Runner, World, Body, Bodies, Composite, Mouse, Events } =
     Matter;
 
 /**
@@ -1075,7 +1075,8 @@ preloadTextures.then(() => {
  * エンジンとレンダラーの開始
  */
 try {
-    Engine.run(engine);
+    const runner = Runner.create();
+    Runner.run(runner, engine);
     Render.run(render);
 } catch (error) {
     console.error("Error starting Engine or Render:", error);

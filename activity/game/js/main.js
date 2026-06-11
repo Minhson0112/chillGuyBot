@@ -1,7 +1,9 @@
 import $ from "jquery";
-import Matter from "matter-js";
+import MatterNamespace from "matter-js";
 import tingle from "tingle.js";
 import "tingle.js/dist/tingle.css";
+
+const Matter = MatterNamespace.default || MatterNamespace;
 
 window.$ = $;
 window.jQuery = $;
