@@ -38,6 +38,7 @@ from bot.models.memberDailyFortune import MemberDailyFortune
 from bot.models.memberModerationHistory import MemberModerationHistory
 from bot.models.memberPaymentTransaction import MemberPaymentTransaction
 from bot.models.memberRolePurchase import MemberRolePurchase
+from bot.models.mergeGamePlayHistory import MergeGamePlayHistory
 from bot.models.musicEvent import MusicEvent
 from bot.models.musicEventEntry import MusicEventEntry
 from bot.models.owoDonateHistory import OwoDonateHistory
