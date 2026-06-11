@@ -10,23 +10,15 @@
 
     window.chillGuyDiscordAuth = authState;
 
-    async function loadDiscordSdk() {
-        if (!window.DISCORD_SDK_MODULE_URL) {
-            throw new Error("DISCORD_SDK_MODULE_URL is not configured");
-        }
-
-        return import(window.DISCORD_SDK_MODULE_URL);
-    }
-
     async function initDiscordAuth() {
-        const clientId = window.DISCORD_CLIENT_ID;
+        const clientId = import.meta.env?.VITE_DISCORD_CLIENT_ID || "";
         if (!clientId) {
             console.info("Discord Activity auth skipped: DISCORD_CLIENT_ID is not configured.");
             return authState;
         }
 
         try {
-            const { DiscordSDK } = await loadDiscordSdk();
+            const { DiscordSDK } = await import("@discord/embedded-app-sdk");
             const discordSdk = new DiscordSDK(clientId);
 
             await discordSdk.ready();
