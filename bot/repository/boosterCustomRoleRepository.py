@@ -34,6 +34,16 @@ class BoosterCustomRoleRepository:
             .all()
         )
 
+    def findActiveTargetUserIds(self):
+        rows = (
+            self.session.query(BoosterCustomRole.target_user_id)
+            .filter(BoosterCustomRole.status == BoosterCustomRoleStatus.ACTIVE.value)
+            .distinct()
+            .all()
+        )
+
+        return [row[0] for row in rows]
+
     def createActive(self, grantedByUserId: int, targetUserId: int, roleId: int):
         boosterCustomRole = BoosterCustomRole(
             granted_by_user_id=grantedByUserId,
