@@ -125,6 +125,7 @@ async def main():
         "bot.commands.autoResponder.deleteAutoResponse",
         "bot.commands.autoResponder.showAllAutoResponse",
         "bot.commands.member.avatar",
+        "bot.commands.member.banner",
         "bot.commands.voice.joinVoice",
         "bot.commands.voice.leaveVoice",
         "bot.commands.voice.speak",
