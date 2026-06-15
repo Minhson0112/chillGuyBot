@@ -17,6 +17,7 @@ class CreateGiveawayService:
         durationSeconds: int,
         channelId: int,
         createdByUserId: int,
+        limitRoleId: int | None = None,
     ):
         title = title.strip()
 
@@ -67,6 +68,7 @@ class CreateGiveawayService:
                 rewardChillCoin=rewardData["rewardChillCoin"],
                 rewardCowoncy=rewardData["rewardCowoncy"],
                 rewardVnd=rewardData["rewardVnd"],
+                limitRoleId=limitRoleId,
             )
 
             session.commit()

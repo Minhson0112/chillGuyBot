@@ -19,6 +19,7 @@ class GiveawayRepository:
         rewardCowoncy: int | None = None,
         rewardVnd: int | None = None,
         rewardText: str | None = None,
+        limitRoleId: int | None = None,
     ):
         giveaway = Giveaway(
             title=title,
@@ -33,6 +34,7 @@ class GiveawayRepository:
             draw_at=drawAt,
             channel_id=channelId,
             created_by_user_id=createdByUserId,
+            limit_role_id=limitRoleId,
         )
 
         self.session.add(giveaway)

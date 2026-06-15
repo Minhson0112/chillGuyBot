@@ -28,6 +28,7 @@ class CreateGiveawayCommand(commands.Cog):
         reward="Giá trị phần thưởng",
         winners="Số người thắng",
         duration="Thời gian tới lúc quay thưởng, tính bằng giây",
+        limit_role="Role bắt buộc để được tham gia giveaway",
     )
     @app_commands.rename(giveaway_type="type")
     @app_commands.choices(
@@ -47,6 +48,7 @@ class CreateGiveawayCommand(commands.Cog):
         reward: int,
         winners: int,
         duration: int,
+        limit_role: discord.Role | None = None,
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -58,6 +60,7 @@ class CreateGiveawayCommand(commands.Cog):
             durationSeconds=duration,
             channelId=interaction.channel_id,
             createdByUserId=interaction.user.id,
+            limitRoleId=limit_role.id if limit_role is not None else None,
         )
 
         if not result["success"]:
