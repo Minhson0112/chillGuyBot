@@ -1872,3 +1872,48 @@ CREATE TABLE merge_game_play_history (
     CONSTRAINT chk_merge_game_play_sun_time
         CHECK (sun_time IS NULL OR sun_time >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='merge game play histories';
+
+# booster custom roles
+CREATE TABLE booster_custom_role (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'booster custom role id',
+
+    granted_by_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id who granted the role',
+    target_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id who received the role',
+    role_id BIGINT UNSIGNED NOT NULL COMMENT 'discord custom role id',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'active' COMMENT 'custom role status: active, removed',
+    removed_by_user_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord user id who removed the role',
+    removed_reason VARCHAR(255) DEFAULT NULL COMMENT 'removed reason: boost_removed, manual_remove, role_deleted, etc',
+    removed_at DATETIME DEFAULT NULL COMMENT 'removed at',
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_booster_custom_role_target_status (target_user_id, status),
+    KEY idx_booster_custom_role_role_id (role_id),
+    KEY idx_booster_custom_role_granted_by_user_id (granted_by_user_id),
+    KEY idx_booster_custom_role_removed_by_user_id (removed_by_user_id),
+
+    CONSTRAINT fk_booster_custom_role_granted_by_user_id
+        FOREIGN KEY (granted_by_user_id) REFERENCES member(user_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_booster_custom_role_target_user_id
+        FOREIGN KEY (target_user_id) REFERENCES member(user_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_booster_custom_role_removed_by_user_id
+        FOREIGN KEY (removed_by_user_id) REFERENCES member(user_id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT chk_booster_custom_role_status
+        CHECK (status IN ('active', 'removed')),
+
+    CONSTRAINT chk_booster_custom_role_removed_state
+        CHECK (
+            (status = 'active' AND removed_at IS NULL)
+            OR (status = 'removed' AND removed_at IS NOT NULL)
+        )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='booster custom roles';
