@@ -16,7 +16,7 @@ class SetRoleCommand(commands.Cog):
     @app_commands.command(name="setrole", description="Cấp custom role booster cho member")
     @app_commands.describe(
         user="Member được cấp custom role",
-        role_id="ID role custom cần cấp",
+        role="Role custom cần cấp",
     )
     @app_commands.default_permissions(administrator=True)
     @guildOnly()
@@ -25,11 +25,11 @@ class SetRoleCommand(commands.Cog):
         self,
         interaction: discord.Interaction,
         user: discord.Member,
-        role_id: str,
+        role: discord.Role,
     ):
         await interaction.response.defer(ephemeral=False)
 
-        result = await self.boosterCustomRoleService.setRole(interaction, user, role_id)
+        result = await self.boosterCustomRoleService.setRole(interaction, user, str(role.id))
 
         await interaction.followup.send(
             f"{LOGO} {result['message']}",
