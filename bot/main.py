@@ -141,6 +141,7 @@ async def main():
         #"bot.commands.wordle.wordle",
         "bot.commands.wordle.wordleTop",
         "bot.commands.donate.topDonate",
+        "bot.commands.donate.topMonthlyDonate",
         "bot.commands.donate.myDonate",
         "bot.commands.moderation.delMsg",
         "bot.commands.musicEvent.createmusicevent",
