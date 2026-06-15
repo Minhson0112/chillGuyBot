@@ -35,32 +35,6 @@ intents.voice_states = True
 bot = commands.Bot(command_prefix=["cg ", "Cg "], intents=intents, help_command=None)
 
 
-async def deleteGlobalSlashCommands():
-    try:
-        globalCommands = await bot.tree.fetch_commands(guild=None)
-    except discord.HTTPException as error:
-        print(f"❌ Không thể lấy global slash commands: {error}")
-        return
-
-    deletedCount = 0
-    skippedCount = 0
-
-    for command in globalCommands:
-        commandTypeName = getattr(getattr(command, "type", None), "name", "")
-
-        if commandTypeName != "chat_input":
-            skippedCount += 1
-            continue
-
-        try:
-            await command.delete()
-            deletedCount += 1
-        except discord.HTTPException as error:
-            print(f"❌ Không thể xóa global slash command {command.name}: {error}")
-
-    print(f"🔧 Đã xóa {deletedCount} global slash commands cũ, bỏ qua {skippedCount} command đặc biệt")
-
-
 @bot.tree.error
 async def onAppCommandError(interaction: discord.Interaction, error: app_commands.AppCommandError):
     if isinstance(error, app_commands.CheckFailure):
@@ -89,7 +63,6 @@ async def on_ready():
         bot.tree.copy_global_to(guild=chillStationGuild)
         synced = await bot.tree.sync(guild=chillStationGuild)
         print(f"🔧 Slash commands đã sync vào Chill Station: {len(synced)} lệnh")
-        await deleteGlobalSlashCommands()
         autoResponderCacheService.loadKeys()
         anonymousMatchCount = anonymousMatchCacheService.loadActiveMatches()
         print(f"Loaded anonymous match cache: {anonymousMatchCount}")
