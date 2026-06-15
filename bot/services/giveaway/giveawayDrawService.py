@@ -1,10 +1,12 @@
 import random
+import re
 from datetime import datetime, timedelta, timezone
 
 import discord
 
 from bot.config.database import getDbSession
 from bot.config.emoji import CONGRATULATIONS, GIFT, STARS
+from bot.repository.owoDonateHistoryRepository import OwoDonateHistoryRepository
 from bot.repository.giveawayParticipantRepository import GiveawayParticipantRepository
 from bot.repository.giveawayRepository import GiveawayRepository
 from bot.repository.giveawayWinnerRepository import GiveawayWinnerRepository
@@ -53,7 +55,13 @@ class GiveawayDrawService:
             selectedParticipants = []
 
             if winnerCount > 0:
-                selectedParticipants = random.sample(participants, winnerCount)
+                donateHistoryRepository = OwoDonateHistoryRepository(session)
+                weightedParticipants = self.buildWeightedParticipants(
+                    giveaway=giveaway,
+                    participants=participants,
+                    donateHistoryRepository=donateHistoryRepository,
+                )
+                selectedParticipants = random.sample(weightedParticipants, winnerCount)
 
             winners = []
 
@@ -131,7 +139,13 @@ class GiveawayDrawService:
                     "message": "Không còn người tham gia hợp lệ để reroll.",
                 }
 
-            selectedParticipant = random.choice(eligibleParticipants)
+            donateHistoryRepository = OwoDonateHistoryRepository(session)
+            weightedEligibleParticipants = self.buildWeightedParticipants(
+                giveaway=giveaway,
+                participants=eligibleParticipants,
+                donateHistoryRepository=donateHistoryRepository,
+            )
+            selectedParticipant = random.choice(weightedEligibleParticipants)
             winnerRepository.markRerolled(oldWinner)
             newWinner = winnerRepository.create(
                 giveawayId=giveawayId,
@@ -152,6 +166,54 @@ class GiveawayDrawService:
                 "winners": currentWinners,
                 "message": self.buildGiveawayRerollMessage(giveaway, currentWinners),
             }
+
+    def buildWeightedParticipants(
+        self,
+        giveaway,
+        participants: list,
+        donateHistoryRepository: OwoDonateHistoryRepository,
+    ):
+        donatorGiveawayMonth = self.resolveDonatorGiveawayMonth(giveaway.title)
+
+        if donatorGiveawayMonth is None:
+            return participants
+
+        year, month = donatorGiveawayMonth
+        topDonatorUserIds = {
+            row.sender_user_id
+            for row in donateHistoryRepository.getTopDonatorsByMonth(
+                year=year,
+                month=month,
+                limit=3,
+            )
+        }
+
+        if len(topDonatorUserIds) == 0:
+            return participants
+
+        weightedParticipants = list(participants)
+
+        for participant in participants:
+            if participant.user_id in topDonatorUserIds:
+                weightedParticipants.append(participant)
+
+        return weightedParticipants
+
+    def resolveDonatorGiveawayMonth(self, title: str | None):
+        if title is None:
+            return None
+
+        match = re.fullmatch(r"GA for donator (\d{4})/(\d{2})", title.strip())
+
+        if match is None:
+            return None
+
+        month = int(match.group(2))
+
+        if month < 1 or month > 12:
+            return None
+
+        return int(match.group(1)), month
 
     def buildGiveawayResultMessage(self, giveaway, winners):
         winnerText = self.buildWinnerText(winners)
