@@ -1,14 +1,14 @@
-from datetime import datetime, timedelta, timezone
-
 import discord
 
 from bot.config.roles import DONATE_REWARD_ROLES
 from bot.config.database import getDbSession
 from bot.repository.owoDonateHistoryRepository import OwoDonateHistoryRepository
+from bot.services.donate.monthlyDonatorRoleService import MonthlyDonatorRoleService
 
 
 class DonateRewardService:
-    GMT7 = timezone(timedelta(hours=7))
+    def __init__(self):
+        self.monthlyDonatorRoleService = MonthlyDonatorRoleService()
 
     def getHighestMatchedRewardRole(self, totalDonate):
         highestMatchedRewardRole = None
@@ -39,37 +39,6 @@ class DonateRewardService:
         with getDbSession() as session:
             owoDonateHistoryRepository = OwoDonateHistoryRepository(session)
             return owoDonateHistoryRepository.getTotalDonateBySenderUserId(senderUserId)
-
-    def buildCurrentMonthDonatorRoleName(self):
-        nowGmt7 = datetime.now(self.GMT7)
-        return f"{nowGmt7.year}_{nowGmt7.month:02d}_donator"
-
-    async def findOrCreateCurrentMonthDonatorRole(self, guild: discord.Guild):
-        roleName = self.buildCurrentMonthDonatorRoleName()
-        role = discord.utils.get(guild.roles, name=roleName)
-
-        if role is not None:
-            return role
-
-        return await guild.create_role(
-            name=roleName,
-            permissions=discord.Permissions.none(),
-            color=discord.Color.default(),
-            hoist=False,
-            mentionable=False,
-            reason="Create monthly donator role",
-        )
-
-    async def updateCurrentMonthDonatorRole(self, guild: discord.Guild, member: discord.Member):
-        currentMonthDonatorRole = await self.findOrCreateCurrentMonthDonatorRole(guild)
-
-        if currentMonthDonatorRole not in member.roles:
-            await member.add_roles(
-                currentMonthDonatorRole,
-                reason="Monthly donator reward",
-            )
-
-        return currentMonthDonatorRole
 
     async def updateDonateRewardRole(self, guild: discord.Guild, member: discord.Member):
         totalDonate = self.getTotalDonateBySenderUserId(member.id)
@@ -110,6 +79,6 @@ class DonateRewardService:
         )
 
         donateRewardResult = await self.updateDonateRewardRole(guild, senderMember)
-        await self.updateCurrentMonthDonatorRole(guild, senderMember)
+        await self.monthlyDonatorRoleService.assignCurrentMonthRole(guild, senderMember)
 
         return donateRewardResult
