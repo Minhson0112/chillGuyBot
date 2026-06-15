@@ -28,6 +28,11 @@ class TicketChannelService:
             MODERATOR_ROLE_ID,
             ADMIN_ROLE_ID,
         ],
+        TicketType.DONATE_BOOSTER: [
+            OWNER_ROLE_ID,
+            MODERATOR_ROLE_ID,
+            ADMIN_ROLE_ID,
+        ],
         TicketType.FARM_GAME_CHILL_COIN: [
             OWNER_ROLE_ID,
         ],
