@@ -78,6 +78,20 @@ class OwoDonateHistoryRepository:
             .all()
         )
 
+    def getTotalDonateByMonth(self, year: int, month: int):
+        startAt, endAt = self.getMonthRange(year, month)
+
+        totalDonate = (
+            self.session.query(
+                func.coalesce(func.sum(OwoDonateHistory.cowoncy_amount), 0)
+            )
+            .filter(OwoDonateHistory.created_at >= startAt)
+            .filter(OwoDonateHistory.created_at < endAt)
+            .scalar()
+        )
+
+        return totalDonate
+
     def getDonateRankBySenderUserId(self, senderUserId):
         rows = (
             self.session.query(

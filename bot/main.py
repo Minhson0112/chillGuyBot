@@ -232,6 +232,7 @@ async def main():
         "bot.tasks.memberDailyActivityFlushTask",
         "bot.tasks.giveawayDrawTask",
         "bot.tasks.dailyGiveawayTask",
+        "bot.tasks.monthlyDonatorGiveawayTask",
         "bot.tasks.monthlyTopChatRewardTask",
         "bot.tasks.monthlyDonatorRoleCleanupTask",
         "bot.tasks.roleShopExpireTask",
