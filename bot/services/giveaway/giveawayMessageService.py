@@ -1,5 +1,6 @@
 import discord
 
+from bot.config.channel import TICKET_CHANNEL_ID
 from bot.config.database import getDbSession
 from bot.config.decoration import FOOTER_DECORATION_IMG_URL
 from bot.config.emoji import CHILL_COIN, COWONCCY, JOIN_BUTTON, VND, WING_L, WING_R
@@ -126,7 +127,7 @@ class GiveawayMessageService:
                 participantCount=participantCount,
             )
 
-    def joinGiveaway(self, giveawayId: int, userId: int):
+    def joinGiveaway(self, giveawayId: int, userId: int, userRoleIds: list[int]):
         with getDbSession() as session:
             giveawayRepository = GiveawayRepository(session)
             participantRepository = GiveawayParticipantRepository(session)
@@ -142,6 +143,15 @@ class GiveawayMessageService:
                 return {
                     "success": False,
                     "message": "Giveaway này không còn hoạt động.",
+                }
+
+            if giveaway.limit_role_id is not None and giveaway.limit_role_id not in userRoleIds:
+                return {
+                    "success": False,
+                    "message": (
+                        f"Giveaway này yêu cầu role <@&{giveaway.limit_role_id}>, "
+                        f"nếu bạn không biết cách lấy role này có thể <#{TICKET_CHANNEL_ID}> chúng tớ sẽ giải đáp."
+                    ),
                 }
 
             existingParticipant = participantRepository.findByGiveawayIdAndUserId(

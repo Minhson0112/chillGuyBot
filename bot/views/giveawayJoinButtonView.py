@@ -58,9 +58,14 @@ class GiveawayJoinButton(discord.ui.Button):
             )
             return
 
+        userRoleIds = []
+        if isinstance(interaction.user, discord.Member):
+            userRoleIds = [role.id for role in interaction.user.roles]
+
         result = self.giveawayMessageService.joinGiveaway(
             giveawayId=self.giveawayId,
             userId=interaction.user.id,
+            userRoleIds=userRoleIds,
         )
 
         if not result["success"]:
