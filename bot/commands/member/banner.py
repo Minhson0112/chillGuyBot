@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+from bot.views.bannerView import BannerView
+
 
 class Banner(commands.Cog):
     def __init__(self, bot):
@@ -11,16 +13,19 @@ class Banner(commands.Cog):
         if member is None:
             member = ctx.author
 
+        if ctx.guild is not None:
+            try:
+                member = await ctx.guild.fetch_member(member.id)
+            except discord.DiscordException:
+                pass
+
         user = await self.bot.fetch_user(member.id)
+        view = BannerView(member, user.banner)
 
-        if user.banner is None:
-            await ctx.send(f"{member.display_name} không có banner.")
-            return
-
-        embed = discord.Embed(title=f"Banner của {member.display_name}")
-        embed.set_image(url=user.banner.url)
-
-        await ctx.send(embed=embed)
+        await ctx.send(
+            embed=view.buildBannerEmbed("server"),
+            view=view,
+        )
 
 
 async def setup(bot):
