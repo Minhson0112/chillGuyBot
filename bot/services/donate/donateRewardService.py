@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 import discord
 
 from bot.config.roles import DONATE_REWARD_ROLES
@@ -7,6 +9,9 @@ from bot.services.donate.monthlyDonatorRoleService import MonthlyDonatorRoleServ
 
 
 class DonateRewardService:
+    GMT7 = timezone(timedelta(hours=7))
+    MINIMUM_MONTHLY_DONATE_FOR_MONTH_ROLE = 100_000
+
     def __init__(self):
         self.monthlyDonatorRoleService = MonthlyDonatorRoleService()
 
@@ -39,6 +44,25 @@ class DonateRewardService:
         with getDbSession() as session:
             owoDonateHistoryRepository = OwoDonateHistoryRepository(session)
             return owoDonateHistoryRepository.getTotalDonateBySenderUserId(senderUserId)
+
+    def getCurrentMonthDonateBySenderUserId(self, senderUserId):
+        nowGmt7 = datetime.now(self.GMT7)
+
+        with getDbSession() as session:
+            owoDonateHistoryRepository = OwoDonateHistoryRepository(session)
+            return owoDonateHistoryRepository.getTotalDonateBySenderUserIdAndMonth(
+                senderUserId=senderUserId,
+                year=nowGmt7.year,
+                month=nowGmt7.month,
+            )
+
+    async def updateCurrentMonthDonatorRole(self, guild: discord.Guild, member: discord.Member):
+        currentMonthDonate = self.getCurrentMonthDonateBySenderUserId(member.id)
+
+        if currentMonthDonate >= self.MINIMUM_MONTHLY_DONATE_FOR_MONTH_ROLE:
+            return await self.monthlyDonatorRoleService.assignCurrentMonthRole(guild, member)
+
+        return None
 
     async def updateDonateRewardRole(self, guild: discord.Guild, member: discord.Member):
         totalDonate = self.getTotalDonateBySenderUserId(member.id)
@@ -79,6 +103,6 @@ class DonateRewardService:
         )
 
         donateRewardResult = await self.updateDonateRewardRole(guild, senderMember)
-        await self.monthlyDonatorRoleService.assignCurrentMonthRole(guild, senderMember)
+        await self.updateCurrentMonthDonatorRole(guild, senderMember)
 
         return donateRewardResult
