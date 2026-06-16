@@ -10,7 +10,7 @@ from bot.services.donate.monthlyDonatorRoleService import MonthlyDonatorRoleServ
 
 class DonateRewardService:
     GMT7 = timezone(timedelta(hours=7))
-    MINIMUM_MONTHLY_DONATE_FOR_MONTH_ROLE = 100_000
+    MINIMUM_MONTHLY_DONATE_FOR_MONTH_ROLE = 1_000_000
 
     def __init__(self):
         self.monthlyDonatorRoleService = MonthlyDonatorRoleService()
