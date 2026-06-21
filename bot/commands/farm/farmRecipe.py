@@ -11,9 +11,9 @@ class FarmRecipeCommand(commands.Cog):
         self.farmRecipeRenderService = FarmRecipeRenderService()
 
     @commands.command(name="rec")
-    async def recipes(self, ctx):
+    async def recipes(self, ctx, page: int = 1):
         try:
-            renderResult = self.farmRecipeRenderService.renderRecipePageToBuffer(page=1)
+            renderResult = self.farmRecipeRenderService.renderRecipePageToBuffer(page=page)
 
             file = discord.File(
                 renderResult["buffer"],
