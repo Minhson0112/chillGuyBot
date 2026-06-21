@@ -2393,3 +2393,72 @@ FROM (
 ) AS shop_data
 INNER JOIN items
     ON items.code = shop_data.item_code;
+
+# additional plant daily tasks
+INSERT INTO daily_task_masters (
+    task_code,
+    task_name,
+    description,
+    task_type,
+    target_item_id,
+    target_crop_id,
+    target_channel_id,
+    required_value,
+    reward_chill_coin,
+    reward_exp,
+    min_farm_level,
+    weight,
+    is_active
+)
+SELECT
+    task_data.task_code,
+    task_data.task_name,
+    task_data.description,
+    'plant_crop',
+    NULL,
+    crops.id,
+    NULL,
+    task_data.required_value,
+    task_data.reward_chill_coin,
+    task_data.reward_exp,
+    task_data.min_farm_level,
+    task_data.weight,
+    1
+FROM (
+    SELECT 'plant_corn_4' AS task_code, 'trồng 4 ngô' AS task_name, 'trồng 4 cây ngô trong farm' AS description, 'corn' AS target_crop_code, 4 AS required_value, 35 AS reward_chill_coin, 15 AS reward_exp, 1 AS min_farm_level, 60 AS weight
+    UNION ALL SELECT 'plant_potato_4', 'trồng 4 khoai tây', 'trồng 4 cây khoai tây trong farm', 'potato', 4, 40, 15, 1, 60
+    UNION ALL SELECT 'plant_parsnip_4', 'trồng 4 củ cải vàng', 'trồng 4 cây củ cải vàng trong farm', 'parsnip', 4, 42, 16, 1, 60
+    UNION ALL SELECT 'plant_hops_4', 'trồng 4 hoa bia', 'trồng 4 cây hoa bia trong farm', 'hops', 4, 43, 17, 1, 60
+    UNION ALL SELECT 'plant_cauliflower_6', 'trồng 6 súp lơ', 'trồng 6 cây súp lơ trong farm', 'cauliflower', 6, 50, 20, 2, 60
+    UNION ALL SELECT 'plant_garlic_6', 'trồng 6 tỏi', 'trồng 6 cây tỏi trong farm', 'garlic', 6, 51, 21, 2, 60
+    UNION ALL SELECT 'plant_kale_6', 'trồng 6 cải xoăn', 'trồng 6 cây cải xoăn trong farm', 'kale', 6, 52, 22, 2, 60
+    UNION ALL SELECT 'plant_rhubarb_6', 'trồng 6 đại hoàng', 'trồng 6 cây đại hoàng trong farm', 'rhubarb', 6, 53, 23, 2, 60
+    UNION ALL SELECT 'plant_tomato_6', 'trồng 6 cà chua', 'trồng 6 cây cà chua trong farm', 'tomato', 6, 54, 24, 2, 60
+    UNION ALL SELECT 'plant_melon_6', 'trồng 6 dưa lưới', 'trồng 6 cây dưa lưới trong farm', 'melon', 6, 55, 35, 2, 60
+    UNION ALL SELECT 'plant_hot_pepper_8', 'trồng 8 ớt', 'trồng 8 cây ớt trong farm', 'hot_pepper', 8, 60, 40, 3, 60
+    UNION ALL SELECT 'plant_red_cabbage_8', 'trồng 8 bắp cải đỏ', 'trồng 8 cây bắp cải đỏ trong farm', 'red_cabbage', 8, 61, 41, 3, 60
+    UNION ALL SELECT 'plant_yam_8', 'trồng 8 khoai lang', 'trồng 8 cây khoai lang trong farm', 'yam', 8, 62, 42, 3, 60
+    UNION ALL SELECT 'plant_cranberry_8', 'trồng 8 nam việt quất', 'trồng 8 cây nam việt quất trong farm', 'cranberry', 8, 63, 43, 3, 60
+    UNION ALL SELECT 'plant_pumpkin_8', 'trồng 8 bí ngô', 'trồng 8 cây bí ngô trong farm', 'pumpkin', 8, 64, 44, 3, 60
+    UNION ALL SELECT 'plant_artichoke_8', 'trồng 8 atisô', 'trồng 8 cây atisô trong farm', 'artichoke', 8, 65, 45, 3, 60
+    UNION ALL SELECT 'plant_blueberry_10', 'trồng 10 việt quất', 'trồng 10 cây việt quất trong farm', 'blueberry', 10, 70, 46, 4, 60
+    UNION ALL SELECT 'plant_strawberry_10', 'trồng 10 dâu tây', 'trồng 10 cây dâu tây trong farm', 'strawberry', 10, 70, 47, 4, 60
+    UNION ALL SELECT 'plant_eggplant_10', 'trồng 10 cà tím', 'trồng 10 cây cà tím trong farm', 'eggplant', 10, 71, 48, 4, 60
+    UNION ALL SELECT 'plant_grape_10', 'trồng 10 nho', 'trồng 10 cây nho trong farm', 'grape', 10, 72, 49, 4, 60
+    UNION ALL SELECT 'plant_bok_choy_10', 'trồng 10 cải thìa', 'trồng 10 cây cải thìa trong farm', 'bok_choy', 10, 73, 50, 4, 60
+) AS task_data
+INNER JOIN crops
+    ON crops.code = task_data.target_crop_code
+ON DUPLICATE KEY UPDATE
+    task_name = VALUES(task_name),
+    description = VALUES(description),
+    task_type = VALUES(task_type),
+    target_item_id = VALUES(target_item_id),
+    target_crop_id = VALUES(target_crop_id),
+    target_channel_id = VALUES(target_channel_id),
+    required_value = VALUES(required_value),
+    reward_chill_coin = VALUES(reward_chill_coin),
+    reward_exp = VALUES(reward_exp),
+    min_farm_level = VALUES(min_farm_level),
+    weight = VALUES(weight),
+    is_active = VALUES(is_active);
