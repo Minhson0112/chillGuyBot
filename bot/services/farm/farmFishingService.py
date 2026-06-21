@@ -24,6 +24,7 @@ class FarmFishingService:
 
     FISHING_COOLDOWN_SECONDS = 300
     DEFAULT_FISHING_SUCCESS_RATE = 0.50
+    DEFAULT_FISHING_CATCH_QUANTITY = 1
 
     MIN_WEIGHT_KG = 1
     MAX_WEIGHT_KG = 100
@@ -105,9 +106,14 @@ class FarmFishingService:
                     ),
                 }
 
+            fishingCatchQuantity = min(
+                self.getFishingCatchQuantity(fishingRodEquipment),
+                bugInventory.quantity,
+            )
+
             userInventoryRepository.decreaseQuantity(
                 userInventory=bugInventory,
-                quantity=self.BUG_COST_PER_FISHING,
+                quantity=fishingCatchQuantity,
             )
 
             farmFishPondRepository.markFished(fishPond)
@@ -131,7 +137,7 @@ class FarmFishingService:
 
                 message = (
                     f"Bạn bị đứt dây câu, câu được cái nịt. "
-                    f"Đã dùng **{self.BUG_COST_PER_FISHING}** {bugText}."
+                    f"Đã dùng **{fishingCatchQuantity}** {bugText}."
                 )
 
                 if fishingRodEquipment is not None:
@@ -158,20 +164,28 @@ class FarmFishingService:
                     "message": "Không tìm thấy dữ liệu cá trong hệ thống.",
                 }
 
-            caughtItem = self.randomSeafoodItem(seafoodItems)
-            weightKg = self.randomWeightKg()
+            caughtResults = []
 
-            userInventoryRepository.addOrCreate(
-                userId=userId,
-                itemId=caughtItem.id,
-                quantity=1,
-            )
+            for _ in range(fishingCatchQuantity):
+                caughtItem = self.randomSeafoodItem(seafoodItems)
+                weightKg = self.randomWeightKg()
 
-            fishingHistoryRepository.create(
-                userId=userId,
-                itemId=caughtItem.id,
-                weightKg=weightKg,
-            )
+                userInventoryRepository.addOrCreate(
+                    userId=userId,
+                    itemId=caughtItem.id,
+                    quantity=1,
+                )
+
+                fishingHistoryRepository.create(
+                    userId=userId,
+                    itemId=caughtItem.id,
+                    weightKg=weightKg,
+                )
+
+                caughtResults.append({
+                    "item": caughtItem,
+                    "weightKg": weightKg,
+                })
 
             farmRepository.increaseFarmExp(farm, self.EXP_PER_FISHING)
 
@@ -179,7 +193,7 @@ class FarmFishingService:
                 userId=userId,
                 taskType=self.DAILY_TASK_TYPE_FISHING,
                 amount=1,
-                targetItemId=caughtItem.id,
+                targetItemId=caughtResults[0]["item"].id,
             )
 
             dailyTaskMessage = dailyTaskProgressService.buildCompletedTaskMessage(
@@ -188,11 +202,20 @@ class FarmFishingService:
 
             session.commit()
 
-            caughtItemText = self.buildItemText(caughtItem)
+            caughtFishMessages = []
+
+            for caughtResult in caughtResults:
+                caughtItemText = self.buildItemText(caughtResult["item"])
+                caughtFishMessages.append(
+                    f"- {caughtItemText} nặng **{caughtResult['weightKg']}kg**"
+                )
+
+            caughtFishText = "\n".join(caughtFishMessages)
 
             message = (
-                f"Bạn đã câu được {caughtItemText} nặng **{weightKg}kg**. "
-                f"Đã dùng **{self.BUG_COST_PER_FISHING}** {bugText}. "
+                f"Bạn đã câu được **{fishingCatchQuantity}** con cá:\n"
+                f"{caughtFishText}\n"
+                f"Đã dùng **{fishingCatchQuantity}** {bugText}. "
                 f"Farm EXP +{self.EXP_PER_FISHING}."
             )
 
@@ -289,6 +312,31 @@ class FarmFishingService:
             return 0
 
         return max(toolTemplate.fishing_cooldown_reduction_seconds, 0)
+
+    def getFishingCatchQuantity(self, fishingRodEquipment):
+        if fishingRodEquipment is None:
+            return self.DEFAULT_FISHING_CATCH_QUANTITY
+
+        userTool = fishingRodEquipment.user_tool
+
+        if userTool is None:
+            return self.DEFAULT_FISHING_CATCH_QUANTITY
+
+        if userTool.status == ToolStatus.BROKEN.value:
+            return self.DEFAULT_FISHING_CATCH_QUANTITY
+
+        if userTool.current_durability <= 0:
+            return self.DEFAULT_FISHING_CATCH_QUANTITY
+
+        toolTemplate = userTool.tool_template
+
+        if toolTemplate is None:
+            return self.DEFAULT_FISHING_CATCH_QUANTITY
+
+        return max(
+            toolTemplate.fishing_catch_quantity,
+            self.DEFAULT_FISHING_CATCH_QUANTITY,
+        )
 
     def consumeFishingRodDurability(self, fishingRodEquipment):
         if fishingRodEquipment is None:

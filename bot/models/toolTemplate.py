@@ -24,6 +24,7 @@ class ToolTemplate(Base):
     crop_growth_reduction_seconds = Column(Integer, nullable=False, server_default=text("0"))
     fishing_cooldown_reduction_seconds = Column(Integer, nullable=False, server_default=text("0"))
     fishing_success_rate = Column(Numeric(3, 2), nullable=False, server_default=text("0.00"))
+    fishing_catch_quantity = Column(Integer, nullable=False, server_default=text("1"))
     harvest_bonus_percent = Column(Integer, nullable=False, server_default=text("0"))
     milk_bonus_quantity = Column(Integer, nullable=False, server_default=text("0"))
 

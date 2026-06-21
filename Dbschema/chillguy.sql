@@ -1221,6 +1221,7 @@ CREATE TABLE tool_templates (
     crop_growth_reduction_seconds INT NOT NULL DEFAULT 0 COMMENT 'crop growth time reduction seconds',
     fishing_cooldown_reduction_seconds INT NOT NULL DEFAULT 0 COMMENT 'fishing cooldown reduction seconds',
     fishing_success_rate DECIMAL(3,2) NOT NULL DEFAULT 0.00 COMMENT 'fishing success rate: 0 or 0.10 to 0.90',
+    fishing_catch_quantity INT NOT NULL DEFAULT 1 COMMENT 'number of fish caught per successful fishing attempt',
     harvest_bonus_percent INT NOT NULL DEFAULT 0 COMMENT 'harvest bonus percent',
     milk_bonus_quantity INT NOT NULL DEFAULT 0 COMMENT 'milk bonus quantity per harvest',
 
@@ -1257,6 +1258,9 @@ CREATE TABLE tool_templates (
 
     CONSTRAINT chk_tool_templates_fishing_success_rate
         CHECK (fishing_success_rate = 0.00 OR fishing_success_rate BETWEEN 0.10 AND 0.90),
+
+    CONSTRAINT chk_tool_templates_fishing_catch_quantity
+        CHECK (fishing_catch_quantity > 0),
 
     CONSTRAINT chk_tool_templates_harvest_bonus_percent
         CHECK (harvest_bonus_percent >= 0),

@@ -2134,6 +2134,7 @@ INSERT INTO tool_templates (
     crop_growth_reduction_seconds,
     fishing_cooldown_reduction_seconds,
     fishing_success_rate,
+    fishing_catch_quantity,
     harvest_bonus_percent,
     milk_bonus_quantity,
     is_active
@@ -2147,6 +2148,7 @@ SELECT
     tool_data.crop_growth_reduction_seconds,
     tool_data.fishing_cooldown_reduction_seconds,
     tool_data.fishing_success_rate,
+    tool_data.fishing_catch_quantity,
     tool_data.harvest_bonus_percent,
     tool_data.milk_bonus_quantity,
     tool_data.is_active
@@ -2160,6 +2162,7 @@ FROM (
         0 AS crop_growth_reduction_seconds,
         0 AS fishing_cooldown_reduction_seconds,
         0.00 AS fishing_success_rate,
+        1 AS fishing_catch_quantity,
         30 AS harvest_bonus_percent,
         0 AS milk_bonus_quantity,
         1 AS is_active
@@ -2175,6 +2178,7 @@ FROM (
         0,
         0,
         0.70,
+        2,
         0,
         0,
         1
@@ -2190,6 +2194,7 @@ FROM (
         0,
         0,
         0.80,
+        3,
         0,
         0,
         1
@@ -2205,6 +2210,7 @@ FROM (
         0,
         120,
         0.90,
+        5,
         0,
         0,
         1
@@ -2220,6 +2226,7 @@ FROM (
         240,
         0,
         0.00,
+        1,
         0,
         0,
         1
@@ -2235,6 +2242,7 @@ FROM (
         480,
         0,
         0.00,
+        1,
         0,
         0,
         1
@@ -2250,6 +2258,7 @@ FROM (
         900,
         0,
         0.00,
+        1,
         0,
         0,
         1
@@ -2265,6 +2274,7 @@ FROM (
         1200,
         0,
         0.00,
+        1,
         0,
         0,
         1
@@ -2280,6 +2290,7 @@ FROM (
         0,
         0,
         0.00,
+        1,
         0,
         1,
         1
