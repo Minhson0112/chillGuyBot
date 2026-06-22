@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.giftcodeClaimHistoryRepository import GiftcodeClaimHistoryRepository
 from bot.repository.giftcodeRepository import GiftcodeRepository
 from bot.repository.memberRepository import MemberRepository
@@ -84,7 +85,7 @@ class GiftcodeService:
                 )
 
                 rewardItemMessages.append(
-                    f"**{self.formatNumber(reward.quantity)}** {self.buildItemText(reward.item)}"
+                    f"**{self.formatNumber(reward.quantity)}** {buildItemText(reward.item)}"
                 )
 
             giftcodeClaimHistoryRepository.create(
@@ -128,14 +129,6 @@ class GiftcodeService:
             f"Phần thưởng nhận được:\n"
             f"{rewardText}"
         )
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def getTodayDate(self):
         return datetime.now(self.GMT7).date()

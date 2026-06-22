@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmKitchenRepository import FarmKitchenRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.foodRecipeRepository import FoodRecipeRepository
@@ -128,7 +128,7 @@ class FarmCookService:
 
             session.commit()
 
-            resultItemText = self.buildItemText(recipe.resultItem)
+            resultItemText = buildItemText(recipe.resultItem)
 
             message = (
                 f"Bạn đã bắt đầu nấu **{cookingQuantity}** {resultItemText}. "
@@ -191,7 +191,7 @@ class FarmCookService:
 
             if currentQuantity < requiredQuantity:
                 missingIngredientMessages.append(
-                    f"- {self.buildItemText(item)} cần **{requiredQuantity}**, hiện có **{currentQuantity}**."
+                    f"- {buildItemText(item)} cần **{requiredQuantity}**, hiện có **{currentQuantity}**."
                 )
 
         return missingIngredientMessages
@@ -220,14 +220,6 @@ class FarmCookService:
                 userInventory=inventory,
                 quantity=requiredQuantity,
             )
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def formatRemainingTime(self, remainingSeconds: int):
         minutes = remainingSeconds // 60

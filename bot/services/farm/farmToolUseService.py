@@ -1,5 +1,5 @@
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
 from bot.repository.farmRepository import FarmRepository
@@ -83,7 +83,7 @@ class FarmToolUseService:
             if existingEquipment is not None and existingEquipment.user_tool_id == userTool.id:
                 return {
                     "success": False,
-                    "message": f"{self.buildToolText(userTool.item)} đang được lắp trong farm rồi.",
+                    "message": f"{buildItemText(userTool.item)} đang được lắp trong farm rồi.",
                 }
 
             oldUserTool = None
@@ -113,23 +113,15 @@ class FarmToolUseService:
                 return {
                     "success": True,
                     "message": (
-                        f"Đã tháo {self.buildToolText(oldUserTool.item)} và lắp "
-                        f"{self.buildToolText(userTool.item)} vào farm."
+                        f"Đã tháo {buildItemText(oldUserTool.item)} và lắp "
+                        f"{buildItemText(userTool.item)} vào farm."
                     ),
                 }
 
             return {
                 "success": True,
-                "message": f"Đã lắp {self.buildToolText(userTool.item)} vào farm.",
+                "message": f"Đã lắp {buildItemText(userTool.item)} vào farm.",
             }
 
     def isValidToolType(self, toolType: str):
         return toolType in [toolTypeItem.value for toolTypeItem in ToolType]
-
-    def buildToolText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"

@@ -1,5 +1,5 @@
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.farmToolEquipmentRepository import FarmToolEquipmentRepository
@@ -42,7 +42,7 @@ class FarmToolRemoveService:
             if userTool.farm_tool_equipment is None:
                 return {
                     "success": False,
-                    "message": f"{self.buildToolText(userTool.item)} hiện không được lắp trong farm.",
+                    "message": f"{buildItemText(userTool.item, '**dụng cụ này**')} hiện không được lắp trong farm.",
                 }
 
             if userTool.farm_tool_equipment.farm_id != farm.id:
@@ -58,16 +58,5 @@ class FarmToolRemoveService:
 
             return {
                 "success": True,
-                "message": f"Đã gỡ {self.buildToolText(userTool.item)} khỏi farm.",
+                "message": f"Đã gỡ {buildItemText(userTool.item, '**dụng cụ này**')} khỏi farm.",
             }
-
-    def buildToolText(self, item):
-        if item is None:
-            return "**dụng cụ này**"
-
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"

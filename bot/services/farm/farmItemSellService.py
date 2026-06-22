@@ -1,5 +1,6 @@
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
 
@@ -47,7 +48,7 @@ class FarmItemSellService:
                 }
 
             item = userInventory.item
-            itemText = self.buildItemText(item)
+            itemText = buildItemText(item)
             chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
             if not item.is_sellable:
@@ -89,14 +90,6 @@ class FarmItemSellService:
                     f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}."
                 ),
             }
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def formatNumber(self, number: int):
         return f"{number:,}"

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
 from bot.repository.farmCowShedRepository import FarmCowShedRepository
@@ -107,7 +107,7 @@ class FarmCowMilkCollectService:
 
             session.commit()
 
-            milkText = self.buildItemText(milkItem)
+            milkText = buildItemText(milkItem)
 
             message = f"Bạn đã vắt được **{milkQuantity}** {milkText}."
 
@@ -202,14 +202,6 @@ class FarmCowMilkCollectService:
         remainingSeconds = int((collectableAt - now).total_seconds())
 
         return max(remainingSeconds, 0)
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def formatRemainingTime(self, remainingSeconds: int):
         minutes = remainingSeconds // 60

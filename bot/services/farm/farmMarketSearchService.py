@@ -1,5 +1,6 @@
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
 from bot.repository.itemRepository import ItemRepository
 from bot.repository.memberRepository import MemberRepository
@@ -34,7 +35,7 @@ class FarmMarketSearchService:
                     "code": item.code,
                     "iconImageKey": item.icon_image_key,
                 },
-                "itemText": self.buildItemText(item),
+                "itemText": buildItemText(item),
                 "searchCost": self.SEARCH_COST,
             }
 
@@ -86,7 +87,7 @@ class FarmMarketSearchService:
                 "sellerDisplayName": self.getSellerDisplayName(seller),
                 "itemName": item.name,
                 "itemIconImageKey": item.icon_image_key,
-                "itemText": self.buildItemText(item),
+                "itemText": buildItemText(item),
                 "quantity": marketListing.quantity,
                 "price": marketListing.price,
                 "searchCost": self.SEARCH_COST,
@@ -99,14 +100,6 @@ class FarmMarketSearchService:
                 "result": result,
                 "message": "Đã tìm thấy shop đang bán món đồ này.",
             }
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def getSellerDisplayName(self, seller):
         if seller is None:

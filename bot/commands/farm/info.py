@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.shopItemRepository import ShopItemRepository
 
 
@@ -37,22 +37,10 @@ class Info(commands.Cog):
                 return
 
             item = shopItem.item
-            itemText = self.buildItemText(item)
+            itemText = buildItemText(item)
             description = item.description or "Món đồ này chưa có mô tả."
 
             await ctx.reply(
                 f"{itemText}\n"
                 f"{description}"
             )
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
-
-
-async def setup(bot):
-    await bot.add_cog(Info(bot))

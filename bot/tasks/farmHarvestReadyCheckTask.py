@@ -5,7 +5,7 @@ from discord.ext import commands, tasks
 
 from bot.config.channel import FARM_NOTIFICATION_CHANNEL_ID
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import getItemEmoji
 from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 
 
@@ -50,7 +50,7 @@ class FarmHarvestReadyCheckTask(commands.Cog):
                 notificationSummaries.append({
                     "userId": member.user_id,
                     "cropName": crop.name,
-                    "cropEmoji": self.resolveCropEmoji(crop),
+                    "cropEmoji": getItemEmoji(crop.cropItem, ""),
                 })
 
             session.commit()
@@ -69,12 +69,6 @@ class FarmHarvestReadyCheckTask(commands.Cog):
             return None
 
         return farmCropArea.farm.member
-
-    def resolveCropEmoji(self, crop):
-        if crop.cropItem is None:
-            return ""
-
-        return FARM_GAME_EMOJI.get(crop.cropItem.icon_image_key, "")
 
     async def sendHarvestReadyNotifications(self, notificationSummaries):
         if len(notificationSummaries) == 0:

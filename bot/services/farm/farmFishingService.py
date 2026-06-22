@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
 from bot.repository.farmFishPondRepository import FarmFishPondRepository
@@ -93,7 +93,7 @@ class FarmFishingService:
                 itemId=bugItem.id,
             )
 
-            bugText = self.buildItemText(bugItem)
+            bugText = buildItemText(bugItem)
 
             if bugInventory is None or bugInventory.quantity < self.BUG_COST_PER_FISHING:
                 currentQuantity = bugInventory.quantity if bugInventory is not None else 0
@@ -205,7 +205,7 @@ class FarmFishingService:
             caughtFishMessages = []
 
             for caughtResult in caughtResults:
-                caughtItemText = self.buildItemText(caughtResult["item"])
+                caughtItemText = buildItemText(caughtResult["item"])
                 caughtFishMessages.append(
                     f"- {caughtItemText} nặng **{caughtResult['weightKg']}kg**"
                 )
@@ -384,14 +384,6 @@ class FarmFishingService:
         weight = round(weight, 2)
 
         return Decimal(str(weight))
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def formatRemainingTime(self, remainingSeconds: int):
         minutes = remainingSeconds // 60

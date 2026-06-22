@@ -2,6 +2,7 @@ import random
 
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.farmTrainEventRepository import FarmTrainEventRepository
 from bot.repository.itemRepository import ItemRepository
@@ -56,7 +57,7 @@ class FarmTrainEventAutoService:
 
             session.commit()
 
-            itemText = self.buildItemText(item)
+            itemText = buildItemText(item)
             chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
             message = (
@@ -116,14 +117,6 @@ class FarmTrainEventAutoService:
         )
 
         return sellPrice * requiredQuantity + bonusChillCoin
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def formatNumber(self, number: int):
         return f"{number:,}"

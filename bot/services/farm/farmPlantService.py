@@ -1,5 +1,5 @@
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.cropRepository import CropRepository
 from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 from bot.repository.farmRepository import FarmRepository
@@ -44,7 +44,7 @@ class FarmPlantService:
                     "message": "Không tìm thấy thông tin item.",
                 }
 
-            itemText = self.buildItemText(item)
+            itemText = buildItemText(item)
 
             if item.type_code != "seed":
                 return {
@@ -130,11 +130,3 @@ class FarmPlantService:
                 "success": True,
                 "message": message,
             }
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"

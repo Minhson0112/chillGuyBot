@@ -5,7 +5,7 @@ from discord.ext import commands, tasks
 
 from bot.config.channel import FARM_NOTIFICATION_CHANNEL_ID
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import getItemEmoji
 from bot.repository.farmKitchenRepository import FarmKitchenRepository
 
 
@@ -50,7 +50,7 @@ class FarmCookReadyCheckTask(commands.Cog):
                 notificationSummaries.append({
                     "userId": member.user_id,
                     "itemName": recipe.resultItem.name,
-                    "itemEmoji": self.resolveItemEmoji(recipe.resultItem),
+                    "itemEmoji": getItemEmoji(recipe.resultItem, ""),
                 })
 
             session.commit()
@@ -69,9 +69,6 @@ class FarmCookReadyCheckTask(commands.Cog):
             return None
 
         return farmKitchen.farm.member
-
-    def resolveItemEmoji(self, item):
-        return FARM_GAME_EMOJI.get(item.icon_image_key, "")
 
     async def sendCookReadyNotifications(self, notificationSummaries):
         if len(notificationSummaries) == 0:

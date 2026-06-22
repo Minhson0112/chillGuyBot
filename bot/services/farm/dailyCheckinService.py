@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.dailyCheckinHistoryRepository import DailyCheckinHistoryRepository
 from bot.repository.dailyCheckinRewardRepository import DailyCheckinRewardRepository
 from bot.repository.memberRepository import MemberRepository
@@ -112,21 +113,13 @@ class DailyCheckinService:
 
         if reward.rewardItem is not None and reward.reward_item_quantity > 0:
             rewardMessages.append(
-                f"**{self.formatNumber(reward.reward_item_quantity)}** {self.buildItemText(reward.rewardItem)}"
+                f"**{self.formatNumber(reward.reward_item_quantity)}** {buildItemText(reward.rewardItem)}"
             )
 
         return (
             f"Điểm danh thành công ngày **{streakDay}**.\n"
             f"Bạn nhận được: " + " và ".join(rewardMessages)
         )
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def getTodayDate(self):
         return datetime.now(self.GMT7).date()

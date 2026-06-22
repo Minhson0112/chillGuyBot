@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
 from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
@@ -106,7 +106,7 @@ class FarmHarvestService:
 
             session.commit()
 
-            cropItemText = self.buildItemText(cropItem)
+            cropItemText = buildItemText(cropItem)
 
             message = f"Bạn đã thu hoạch **{harvestQuantity}** {cropItemText}."
 
@@ -221,14 +221,6 @@ class FarmHarvestService:
             totalPestSeconds += max(currentPestSeconds, 0)
 
         return max(totalPestSeconds, 0)
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def formatRemainingTime(self, remainingSeconds: int):
         minutes = remainingSeconds // 60

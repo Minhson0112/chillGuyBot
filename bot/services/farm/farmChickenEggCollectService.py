@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmChickenCoopRepository import FarmChickenCoopRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.itemRepository import ItemRepository
@@ -95,7 +95,7 @@ class FarmChickenEggCollectService:
 
             session.commit()
 
-            eggText = self.buildItemText(eggItem)
+            eggText = buildItemText(eggItem)
 
             message = f"Bạn đã lấy được **{eggQuantity}** {eggText}."
 
@@ -132,14 +132,6 @@ class FarmChickenEggCollectService:
         remainingSeconds = int((collectableAt - now).total_seconds())
 
         return max(remainingSeconds, 0)
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def formatRemainingTime(self, remainingSeconds: int):
         minutes = remainingSeconds // 60

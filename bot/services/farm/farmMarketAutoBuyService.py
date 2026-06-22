@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
 from bot.repository.memberRepository import MemberRepository
 
@@ -82,18 +82,7 @@ class FarmMarketAutoBuyService:
 
         notificationSummaries[sellerUserId]["totalPaid"] += listing.price
         notificationSummaries[sellerUserId]["items"].append({
-            "itemText": self.buildItemText(listing.item),
+            "itemText": buildItemText(listing.item),
             "quantity": listing.quantity,
             "price": listing.price,
         })
-
-    def buildItemText(self, item):
-        if item is None:
-            return "**item không xác định**"
-
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"

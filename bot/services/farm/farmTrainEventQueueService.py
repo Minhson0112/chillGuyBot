@@ -1,5 +1,6 @@
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.farmTrainEventHistoryRepository import FarmTrainEventHistoryRepository
 from bot.repository.farmTrainEventRepository import FarmTrainEventRepository
@@ -87,7 +88,7 @@ class FarmTrainEventQueueService:
                     "success": False,
                     "message": (
                         f"Tàu hỏa yêu cầu **{self.formatNumber(trainEvent.required_quantity)}** "
-                        f"{self.buildItemText(requiredItem)}, "
+                        f"{buildItemText(requiredItem)}, "
                         f"bạn hiện có **{self.formatNumber(currentQuantity)}**."
                     ),
                 }
@@ -134,7 +135,7 @@ class FarmTrainEventQueueService:
 
             message = (
                 f"Bạn đã chất **{self.formatNumber(trainEvent.required_quantity)}** "
-                f"{self.buildItemText(requiredItem)} lên tàu.\n"
+                f"{buildItemText(requiredItem)} lên tàu.\n"
                 f"Nhận được **{self.formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji} "
                 f"và **{self.formatNumber(trainEvent.reward_exp)}** {expEmoji}."
             )
@@ -146,14 +147,6 @@ class FarmTrainEventQueueService:
                 "success": True,
                 "message": message,
             }
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def formatNumber(self, number: int):
         return f"{number:,}"

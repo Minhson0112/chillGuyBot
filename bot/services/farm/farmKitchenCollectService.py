@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmKitchenRepository import FarmKitchenRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
@@ -75,16 +75,8 @@ class FarmKitchenCollectService:
 
             return {
                 "success": True,
-                "message": f"Bạn đã nhận **{resultQuantity}** {self.buildItemText(resultItem)}.",
+                "message": f"Bạn đã nhận **{resultQuantity}** {buildItemText(resultItem)}.",
             }
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def formatRemainingTime(self, remainingSeconds: int):
         minutes = remainingSeconds // 60

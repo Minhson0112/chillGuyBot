@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.config.farmLevel import FARM_MAX_LEVEL, FARM_LEVEL_REQUIRED_EXP
+from bot.helper.farmItemHelper import getItemEmoji
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.farmTrainEventRepository import FarmTrainEventRepository
 from bot.enums.toolStatus import ToolStatus
@@ -240,7 +241,7 @@ class FarmRenderService:
             cropEmoji = ""
 
             if crop.cropItem is not None:
-                cropEmoji = FARM_GAME_EMOJI.get(crop.cropItem.icon_image_key, "")
+                cropEmoji = getItemEmoji(crop.cropItem, "")
 
             cropText = f"{cropEmoji} **{crop.name}**".strip()
             remainingTimeText = self.buildRemainingHarvestTimeText(cropArea)
@@ -463,7 +464,7 @@ class FarmRenderService:
             }
 
         resultItem = currentRecipe.resultItem
-        itemEmoji = FARM_GAME_EMOJI.get(resultItem.icon_image_key, "")
+        itemEmoji = getItemEmoji(resultItem, "")
         kitchenFoodText = f"{itemEmoji} **{resultItem.name}**".strip()
 
         return {
@@ -607,7 +608,7 @@ class FarmRenderService:
             }
 
         requiredItem = trainEvent.requiredItem
-        itemEmoji = FARM_GAME_EMOJI.get(requiredItem.icon_image_key, "")
+        itemEmoji = getItemEmoji(requiredItem, "")
         chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
         expEmoji = FARM_GAME_EMOJI["exp"]
 

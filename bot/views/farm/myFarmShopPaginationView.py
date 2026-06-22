@@ -2,6 +2,7 @@ import discord
 
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
 from bot.services.farm.farmMarketShopRenderService import FarmMarketShopRenderService
 
@@ -104,7 +105,7 @@ class MyFarmShopPaginationView(discord.ui.View):
             return embed
 
         for listing in soldListings:
-            itemText = self.buildItemText(listing.item)
+            itemText = buildItemText(listing.item, "**Không rõ item**")
             buyerText = self.buildBuyerText(listing.buyer_user_id)
             soldAtText = self.formatSoldAt(listing.sold_at)
             chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
@@ -121,17 +122,6 @@ class MyFarmShopPaginationView(discord.ui.View):
             )
 
         return embed
-
-    def buildItemText(self, item):
-        if item is None:
-            return "**Không rõ item**"
-
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def buildBuyerText(self, buyerUserId):
         if buyerUserId is None:

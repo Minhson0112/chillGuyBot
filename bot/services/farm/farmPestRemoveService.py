@@ -1,5 +1,5 @@
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.itemRepository import ItemRepository
@@ -81,7 +81,7 @@ class FarmPestRemoveService:
 
             session.commit()
 
-            bugText = self.buildItemText(bugItem)
+            bugText = buildItemText(bugItem)
 
             message = f"Bạn đã bắt được **{bugQuantity}** {bugText} và cây đã hết sâu bệnh."
 
@@ -92,11 +92,3 @@ class FarmPestRemoveService:
                 "success": True,
                 "message": message,
             }
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"

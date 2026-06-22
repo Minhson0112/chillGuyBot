@@ -1,5 +1,6 @@
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
@@ -57,7 +58,7 @@ class FarmBuyShopService:
                 }
 
             item = marketListing.item
-            itemText = self.buildItemText(item)
+            itemText = buildItemText(item)
             chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
             if buyer.chill_coin < marketListing.price:
@@ -110,14 +111,6 @@ class FarmBuyShopService:
                 "success": True,
                 "message": message,
             }
-
-    def buildItemText(self, item):
-        itemEmoji = FARM_GAME_EMOJI.get(item.icon_image_key)
-
-        if itemEmoji is None:
-            return f"**{item.name}**"
-
-        return f"{itemEmoji} **{item.name}**"
 
     def getSellerDisplayName(self, seller):
         if seller.nick:
