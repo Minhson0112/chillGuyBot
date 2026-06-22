@@ -4,6 +4,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.repository.userInventoryRepository import UserInventoryRepository
 from bot.repository.userToolRepository import UserToolRepository
@@ -315,7 +316,7 @@ class FarmInventoryRenderService:
     ):
         self.drawText(
             baseImage,
-            text=f"SL: {self.formatNumber(quantity)}",
+            text=f"SL: {formatNumber(quantity)}",
             x=slotX + self.QUANTITY_TEXT_OFFSET_X,
             y=y - 2,
             fontSize=self.QUANTITY_FONT_SIZE,
@@ -341,7 +342,7 @@ class FarmInventoryRenderService:
 
         self.drawText(
             baseImage,
-            text=self.formatNumber(sellPrice),
+            text=formatNumber(sellPrice),
             x=textX,
             y=y - 2,
             fontSize=self.PRICE_FONT_SIZE,
@@ -449,8 +450,6 @@ class FarmInventoryRenderService:
 
         return page
 
-    def formatNumber(self, number: int):
-        return f"{number:,}"
 
     def truncateText(self, text: str, maxLength: int):
         if text is None:

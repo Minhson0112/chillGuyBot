@@ -1,3 +1,4 @@
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.helper.farmItemHelper import buildItemText
@@ -87,9 +88,9 @@ class FarmTrainEventQueueService:
                 return {
                     "success": False,
                     "message": (
-                        f"Tàu hỏa yêu cầu **{self.formatNumber(trainEvent.required_quantity)}** "
+                        f"Tàu hỏa yêu cầu **{formatNumber(trainEvent.required_quantity)}** "
                         f"{buildItemText(requiredItem)}, "
-                        f"bạn hiện có **{self.formatNumber(currentQuantity)}**."
+                        f"bạn hiện có **{formatNumber(currentQuantity)}**."
                     ),
                 }
 
@@ -134,10 +135,10 @@ class FarmTrainEventQueueService:
             expEmoji = FARM_GAME_EMOJI["exp"]
 
             message = (
-                f"Bạn đã chất **{self.formatNumber(trainEvent.required_quantity)}** "
+                f"Bạn đã chất **{formatNumber(trainEvent.required_quantity)}** "
                 f"{buildItemText(requiredItem)} lên tàu.\n"
-                f"Nhận được **{self.formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji} "
-                f"và **{self.formatNumber(trainEvent.reward_exp)}** {expEmoji}."
+                f"Nhận được **{formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji} "
+                f"và **{formatNumber(trainEvent.reward_exp)}** {expEmoji}."
             )
 
             if dailyTaskMessage is not None:
@@ -147,6 +148,3 @@ class FarmTrainEventQueueService:
                 "success": True,
                 "message": message,
             }
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

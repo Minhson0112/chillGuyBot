@@ -2,6 +2,7 @@ import math
 
 import discord
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.decoration import FOOTER_DECORATION_IMG_URL
 
 
@@ -53,7 +54,7 @@ class ServerInvitePaginationView(discord.ui.View):
 
                 lines.append(
                     f"{inviterText} - `{invite.invite_code}` - "
-                    f"Đã dùng **{self.formatNumber(invite.uses)}** - "
+                    f"Đã dùng **{formatNumber(int(invite.uses or 0))}** - "
                     f"`{self.formatStatus(invite.status)}` - {createdAtText}"
                 )
 
@@ -111,8 +112,6 @@ class ServerInvitePaginationView(discord.ui.View):
 
         return value.strftime("%d/%m/%Y %H:%M")
 
-    def formatNumber(self, value):
-        return f"{int(value or 0):,}".replace(",", ".")
 
     def formatStatus(self, status):
         statusMap = {

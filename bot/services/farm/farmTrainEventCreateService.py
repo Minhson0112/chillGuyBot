@@ -1,3 +1,4 @@
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.helper.farmItemHelper import buildItemText
@@ -65,12 +66,9 @@ class FarmTrainEventCreateService:
                 "success": True,
                 "message": (
                     f"Đã tạo sự kiện tàu hỏa **#{farmTrainEvent.id}**.\n"
-                    f"Yêu cầu: **{self.formatNumber(requiredQuantity)}** {itemText}\n"
-                    f"Thưởng: **{self.formatNumber(rewardChillCoin)}** {chillCoinEmoji}"
-                    f"và **{self.formatNumber(rewardExp)} EXP**.\n"
+                    f"Yêu cầu: **{formatNumber(requiredQuantity)}** {itemText}\n"
+                    f"Thưởng: **{formatNumber(rewardChillCoin)}** {chillCoinEmoji}"
+                    f"và **{formatNumber(rewardExp)} EXP**.\n"
                     f"Tàu hỏa đã xuất hiện ở toàn bộ farm."
                 ),
             }
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

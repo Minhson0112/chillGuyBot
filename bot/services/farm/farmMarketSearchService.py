@@ -1,3 +1,4 @@
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.helper.farmItemHelper import buildItemText
@@ -71,8 +72,8 @@ class FarmMarketSearchService:
                 return {
                     "success": False,
                     "message": (
-                        f"Bạn cần **{self.formatNumber(self.SEARCH_COST)}** {chillCoinEmoji} "
-                        f"để tìm kiếm, hiện bạn có **{self.formatNumber(searcher.chill_coin)}** {chillCoinEmoji}."
+                        f"Bạn cần **{formatNumber(self.SEARCH_COST)}** {chillCoinEmoji} "
+                        f"để tìm kiếm, hiện bạn có **{formatNumber(searcher.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -112,6 +113,3 @@ class FarmMarketSearchService:
             return seller.global_name
 
         return seller.username
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

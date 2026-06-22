@@ -3,6 +3,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.repository.farmTrainEventHistoryRepository import FarmTrainEventHistoryRepository
 from bot.services.assetImageService import assetImageService
@@ -140,7 +141,7 @@ class FarmTrainRankingRenderService:
     ):
         self.drawRightFitTextCenterY(
             baseImage=baseImage,
-            text=self.formatNumber(completedCount),
+            text=formatNumber(completedCount),
             rightX=self.COUNT_RIGHT_X,
             centerY=centerY,
             maxWidth=self.COUNT_MAX_WIDTH,
@@ -300,8 +301,6 @@ class FarmTrainRankingRenderService:
 
         return bbox[3] - bbox[1]
 
-    def formatNumber(self, number: int):
-        return f"{number:,}"
 
     def convertImageToBuffer(self, image: Image.Image):
         buffer = BytesIO()

@@ -4,6 +4,7 @@ import random
 import discord
 from discord.ext import commands
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.repository.memberRepository import MemberRepository
@@ -75,7 +76,7 @@ class Slot(commands.Cog):
         embed = discord.Embed(
             title="Máy Slot",
             description=(
-                f"Tiền cược: **{self.formatNumber(bet)}** {chillCoinEmoji}\n"
+                f"Tiền cược: **{formatNumber(bet)}** {chillCoinEmoji}\n"
                 f"Đang quay thưởng..."
             ),
             color=discord.Color.gold(),
@@ -162,7 +163,7 @@ class Slot(commands.Cog):
                 "success": False,
                 "message": (
                     f"Mỗi lượt slot chỉ được cược tối đa "
-                    f"**{self.formatNumber(self.MAX_BET)}** {chillCoinEmoji}."
+                    f"**{formatNumber(self.MAX_BET)}** {chillCoinEmoji}."
                 ),
             }
 
@@ -180,8 +181,8 @@ class Slot(commands.Cog):
                 return {
                     "success": False,
                     "message": (
-                        f"Bạn cần **{self.formatNumber(bet)}** {chillCoinEmoji} để chơi, "
-                        f"hiện có **{self.formatNumber(member.chill_coin)}** {chillCoinEmoji}."
+                        f"Bạn cần **{formatNumber(bet)}** {chillCoinEmoji} để chơi, "
+                        f"hiện có **{formatNumber(member.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -212,8 +213,8 @@ class Slot(commands.Cog):
                     "success": False,
                     "message": (
                         f"Số dư của bạn không đủ để hoàn tất lượt quay. "
-                        f"Cần **{self.formatNumber(bet)}** {chillCoinEmoji}, "
-                        f"hiện có **{self.formatNumber(member.chill_coin)}** {chillCoinEmoji}."
+                        f"Cần **{formatNumber(bet)}** {chillCoinEmoji}, "
+                        f"hiện có **{formatNumber(member.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -257,7 +258,7 @@ class Slot(commands.Cog):
             title="Máy Slot",
             description=(
                 f"```txt\n{displayText}\n```\n"
-                f"Tiền cược: **{self.formatNumber(bet)}** {chillCoinEmoji}"
+                f"Tiền cược: **{formatNumber(bet)}** {chillCoinEmoji}"
             ),
             color=discord.Color.gold(),
         )
@@ -284,21 +285,21 @@ class Slot(commands.Cog):
         if multiplier == 10:
             resultText = (
                 f"Jackpot. Bạn nhận thưởng x10.\n"
-                f"Lãi: **{self.formatNumber(coinDelta)}** {chillCoinEmoji}"
+                f"Lãi: **{formatNumber(coinDelta)}** {chillCoinEmoji}"
             )
             color = discord.Color.green()
 
         elif multiplier == 2:
             resultText = (
                 f"Bạn trúng thưởng x2.\n"
-                f"Lãi: **{self.formatNumber(coinDelta)}** {chillCoinEmoji}"
+                f"Lãi: **{formatNumber(coinDelta)}** {chillCoinEmoji}"
             )
             color = discord.Color.green()
 
         else:
             resultText = (
                 f"Không trúng thưởng.\n"
-                f"Mất: **{self.formatNumber(abs(coinDelta))}** {chillCoinEmoji}"
+                f"Mất: **{formatNumber(abs(coinDelta))}** {chillCoinEmoji}"
             )
             color = discord.Color.red()
 
@@ -307,7 +308,7 @@ class Slot(commands.Cog):
             description=(
                 f"```txt\n{outcomeText}\n```\n"
                 f"{resultText}\n\n"
-                f"Số dư hiện tại: **{self.formatNumber(newBalance)}** {chillCoinEmoji}"
+                f"Số dư hiện tại: **{formatNumber(newBalance)}** {chillCoinEmoji}"
             ),
             color=color,
         )
@@ -319,7 +320,7 @@ class Slot(commands.Cog):
 
         embed.add_field(
             name="Tiền cược",
-            value=f"**{self.formatNumber(bet)}** {chillCoinEmoji}",
+            value=f"**{formatNumber(bet)}** {chillCoinEmoji}",
             inline=True,
         )
 
@@ -331,8 +332,6 @@ class Slot(commands.Cog):
 
         return embed
 
-    def formatNumber(self, number: int):
-        return f"{number:,}"
 
 
 async def setup(bot):

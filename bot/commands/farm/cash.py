@@ -1,5 +1,6 @@
 from discord.ext import commands
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.repository.memberRepository import MemberRepository
@@ -20,14 +21,12 @@ class CashCommand(commands.Cog):
                 return
 
             chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
-            chillCoin = self.formatNumber(member.chill_coin)
+            chillCoin = formatNumber(member.chill_coin)
 
             await ctx.reply(
                 f"{ctx.author.mention} ơi, bạn hiện có **{chillCoin}** {chillCoinEmoji} chill coin."
             )
 
-    def formatNumber(self, number: int):
-        return f"{number:,}"
 
 
 async def setup(bot):

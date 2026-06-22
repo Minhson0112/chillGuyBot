@@ -4,6 +4,7 @@ import random
 import discord
 from discord.ext import commands
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import BLACKJACK_CARD_EMOJI, FARM_GAME_EMOJI, UPSIDE_DOWN_CARD
 from bot.repository.memberRepository import MemberRepository
@@ -188,7 +189,7 @@ class Blackjack(commands.Cog):
                     statusText=(
                         f"{self.HIT_EMOJI}: Rút bài\n"
                         f"{self.STAND_EMOJI}: Dừng\n"
-                        f"Cược: **{self.formatNumber(bet)}** {chillCoinEmoji}"
+                        f"Cược: **{formatNumber(bet)}** {chillCoinEmoji}"
                     ),
                 )
 
@@ -313,7 +314,7 @@ class Blackjack(commands.Cog):
         if bet > self.MAX_BET:
             return {
                 "success": False,
-                "message": f"Mỗi ván chỉ được cược tối đa **{self.formatNumber(self.MAX_BET)}** chill coin.",
+                "message": f"Mỗi ván chỉ được cược tối đa **{formatNumber(self.MAX_BET)}** chill coin.",
             }
 
         with getDbSession() as session:
@@ -332,8 +333,8 @@ class Blackjack(commands.Cog):
                 return {
                     "success": False,
                     "message": (
-                        f"Bạn cần **{self.formatNumber(bet)}** {chillCoinEmoji} để chơi, "
-                        f"hiện có **{self.formatNumber(member.chill_coin)}** {chillCoinEmoji}."
+                        f"Bạn cần **{formatNumber(bet)}** {chillCoinEmoji} để chơi, "
+                        f"hiện có **{formatNumber(member.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -360,9 +361,9 @@ class Blackjack(commands.Cog):
         chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
         if coinDelta > 0:
-            resultText = f"Thắng **{self.formatNumber(coinDelta)}** {chillCoinEmoji}"
+            resultText = f"Thắng **{formatNumber(coinDelta)}** {chillCoinEmoji}"
         elif coinDelta < 0:
-            resultText = f"Thua **{self.formatNumber(abs(coinDelta))}** {chillCoinEmoji}"
+            resultText = f"Thua **{formatNumber(abs(coinDelta))}** {chillCoinEmoji}"
         else:
             resultText = "Không thay đổi số dư"
 
@@ -375,7 +376,7 @@ class Blackjack(commands.Cog):
             statusText=(
                 f"{outcome}\n"
                 f"Kết quả: {resultText}\n"
-                f"Số dư hiện tại: **{self.formatNumber(newBalance)}** {chillCoinEmoji}"
+                f"Số dư hiện tại: **{formatNumber(newBalance)}** {chillCoinEmoji}"
             ),
             color=color,
         )
@@ -512,7 +513,7 @@ class Blackjack(commands.Cog):
 
         embed.add_field(
             name="Cược",
-            value=f"**{self.formatNumber(bet)}** {chillCoinEmoji}",
+            value=f"**{formatNumber(bet)}** {chillCoinEmoji}",
             inline=True,
         )
 
@@ -531,8 +532,6 @@ class Blackjack(commands.Cog):
 
         return " ".join([cards[0]["emoji"]] + hiddenCards)
 
-    def formatNumber(self, number: int):
-        return f"{number:,}"
 
 
 async def setup(bot):

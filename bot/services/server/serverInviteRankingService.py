@@ -2,6 +2,7 @@ import discord
 
 from bot.config.database import getDbSession
 from bot.config.decoration import FOOTER_DECORATION_IMG_URL
+from bot.helper.numberFormatHelper import formatNumber
 from bot.repository.serverInviteRepository import ServerInviteRepository
 
 
@@ -37,7 +38,7 @@ class ServerInviteRankingService:
 
             leaderboardText += (
                 f"Top {index}: <@{row.inviterUserId}> - "
-                f"Mời được **{self.formatNumber(totalUses)}** người\n"
+                f"Mời được **{formatNumber(totalUses)}** người\n"
             )
 
         embed.add_field(
@@ -49,8 +50,8 @@ class ServerInviteRankingService:
         topOne = topInviters[0]
         embed.set_footer(
             text=(
-                f"Top 1 hiện tại: {self.formatNumber(int(topOne.totalUses or 0))} người "
-                f"| Tổng top 10: {self.formatNumber(totalInvitedCount)} người"
+                f"Top 1 hiện tại: {formatNumber(int(topOne.totalUses or 0))} người "
+                f"| Tổng top 10: {formatNumber(totalInvitedCount)} người"
             )
         )
 
@@ -60,6 +61,3 @@ class ServerInviteRankingService:
         embed.set_image(url=FOOTER_DECORATION_IMG_URL)
 
         return embed
-
-    def formatNumber(self, value: int):
-        return f"{value:,}".replace(",", ".")

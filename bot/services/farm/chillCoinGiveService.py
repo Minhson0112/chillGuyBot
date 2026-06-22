@@ -1,5 +1,6 @@
 from datetime import datetime, time, timedelta
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.enums.chillCoinTransactionType import ChillCoinTransactionType
@@ -59,8 +60,8 @@ class ChillCoinGiveService:
                     "success": False,
                     "message": (
                         f"Bạn không đủ {chillCoinEmoji} để chuyển. "
-                        f"Muốn chuyển **{self.formatNumber(amount)}** {chillCoinEmoji}, "
-                        f"hiện có **{self.formatNumber(fromMember.chill_coin)}** {chillCoinEmoji}."
+                        f"Muốn chuyển **{formatNumber(amount)}** {chillCoinEmoji}, "
+                        f"hiện có **{formatNumber(fromMember.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -80,7 +81,7 @@ class ChillCoinGiveService:
                         "success": False,
                         "message": (
                             f"Hôm nay người này đã nhận đủ giới hạn "
-                            f"**{self.formatNumber(self.DAILY_RECEIVE_LIMIT)}** {chillCoinEmoji} rồi."
+                            f"**{formatNumber(self.DAILY_RECEIVE_LIMIT)}** {chillCoinEmoji} rồi."
                         ),
                     }
 
@@ -89,7 +90,7 @@ class ChillCoinGiveService:
                         "success": False,
                         "message": (
                             f"Hôm nay người này chỉ nhận thêm được "
-                            f"**{self.formatNumber(remainingReceivableAmount)}** {chillCoinEmoji} nữa thôi."
+                            f"**{formatNumber(remainingReceivableAmount)}** {chillCoinEmoji} nữa thôi."
                         ),
                     }
 
@@ -109,7 +110,7 @@ class ChillCoinGiveService:
             return {
                 "success": True,
                 "message": (
-                    f"Bạn đã chuyển **{self.formatNumber(amount)}** {chillCoinEmoji} "
+                    f"Bạn đã chuyển **{formatNumber(amount)}** {chillCoinEmoji} "
                     f"cho **{self.getMemberDisplayName(toMember)}**."
                 ),
             }
@@ -129,6 +130,3 @@ class ChillCoinGiveService:
             return member.global_name
 
         return member.username
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

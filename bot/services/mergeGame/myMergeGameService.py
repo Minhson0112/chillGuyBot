@@ -4,6 +4,7 @@ import discord
 
 from bot.config.database import getDbSession
 from bot.config.emoji import SATURN, SUN
+from bot.helper.numberFormatHelper import formatNumber
 from bot.helper.timeFormatHelper import formatMillisecondsMinutesSeconds
 from bot.repository.mergeGamePlayHistoryRepository import MergeGamePlayHistoryRepository
 
@@ -63,11 +64,8 @@ class MyMergeGameService:
 
         return embed
 
-    def formatNumber(self, value):
-        return f"{int(value):,}".replace(",", ".")
-
     def formatOptionalNumber(self, value):
         if value is None:
             return "--"
 
-        return self.formatNumber(value)
+        return formatNumber(int(value))

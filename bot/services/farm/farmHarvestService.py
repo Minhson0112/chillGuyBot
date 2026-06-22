@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
@@ -222,6 +223,3 @@ class FarmHarvestService:
             totalPestSeconds += max(currentPestSeconds, 0)
 
         return max(totalPestSeconds, 0)
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

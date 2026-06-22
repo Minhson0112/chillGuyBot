@@ -4,6 +4,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.config.emoji import FARM_GAME_EMOJI
@@ -464,7 +465,7 @@ class FarmRenderService:
 
         return {
             "kitchenFoodText": kitchenFoodText,
-            "kitchenQuantityText": self.formatNumber(kitchen.cooking_quantity),
+            "kitchenQuantityText": formatNumber(kitchen.cooking_quantity),
             "kitchenRemainingTimeText": self.buildKitchenRemainingTimeText(kitchen),
         }
 
@@ -506,7 +507,7 @@ class FarmRenderService:
 
         self.drawStatusText(
             baseImage,
-            text=self.formatNumber(chillCoin),
+            text=formatNumber(chillCoin),
             x=self.COIN_TEXT_X,
             y=self.COIN_TEXT_Y,
         )
@@ -555,7 +556,7 @@ class FarmRenderService:
         else:
             currentExp = min(currentExp, requiredExp)
             progressRate = currentExp / requiredExp
-            expText = f"{self.formatNumber(currentExp)}/{self.formatNumber(requiredExp)}"
+            expText = f"{formatNumber(currentExp)}/{formatNumber(requiredExp)}"
 
         self.drawExpBar(baseImage, progressRate)
 
@@ -609,10 +610,10 @@ class FarmRenderService:
 
         return {
             "trainEventText": (
-                f"Tàu hỏa yêu cầu **{self.formatNumber(trainEvent.required_quantity)}** "
+                f"Tàu hỏa yêu cầu **{formatNumber(trainEvent.required_quantity)}** "
                 f"{itemEmoji} **{requiredItem.name}**, "
-                f"phần thưởng **{self.formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji} "
-                f"**{self.formatNumber(trainEvent.reward_exp)}** {expEmoji}"
+                f"phần thưởng **{formatNumber(trainEvent.reward_chill_coin)}** {chillCoinEmoji} "
+                f"**{formatNumber(trainEvent.reward_exp)}** {expEmoji}"
                 f"{nextTrainMessage}"
             ),
         }
@@ -937,8 +938,6 @@ class FarmRenderService:
             stroke_fill=(0, 0, 0, 255),
         )
 
-    def formatNumber(self, number: int):
-        return f"{number:,}"
 
     def convertImageToBuffer(self, image: Image.Image):
         buffer = BytesIO()

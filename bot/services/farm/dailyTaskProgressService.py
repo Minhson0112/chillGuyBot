@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.memberRepository import MemberRepository
@@ -117,8 +118,8 @@ class DailyTaskProgressService:
         for task in completedTasks:
             messages.append(
                 f"Hoàn thành daily task: **{task.task_name}**\n"
-                f"Nhận được **{self.formatNumber(task.reward_chill_coin)}** {chillCoinEmoji} "
-                f"+ **{self.formatNumber(task.reward_exp)}** {expEmoji}"
+                f"Nhận được **{formatNumber(task.reward_chill_coin)}** {chillCoinEmoji} "
+                f"+ **{formatNumber(task.reward_exp)}** {expEmoji}"
             )
 
         return "\n\n".join(messages)
@@ -166,6 +167,3 @@ class DailyTaskProgressService:
 
     def getTodayDate(self):
         return datetime.now(self.GMT7).date()
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

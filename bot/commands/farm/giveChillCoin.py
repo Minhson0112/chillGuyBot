@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.channel import PAYMENT_CHANNEL_ID
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.config.userId import OWNER_ID, TREASURER_MEMBER_ID_LIST
@@ -302,7 +303,7 @@ class GiveChillCoinCommand(commands.Cog):
             description=(
                 f"Người mua: {member.mention}\n"
                 f"Role đã mua: {role.mention}\n"
-                f"Số tiền: **{self.formatNumber(chillCoinAmount)}** {chillCoinEmoji}\n"
+                f"Số tiền: **{formatNumber(chillCoinAmount)}** {chillCoinEmoji}\n"
                 f"Hạn sử dụng đến: **{expiredAtText}**"
             ),
             color=discord.Color.green(),
@@ -323,8 +324,6 @@ class GiveChillCoinCommand(commands.Cog):
 
         return embed
 
-    def formatNumber(self, number: int):
-        return f"{number:,}"
 
 
 async def setup(bot):

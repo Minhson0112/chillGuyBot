@@ -1,5 +1,6 @@
 import discord
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.helper.farmItemHelper import buildItemText
@@ -113,8 +114,8 @@ class MyFarmShopPaginationView(discord.ui.View):
             embed.add_field(
                 name=f"#{listing.id} - {itemText}",
                 value=(
-                    f"Số lượng: **{self.formatNumber(listing.quantity)}**\n"
-                    f"Giá: **{self.formatNumber(listing.price)}** {chillCoinEmoji}\n"
+                    f"Số lượng: **{formatNumber(listing.quantity)}**\n"
+                    f"Giá: **{formatNumber(listing.price)}** {chillCoinEmoji}\n"
                     f"Người mua: {buyerText}\n"
                     f"Thời gian mua: **{soldAtText}**"
                 ),
@@ -134,6 +135,3 @@ class MyFarmShopPaginationView(discord.ui.View):
             return "-"
 
         return soldAt.strftime("%Y-%m-%d %H:%M")
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

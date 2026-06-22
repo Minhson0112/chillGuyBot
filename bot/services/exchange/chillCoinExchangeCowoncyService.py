@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.repository.chillCoinExchangeCowoncyHistoryRepository import ChillCoinExchangeCowoncyHistoryRepository
@@ -60,8 +61,8 @@ class ChillCoinExchangeCowoncyService:
                     "success": False,
                     "message": (
                         f"{self.getMemberDisplayName(receiverMember)} không đủ {chillCoinEmoji} để đổi. "
-                        f"Muốn đổi **{self.formatNumber(chillCoinAmount)}** {chillCoinEmoji}, "
-                        f"hiện có **{self.formatNumber(receiverMember.chill_coin)}** {chillCoinEmoji}."
+                        f"Muốn đổi **{formatNumber(chillCoinAmount)}** {chillCoinEmoji}, "
+                        f"hiện có **{formatNumber(receiverMember.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -175,8 +176,8 @@ class ChillCoinExchangeCowoncyService:
         chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
         return (
-            f"User này chỉ còn có thể đổi thêm **{self.formatNumber(remainingCowoncyAmount)}** {self.COWONCY_EMOJI} "
-            f"trong tuần này, tương đương **{self.formatNumber(remainingChillCoinAmount)}** {chillCoinEmoji}.\n"
+            f"User này chỉ còn có thể đổi thêm **{formatNumber(remainingCowoncyAmount)}** {self.COWONCY_EMOJI} "
+            f"trong tuần này, tương đương **{formatNumber(remainingChillCoinAmount)}** {chillCoinEmoji}.\n"
             f"Hãy quay lại vào **{nextExchangeAtText} (GMT+7)**."
         )
 
@@ -185,8 +186,8 @@ class ChillCoinExchangeCowoncyService:
         maxChillCoinAmount = self.WEEKLY_COWONCY_LIMIT // self.COWONCY_PER_CHILL_COIN
 
         return (
-            f"Mỗi tuần chỉ có thể đổi tối đa **{self.formatNumber(self.WEEKLY_COWONCY_LIMIT)}** {self.COWONCY_EMOJI}, "
-            f"tương đương **{self.formatNumber(maxChillCoinAmount)}** {chillCoinEmoji}."
+            f"Mỗi tuần chỉ có thể đổi tối đa **{formatNumber(self.WEEKLY_COWONCY_LIMIT)}** {self.COWONCY_EMOJI}, "
+            f"tương đương **{formatNumber(maxChillCoinAmount)}** {chillCoinEmoji}."
         )
 
     def getMemberDisplayName(self, member):
@@ -197,6 +198,3 @@ class ChillCoinExchangeCowoncyService:
             return member.global_name
 
         return member.username
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

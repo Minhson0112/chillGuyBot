@@ -1,3 +1,4 @@
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.helper.farmItemHelper import buildItemText
@@ -87,9 +88,6 @@ class FarmItemSellService:
                 "success": True,
                 "message": (
                     f"Bạn đã bán **{quantity}** {itemText} và nhận được "
-                    f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}."
+                    f"**{formatNumber(totalPrice)}** {chillCoinEmoji}."
                 ),
             }
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

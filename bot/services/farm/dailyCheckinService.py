@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.helper.farmItemHelper import buildItemText
@@ -108,12 +109,12 @@ class DailyCheckinService:
         chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
         rewardMessages = [
-            f"**{self.formatNumber(reward.reward_chill_coin)}** {chillCoinEmoji}",
+            f"**{formatNumber(reward.reward_chill_coin)}** {chillCoinEmoji}",
         ]
 
         if reward.rewardItem is not None and reward.reward_item_quantity > 0:
             rewardMessages.append(
-                f"**{self.formatNumber(reward.reward_item_quantity)}** {buildItemText(reward.rewardItem)}"
+                f"**{formatNumber(reward.reward_item_quantity)}** {buildItemText(reward.rewardItem)}"
             )
 
         return (
@@ -123,6 +124,3 @@ class DailyCheckinService:
 
     def getTodayDate(self):
         return datetime.now(self.GMT7).date()
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

@@ -1,3 +1,4 @@
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.config.farmPlot import (
@@ -80,8 +81,8 @@ class FarmPlotUnlockService:
                     "success": False,
                     "message": (
                         f"Mở ô đất thứ **{nextPlotCount}** cần "
-                        f"**{self.formatNumber(unlockPrice)}** {chillCoinEmoji}, "
-                        f"bạn chỉ có **{self.formatNumber(member.chill_coin)}** {chillCoinEmoji}."
+                        f"**{formatNumber(unlockPrice)}** {chillCoinEmoji}, "
+                        f"bạn chỉ có **{formatNumber(member.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -94,7 +95,7 @@ class FarmPlotUnlockService:
                 "success": True,
                 "message": (
                     f"Bạn đã mở ô đất thứ **{nextPlotCount}** với "
-                    f"**{self.formatNumber(unlockPrice)}** {chillCoinEmoji}."
+                    f"**{formatNumber(unlockPrice)}** {chillCoinEmoji}."
                 ),
             }
 
@@ -109,6 +110,3 @@ class FarmPlotUnlockService:
             return False
 
         return True
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

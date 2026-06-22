@@ -1,6 +1,7 @@
 import random
 from datetime import datetime, timedelta, timezone
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.cache.userDailyTaskCache import userDailyTaskCache, userDailyTaskLoadedCache
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
@@ -267,8 +268,8 @@ class DailyTaskService:
         )
 
         rewardText = (
-            f"**{self.formatNumber(task.reward_chill_coin)}** {chillCoinEmoji} "
-            f"+ **{self.formatNumber(task.reward_exp)}** {expEmoji}"
+            f"**{formatNumber(task.reward_chill_coin)}** {chillCoinEmoji} "
+            f"+ **{formatNumber(task.reward_exp)}** {expEmoji}"
         )
 
         return (
@@ -334,8 +335,8 @@ class DailyTaskService:
             )
 
         return (
-            f"{self.formatNumber(progressValue)}"
-            f"/{self.formatNumber(task.required_value)}"
+            f"{formatNumber(progressValue)}"
+            f"/{formatNumber(task.required_value)}"
         )
 
     def buildProgressBar(
@@ -356,6 +357,3 @@ class DailyTaskService:
 
     def getTodayDate(self):
         return datetime.now(self.GMT7).date()
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

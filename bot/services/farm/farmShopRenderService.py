@@ -4,6 +4,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.repository.shopItemRepository import ShopItemRepository
 from bot.services.assetImageService import assetImageService
@@ -179,7 +180,7 @@ class FarmShopRenderService:
 
         self.drawText(
             baseImage,
-            text=self.formatNumber(buyPrice),
+            text=formatNumber(buyPrice),
             x=textX,
             y=y - 2,
             fontSize=self.PRICE_FONT_SIZE,
@@ -309,8 +310,6 @@ class FarmShopRenderService:
 
         return page
 
-    def formatNumber(self, number: int):
-        return f"{number:,}"
 
     def truncateText(self, text: str, maxLength: int):
         if text is None:

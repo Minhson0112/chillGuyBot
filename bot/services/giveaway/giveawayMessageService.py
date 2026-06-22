@@ -6,6 +6,7 @@ from bot.config.decoration import FOOTER_DECORATION_IMG_URL
 from bot.config.emoji import CHILL_COIN, COWONCCY, JOIN_BUTTON, VND, WING_L, WING_R
 from bot.enums.giveawayStatus import GiveawayStatus
 from bot.enums.giveawayType import GiveawayType
+from bot.helper.numberFormatHelper import formatNumber
 from bot.repository.giveawayParticipantRepository import GiveawayParticipantRepository
 from bot.repository.giveawayRepository import GiveawayRepository
 from bot.services.discordTimestampService import discordTimestampService
@@ -57,7 +58,7 @@ class GiveawayMessageService:
         if giveaway.type == GiveawayType.CUSTOM.value:
             return giveaway.reward_text or "Custom"
 
-        return f"{rewardEmoji} **{self.formatNumber(rewardAmount)}** {rewardUnit}"
+        return f"{rewardEmoji} **{formatNumber(rewardAmount)}** {rewardUnit}"
 
     def resolveRewardEmoji(self, giveawayType: str):
         if giveawayType == GiveawayType.CHILL_COIN.value:
@@ -100,12 +101,6 @@ class GiveawayMessageService:
             return None
 
         return guild.icon.url
-
-    def formatNumber(self, number: int | None):
-        if number is None:
-            return "0"
-
-        return f"{number:,}"
 
     def resolveEmbedTimestamp(self, value):
         return discordTimestampService.normalizeDatetime(value)

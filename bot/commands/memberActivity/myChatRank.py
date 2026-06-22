@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from discord.ext import commands
 
 from bot.config.database import getDbSession
+from bot.helper.numberFormatHelper import formatNumber
 from bot.repository.memberDailyActivityRepository import MemberDailyActivityRepository
 
 
@@ -39,7 +40,7 @@ class MyChatRank(commands.Cog):
             )
             return
 
-        chatCount = self.formatNumber(rankData["level_chat_count"])
+        chatCount = formatNumber(int(rankData["level_chat_count"]))
         rank = rankData["rank"]
         totalRankedMemberCount = rankData["total_ranked_member_count"]
 
@@ -48,9 +49,6 @@ class MyChatRank(commands.Cog):
             f"Số tin nhắn hợp lệ: **{chatCount}**",
             mention_author=False,
         )
-
-    def formatNumber(self, value):
-        return f"{int(value):,}".replace(",", ".")
 
 
 async def setup(bot):

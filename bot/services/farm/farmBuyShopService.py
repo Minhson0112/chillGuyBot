@@ -1,3 +1,4 @@
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.helper.farmItemHelper import buildItemText
@@ -66,8 +67,8 @@ class FarmBuyShopService:
                     "success": False,
                     "message": (
                         f"Mua **{marketListing.quantity}** {itemText} cần "
-                        f"**{self.formatNumber(marketListing.price)}** {chillCoinEmoji}, "
-                        f"bạn chỉ có **{self.formatNumber(buyer.chill_coin)}** {chillCoinEmoji}."
+                        f"**{formatNumber(marketListing.price)}** {chillCoinEmoji}, "
+                        f"bạn chỉ có **{formatNumber(buyer.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -101,7 +102,7 @@ class FarmBuyShopService:
             message = (
                 f"Bạn đã mua **{marketListing.quantity}** {itemText} "
                 f"từ shop của **{self.getSellerDisplayName(seller)}** với "
-                f"**{self.formatNumber(marketListing.price)}** {chillCoinEmoji}."
+                f"**{formatNumber(marketListing.price)}** {chillCoinEmoji}."
             )
 
             if dailyTaskMessage is not None:
@@ -120,6 +121,3 @@ class FarmBuyShopService:
             return seller.global_name
 
         return seller.username
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

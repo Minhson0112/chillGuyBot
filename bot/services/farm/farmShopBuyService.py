@@ -1,3 +1,4 @@
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.helper.farmItemHelper import buildItemText
@@ -97,8 +98,8 @@ class FarmShopBuyService:
                     "success": False,
                     "message": (
                         f"Mua **{quantity}** {itemText} cần "
-                        f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}, "
-                        f"bạn chỉ có **{self.formatNumber(member.chill_coin)}** {chillCoinEmoji}."
+                        f"**{formatNumber(totalPrice)}** {chillCoinEmoji}, "
+                        f"bạn chỉ có **{formatNumber(member.chill_coin)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -119,7 +120,7 @@ class FarmShopBuyService:
                     "success": True,
                     "message": (
                         f"{animalBuyResult['message']} "
-                        f"Bạn đã trả **{self.formatNumber(totalPrice)}** {chillCoinEmoji}."
+                        f"Bạn đã trả **{formatNumber(totalPrice)}** {chillCoinEmoji}."
                     ),
                 }
 
@@ -143,7 +144,7 @@ class FarmShopBuyService:
                     "success": True,
                     "message": (
                         f"Bạn đã mua {itemText} với "
-                        f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}. "
+                        f"**{formatNumber(totalPrice)}** {chillCoinEmoji}. "
                         f"Độ bền: **{toolTemplate.max_durability}**. "
                         f"ID tool: **{userTool.id}**"
                     ),
@@ -163,10 +164,7 @@ class FarmShopBuyService:
                 "success": True,
                 "message": (
                     f"Bạn đã mua **{quantity}** {itemText} với "
-                    f"**{self.formatNumber(totalPrice)}** {chillCoinEmoji}. "
+                    f"**{formatNumber(totalPrice)}** {chillCoinEmoji}. "
                     f"ID kho: **{userInventory.id}**"
                 ),
             }
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

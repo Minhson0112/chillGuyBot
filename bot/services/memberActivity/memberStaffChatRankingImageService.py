@@ -2,6 +2,7 @@ from io import BytesIO
 
 from PIL import ImageDraw, ImageFont
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.services.assetImageService import assetImageService
 
 class MemberStaffChatRankingImageService:
@@ -42,7 +43,7 @@ class MemberStaffChatRankingImageService:
             displayName = await self.resolveMemberDisplayName(guild, member.user_id)
             displayName = self.truncateText(displayName, 24)
 
-            chatCount = self.formatNumber(member.level_chat_count)
+            chatCount = formatNumber(int(member.level_chat_count))
 
             nameBox = (
                 self.NAME_BOX_LEFT,
@@ -106,9 +107,6 @@ class MemberStaffChatRankingImageService:
             return f"{text[:maxLength - 3]}..."
 
         return text
-
-    def formatNumber(self, value):
-        return f"{int(value):,}".replace(",", ".")
 
     def getFont(self, fontSize):
         try:

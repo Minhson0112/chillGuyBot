@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.enums.giveawayType import GiveawayType
 from bot.repository.giveawayRepository import GiveawayRepository
@@ -121,6 +122,3 @@ class CreateGiveawayService:
             rewardData["rewardVnd"] = reward
 
         return rewardData
-
-    def formatNumber(self, number: int):
-        return f"{number:,}"

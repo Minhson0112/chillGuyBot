@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 
+from bot.helper.numberFormatHelper import formatNumber
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.services.farm.farmMarketSearchService import FarmMarketSearchService
 
@@ -98,13 +99,13 @@ class FindMarketItemView(discord.ui.View):
 
         embed.add_field(
             name="Số lượng",
-            value=f"**{self.formatNumber(result['quantity'])}**",
+            value=f"**{formatNumber(result['quantity'])}**",
             inline=True,
         )
 
         embed.add_field(
             name="Giá bán",
-            value=f"**{self.formatNumber(result['price'])}** {chillCoinEmoji}",
+            value=f"**{formatNumber(result['price'])}** {chillCoinEmoji}",
             inline=True,
         )
 
@@ -122,14 +123,12 @@ class FindMarketItemView(discord.ui.View):
 
         embed.add_field(
             name="Phí tìm kiếm",
-            value=f"**{self.formatNumber(result['searchCost'])}** {chillCoinEmoji}",
+            value=f"**{formatNumber(result['searchCost'])}** {chillCoinEmoji}",
             inline=True,
         )
 
         return embed
 
-    def formatNumber(self, number: int):
-        return f"{number:,}"
 
 
 class FindMarketItem(commands.Cog):
@@ -156,7 +155,7 @@ class FindMarketItem(commands.Cog):
                 title="Xác nhận tìm kiếm shop",
                 description=(
                     f"Có phải bạn muốn tìm món đồ: {findItemResult['itemText']} không?\n"
-                    f"Giá tìm kiếm: **{self.formatNumber(findItemResult['searchCost'])}** {chillCoinEmoji}\n\n"
+                    f"Giá tìm kiếm: **{formatNumber(findItemResult['searchCost'])}** {chillCoinEmoji}\n\n"
                     f"Nếu không có farm nào đang bán món này, bạn sẽ không mất phí."
                 ),
                 color=discord.Color.gold(),
@@ -180,8 +179,6 @@ class FindMarketItem(commands.Cog):
             print(f"Find market item error: {e}")
             await ctx.reply("Đã xảy ra lỗi khi tìm món đồ trong shop.")
 
-    def formatNumber(self, number: int):
-        return f"{number:,}"
 
 
 async def setup(bot):
