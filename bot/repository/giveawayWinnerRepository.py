@@ -1,7 +1,9 @@
 from datetime import datetime, timezone
 
+from bot.enums.giveawayStatus import GiveawayStatus
 from bot.enums.giveawayWinnerDisqualifiedReason import GiveawayWinnerDisqualifiedReason
 from bot.enums.giveawayWinnerStatus import GiveawayWinnerStatus
+from bot.models.giveaway import Giveaway
 from bot.models.giveawayWinner import GiveawayWinner
 
 
@@ -57,10 +59,16 @@ class GiveawayWinnerRepository:
 
         return {row[0] for row in rows}
 
-    def findAllCurrentWinners(self):
+    def findCurrentWinnersByGiveawayEndedAfter(self, endedAfter: datetime):
         return (
             self.session.query(GiveawayWinner)
+            .join(Giveaway, Giveaway.id == GiveawayWinner.giveaway_id)
             .filter(GiveawayWinner.current_slot_number.isnot(None))
+            .filter(
+                Giveaway.status == GiveawayStatus.ENDED.value,
+                Giveaway.ended_at.isnot(None),
+                Giveaway.ended_at >= endedAfter,
+            )
             .order_by(GiveawayWinner.giveaway_id.asc(), GiveawayWinner.current_slot_number.asc())
             .all()
         )

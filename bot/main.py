@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta, timezone
 
 import discord
 from discord import app_commands
@@ -81,6 +82,10 @@ async def on_ready():
         print(f"❌ Lỗi sync commands: {e}")
 
 async def registerPersistentViews():
+    rerollEndedAfter = datetime.now(timezone(timedelta(hours=7))).replace(
+        tzinfo=None,
+    ) - timedelta(days=1)
+
     with getDbSession() as dbSession:
         musicEventRepository = MusicEventRepository(dbSession)
         giveawayRepository = GiveawayRepository(dbSession)
@@ -88,7 +93,9 @@ async def registerPersistentViews():
         lottoEventRepository = LottoEventRepository(dbSession)
         musicEvents = musicEventRepository.findAll()
         giveaways = giveawayRepository.findActiveGiveawaysWithMessage()
-        currentWinners = giveawayWinnerRepository.findAllCurrentWinners()
+        currentWinners = giveawayWinnerRepository.findCurrentWinnersByGiveawayEndedAfter(
+            rerollEndedAfter,
+        )
         lottoEvents = lottoEventRepository.findActiveOpenEvents()
         winnersByGiveawayId = {}
 
