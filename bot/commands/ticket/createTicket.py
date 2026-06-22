@@ -7,8 +7,8 @@ from bot.config.decoration import TICKET_DECORATION_IMG_URL
 from bot.config.emoji import LOGO, SATURN, TYM_ARROW
 from bot.validation.guildValidation import chillStationOnly
 from bot.validation.isOwnerValidation import isOwner
-from bot.views.ticketCloseButtonView import TicketCloseButtonView
-from bot.views.ticketCreateButtonView import TicketCreateButtonView
+from bot.views.ticket.ticketCloseButtonView import TicketCloseButtonView
+from bot.views.ticket.ticketCreateButtonView import TicketCreateButtonView
 
 
 class CreateTicketCommand(commands.Cog):

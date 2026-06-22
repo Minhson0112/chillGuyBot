@@ -11,7 +11,7 @@ from bot.services.donate.monthlyDonatorRoleService import MonthlyDonatorRoleServ
 from bot.services.giveaway.createGiveawayService import CreateGiveawayService
 from bot.services.giveaway.giveawayMessageService import GiveawayMessageService
 from bot.services.giveaway.giveawaySchedulerService import giveawaySchedulerService
-from bot.views.giveawayJoinButtonView import GiveawayJoinButtonView
+from bot.views.giveaway.giveawayJoinButtonView import GiveawayJoinButtonView
 
 
 class MonthlyDonatorGiveawayService:

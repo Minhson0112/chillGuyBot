@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.views.bannerView import BannerView
+from bot.views.member.bannerView import BannerView
 
 
 class Banner(commands.Cog):

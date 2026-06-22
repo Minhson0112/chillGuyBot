@@ -16,9 +16,9 @@ from bot.services.autoResponder.autoResponderCacheService import AutoResponderCa
 from bot.services.wordle.wordleStartupService import WordleStartupService
 from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryStartupService
 from bot.services.assetImageService import assetImageService
-from bot.views.giveawayJoinButtonView import GiveawayJoinButtonView
-from bot.views.giveawayRerollView import GiveawayRerollView
-from bot.views.lottoBuyTicketView import LottoBuyTicketView
+from bot.views.giveaway.giveawayJoinButtonView import GiveawayJoinButtonView
+from bot.views.giveaway.giveawayRerollView import GiveawayRerollView
+from bot.views.lotto.lottoBuyTicketView import LottoBuyTicketView
 
 autoResponderCacheService = AutoResponderCacheService()
 anonymousMatchCacheService = AnonymousMatchCacheService()

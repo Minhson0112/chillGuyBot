@@ -7,7 +7,7 @@ from bot.services.giveaway.createGiveawayService import CreateGiveawayService
 from bot.services.giveaway.giveawayMessageService import GiveawayMessageService
 from bot.services.giveaway.giveawaySchedulerService import giveawaySchedulerService
 from bot.validation.guildValidation import guildOnly
-from bot.views.giveawayJoinButtonView import GiveawayJoinButtonView
+from bot.views.giveaway.giveawayJoinButtonView import GiveawayJoinButtonView
 from bot.enums.moderationActionType import ModerationActionType
 from bot.validation.modPermissionValidation import hasModerationPermission
 

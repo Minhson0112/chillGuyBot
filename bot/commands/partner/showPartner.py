@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from bot.config.roles import MOD_ROLE_IDS
 from bot.services.partner.showPartnerService import ShowPartnerService
-from bot.views.partnerListPaginationView import PartnerListPaginationView
+from bot.views.partner.partnerListPaginationView import PartnerListPaginationView
 
 
 class ShowPartnerCommand(commands.Cog):

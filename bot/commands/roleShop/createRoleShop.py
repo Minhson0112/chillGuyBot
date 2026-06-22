@@ -6,7 +6,7 @@ from bot.config.channel import SHOP_ROLE_CHANNEL_ID
 from bot.config.emoji import LOGO
 from bot.validation.guildValidation import guildOnly
 from bot.validation.isOwnerValidation import isOwner
-from bot.views.roleShopBuyButtonView import RoleShopBuyButtonView
+from bot.views.roleShop.roleShopBuyButtonView import RoleShopBuyButtonView
 
 
 class CreateRoleShopCommand(commands.Cog):

@@ -274,7 +274,7 @@ class GiveawayDrawService:
             print(f"Giveaway draw skipped http error: giveawayId={giveaway.id}, error={error}")
             return
 
-        from bot.views.giveawayRerollView import GiveawayRerollView
+        from bot.views.giveaway.giveawayRerollView import GiveawayRerollView
 
         rerollView = None
 

@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.views.avatarView import AvatarView
+from bot.views.member.avatarView import AvatarView
 
 
 class Avatar(commands.Cog):

@@ -5,7 +5,7 @@ import discord
 from bot.config.emoji import WELCOME
 from bot.config.roles import ADMIN_ROLE_ID, MODERATOR_ROLE_ID, OWNER_ROLE_ID
 from bot.enums.ticketType import TicketType
-from bot.views.ticketCloseButtonView import TicketCloseButtonView
+from bot.views.ticket.ticketCloseButtonView import TicketCloseButtonView
 
 
 class TicketChannelService:

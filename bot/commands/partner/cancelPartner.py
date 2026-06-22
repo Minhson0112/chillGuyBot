@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from bot.config.roles import MOD_ROLE_IDS
 from bot.services.partner.cancelPartnerService import CancelPartnerService
-from bot.views.partnerCancelView import PartnerCancelConfirmView
+from bot.views.partner.partnerCancelView import PartnerCancelConfirmView
 
 
 class CancelPartnerCommand(commands.Cog):

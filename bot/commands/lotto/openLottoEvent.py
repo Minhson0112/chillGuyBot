@@ -8,7 +8,7 @@ from bot.config.roles import MOD_ROLE_IDS
 from bot.enums.lottoEventStatus import LottoEventStatus
 from bot.repository.lottoEventRepository import LottoEventRepository
 from bot.services.lotto.lottoEventMessageService import LottoEventMessageService
-from bot.views.lottoBuyTicketView import LottoBuyTicketView
+from bot.views.lotto.lottoBuyTicketView import LottoBuyTicketView
 
 
 class OpenLottoEventCommand(commands.Cog):

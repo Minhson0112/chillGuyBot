@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 from bot.services.server.serverInviteListService import ServerInviteListService
-from bot.views.serverInvitePaginationView import ServerInvitePaginationView
+from bot.views.server.serverInvitePaginationView import ServerInvitePaginationView
 
 
 class ListInvitesCommand(commands.Cog):

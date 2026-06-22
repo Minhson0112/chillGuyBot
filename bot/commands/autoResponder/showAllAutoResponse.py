@@ -5,7 +5,7 @@ from discord.ext import commands
 from bot.config.userId import MOD_ADMIN_USER_IDS
 from bot.services.autoResponder.showAllAutoResponseService import ShowAllAutoResponseService
 from bot.validation.guildValidation import chillStationOnly
-from bot.views.autoResponderPaginationView import AutoResponderPaginationView
+from bot.views.autoResponder.autoResponderPaginationView import AutoResponderPaginationView
 
 
 class ShowAllAutoResponse(commands.Cog):

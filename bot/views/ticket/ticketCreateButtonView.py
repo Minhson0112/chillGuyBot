@@ -1,7 +1,7 @@
 import discord
 
 from bot.config.emoji import TICK
-from bot.views.ticketTypeSelectView import TicketTypeSelectView
+from bot.views.ticket.ticketTypeSelectView import TicketTypeSelectView
 
 
 TICKET_CREATE_BUTTON_CUSTOM_ID = "ticket_create_button"

@@ -7,7 +7,7 @@ from bot.config.roles import HOMIES_ROLE_ID
 from bot.config.emoji import LOGO
 from bot.validation.guildValidation import guildOnly
 from bot.validation.isOwnerValidation import isOwner
-from bot.views.homiesRoleButtonView import HomiesRoleButtonView
+from bot.views.homies.homiesRoleButtonView import HomiesRoleButtonView
 
 
 class SetHomiesCommand(commands.Cog):
