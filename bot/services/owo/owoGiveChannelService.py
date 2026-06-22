@@ -1,5 +1,6 @@
 import discord
 
+from bot.helper.discordResolverHelper import resolveGuildMember
 from bot.config.emoji import LOGO
 from bot.config.userId import OWNER_ID, TREASURER_MEMBER_ID_LIST
 from bot.enums.memberPaymentTargetType import MemberPaymentTargetType
@@ -28,7 +29,7 @@ class OwoGiveChannelService:
         if receiverUserId not in TREASURER_MEMBER_ID_LIST:
             return False
 
-        senderMember = await self.resolveGuildMember(
+        senderMember = await resolveGuildMember(
             guild=message.guild,
             userId=senderUserId,
         )
@@ -36,7 +37,7 @@ class OwoGiveChannelService:
         if senderMember is None:
             return False
 
-        receiverMember = await self.resolveGuildMember(
+        receiverMember = await resolveGuildMember(
             guild=message.guild,
             userId=receiverUserId,
         )
@@ -70,7 +71,7 @@ class OwoGiveChannelService:
         if receiverUserId != OWNER_ID:
             return False
 
-        senderMember = await self.resolveGuildMember(
+        senderMember = await resolveGuildMember(
             guild=message.guild,
             userId=senderUserId,
         )
@@ -78,7 +79,7 @@ class OwoGiveChannelService:
         if senderMember is None:
             return False
 
-        receiverMember = await self.resolveGuildMember(
+        receiverMember = await resolveGuildMember(
             guild=message.guild,
             userId=receiverUserId,
         )
@@ -118,7 +119,7 @@ class OwoGiveChannelService:
         if receiverUserId != OWNER_ID and receiverUserId not in TREASURER_MEMBER_ID_LIST:
             return False
 
-        senderMember = await self.resolveGuildMember(
+        senderMember = await resolveGuildMember(
             guild=message.guild,
             userId=senderUserId,
         )
@@ -169,23 +170,6 @@ class OwoGiveChannelService:
         )
 
         return True
-
-    async def resolveGuildMember(
-        self,
-        guild: discord.Guild,
-        userId: int,
-    ):
-        guildMember = guild.get_member(userId)
-
-        if guildMember is not None:
-            return guildMember
-
-        try:
-            return await guild.fetch_member(userId)
-        except discord.NotFound:
-            return None
-        except discord.HTTPException:
-            return None
 
     def buildThankYouMessage(
         self,

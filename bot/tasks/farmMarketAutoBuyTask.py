@@ -3,6 +3,7 @@ from apscheduler.triggers.cron import CronTrigger
 import discord
 from discord.ext import commands
 
+from bot.helper.discordResolverHelper import resolveChannel
 from bot.config.channel import FARM_NOTIFICATION_CHANNEL_ID
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.services.farm.farmMarketAutoBuyService import FarmMarketAutoBuyService
@@ -52,7 +53,7 @@ class FarmMarketAutoBuyTask(commands.Cog):
         if len(notificationSummaries) == 0:
             return
 
-        notificationChannel = await self.resolveNotificationChannel()
+        notificationChannel = await resolveChannel(self.bot, FARM_NOTIFICATION_CHANNEL_ID, discord.TextChannel)
 
         if notificationChannel is None:
             return
@@ -83,27 +84,3 @@ class FarmMarketAutoBuyTask(commands.Cog):
             f"{chr(10).join(itemLines)}\n"
             f"Tổng tiền nhận được: **{notificationSummary['totalPaid']:,}** {chillCoinEmoji}."
         )
-
-    async def resolveNotificationChannel(self):
-        channel = self.bot.get_channel(FARM_NOTIFICATION_CHANNEL_ID)
-
-        if channel is not None:
-            return channel
-
-        try:
-            channel = await self.bot.fetch_channel(FARM_NOTIFICATION_CHANNEL_ID)
-        except discord.NotFound:
-            return None
-        except discord.Forbidden:
-            return None
-        except discord.HTTPException:
-            return None
-
-        if not isinstance(channel, discord.TextChannel):
-            return None
-
-        return channel
-
-
-async def setup(bot):
-    await bot.add_cog(FarmMarketAutoBuyTask(bot))

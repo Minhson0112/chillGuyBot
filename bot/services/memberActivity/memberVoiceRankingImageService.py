@@ -2,6 +2,7 @@ from io import BytesIO
 
 from PIL import ImageDraw, ImageFont
 
+from bot.helper.discordResolverHelper import resolveMemberDisplayName
 from bot.helper.timeFormatHelper import formatHoursMinutesSeconds
 from bot.services.assetImageService import assetImageService
 
@@ -41,7 +42,7 @@ class MemberVoiceRankingImageService:
         for index, member in enumerate(topMembers):
             rowCenterY = self.ROW_CENTER_Y_LIST[index]
 
-            displayName = await self.resolveMemberDisplayName(guild, member.user_id)
+            displayName = await resolveMemberDisplayName(self.bot, guild, member.user_id)
             displayName = self.truncateText(displayName, 24)
 
             voiceTime = formatHoursMinutesSeconds(int(member.voice_seconds))
@@ -82,26 +83,6 @@ class MemberVoiceRankingImageService:
         buffer.seek(0)
 
         return buffer
-
-    async def resolveMemberDisplayName(self, guild, userId: int):
-        if guild is not None:
-            guildMember = guild.get_member(userId)
-
-            if guildMember is not None:
-                return guildMember.display_name
-
-        user = self.bot.get_user(userId)
-
-        if user is None:
-            try:
-                user = await self.bot.fetch_user(userId)
-            except Exception:
-                user = None
-
-        if user is not None:
-            return user.display_name
-
-        return str(userId)
 
     def truncateText(self, text, maxLength):
         if len(text) > maxLength:

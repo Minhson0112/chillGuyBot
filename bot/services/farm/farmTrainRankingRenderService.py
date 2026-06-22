@@ -3,6 +3,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from bot.helper.discordResolverHelper import resolveMemberDisplayName
 from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.repository.farmTrainEventHistoryRepository import FarmTrainEventHistoryRepository
@@ -69,7 +70,8 @@ class FarmTrainRankingRenderService:
                 })
 
         for rankingRow in rankingRows:
-            rankingRow["memberDisplayName"] = await self.resolveMemberDisplayName(
+            rankingRow["memberDisplayName"] = await resolveMemberDisplayName(
+                self.bot,
                 guild=guild,
                 userId=rankingRow["userId"],
             )
@@ -147,30 +149,6 @@ class FarmTrainRankingRenderService:
             maxWidth=self.COUNT_MAX_WIDTH,
             fontSize=self.COUNT_FONT_SIZE,
         )
-
-    async def resolveMemberDisplayName(
-        self,
-        guild,
-        userId: int,
-    ):
-        if guild is not None:
-            guildMember = guild.get_member(userId)
-
-            if guildMember is not None:
-                return guildMember.display_name
-
-        user = self.bot.get_user(userId)
-
-        if user is None:
-            try:
-                user = await self.bot.fetch_user(userId)
-            except Exception:
-                user = None
-
-        if user is not None:
-            return user.display_name
-
-        return str(userId)
 
     def drawEllipsisTextCenterY(
         self,

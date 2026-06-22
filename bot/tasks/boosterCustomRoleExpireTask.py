@@ -5,6 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from discord.ext import commands
 
+from bot.helper.discordResolverHelper import resolveGuildMember
 from bot.config.config import CHILL_STATION_GUILD_ID
 from bot.config.database import getDbSession
 from bot.config.roles import DEFAULT_BOOSTER_ROLE_ID
@@ -45,7 +46,7 @@ class BoosterCustomRoleExpireTask(commands.Cog):
             activeTargetUserIds = self.findActiveTargetUserIds()
 
             for userId in activeTargetUserIds:
-                member = await self.resolveGuildMember(guild, userId)
+                member = await resolveGuildMember(guild, userId)
 
                 if member is None:
                     continue
@@ -65,19 +66,6 @@ class BoosterCustomRoleExpireTask(commands.Cog):
         with getDbSession() as session:
             boosterCustomRoleRepository = BoosterCustomRoleRepository(session)
             return boosterCustomRoleRepository.findActiveTargetUserIds()
-
-    async def resolveGuildMember(self, guild: discord.Guild, userId: int):
-        member = guild.get_member(userId)
-
-        if member is not None:
-            return member
-
-        try:
-            return await guild.fetch_member(userId)
-        except discord.NotFound:
-            return None
-        except discord.HTTPException:
-            return None
 
     def hasExpiredBooster(self, member: discord.Member):
         return (

@@ -3,6 +3,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from bot.helper.discordResolverHelper import resolveMemberDisplayName
 from bot.config.database import getDbSession
 from bot.repository.fishingHistoryRepository import FishingHistoryRepository
 from bot.services.assetImageService import assetImageService
@@ -64,7 +65,8 @@ class FarmFishingRankingRenderService:
             rankingRows = []
 
             for fishingHistory in rankings:
-                memberDisplayName = await self.resolveMemberDisplayName(
+                memberDisplayName = await resolveMemberDisplayName(
+                    self.bot,
                     guild=guild,
                     userId=fishingHistory.user_id,
                 )
@@ -189,30 +191,6 @@ class FarmFishingRankingRenderService:
             maxWidth=self.WEIGHT_MAX_WIDTH,
             fontSize=self.WEIGHT_FONT_SIZE,
         )
-
-    async def resolveMemberDisplayName(
-        self,
-        guild,
-        userId: int,
-    ):
-        if guild is not None:
-            guildMember = guild.get_member(userId)
-
-            if guildMember is not None:
-                return guildMember.display_name
-
-        user = self.bot.get_user(userId)
-
-        if user is None:
-            try:
-                user = await self.bot.fetch_user(userId)
-            except Exception:
-                user = None
-
-        if user is not None:
-            return user.display_name
-
-        return str(userId)
 
     def drawEllipsisText(
         self,

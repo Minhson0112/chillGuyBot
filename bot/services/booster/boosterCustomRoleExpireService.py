@@ -2,6 +2,7 @@ from datetime import datetime
 
 import discord
 
+from bot.helper.discordResolverHelper import resolveChannel
 from bot.config.channel import BOT_NOTIFICATION_CHANNEL_ID, TICKET_CHANNEL_ID
 from bot.config.database import getDbSession
 from bot.config.emoji import BOOSTER
@@ -18,7 +19,7 @@ class BoosterCustomRoleExpireService:
         if len(activeCustomRoles) == 0:
             return
 
-        notificationChannel = await self.resolveNotificationChannel(bot)
+        notificationChannel = await resolveChannel(bot, BOT_NOTIFICATION_CHANNEL_ID, discord.TextChannel)
 
         for customRole in activeCustomRoles:
             role = member.guild.get_role(customRole["roleId"])
@@ -90,20 +91,6 @@ class BoosterCustomRoleExpireService:
             return {
                 "success": True,
             }
-
-    async def resolveNotificationChannel(self, bot):
-        channel = bot.get_channel(BOT_NOTIFICATION_CHANNEL_ID)
-
-        if channel is None:
-            try:
-                channel = await bot.fetch_channel(BOT_NOTIFICATION_CHANNEL_ID)
-            except discord.HTTPException:
-                return None
-
-        if not isinstance(channel, discord.TextChannel):
-            return None
-
-        return channel
 
     def buildBoosterExpiredEmbed(self, role: discord.Role):
         return discord.Embed(

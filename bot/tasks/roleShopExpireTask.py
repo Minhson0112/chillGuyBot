@@ -3,6 +3,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from discord.ext import commands
 
+from bot.helper.discordResolverHelper import resolveChannel
+from bot.helper.discordResolverHelper import resolveGuildMember
 from bot.config.channel import BOT_NOTIFICATION_CHANNEL_ID, SHOP_ROLE_CHANNEL_ID
 from bot.services.roleShop.roleShopExpireService import RoleShopExpireService
 
@@ -33,7 +35,7 @@ class RoleShopExpireTask(commands.Cog):
         if len(expiredPurchases) == 0:
             return
 
-        notificationChannel = await self.resolveNotificationChannel()
+        notificationChannel = await resolveChannel(self.bot, BOT_NOTIFICATION_CHANNEL_ID, discord.TextChannel)
 
         if notificationChannel is None:
             return
@@ -51,7 +53,7 @@ class RoleShopExpireTask(commands.Cog):
     ):
         guild = notificationChannel.guild
 
-        member = await self.resolveGuildMember(
+        member = await resolveGuildMember(
             guild=guild,
             userId=expiredPurchase["userId"],
         )
@@ -130,43 +132,6 @@ class RoleShopExpireTask(commands.Cog):
                 everyone=False,
             ),
         )
-
-    async def resolveNotificationChannel(self):
-        channel = self.bot.get_channel(BOT_NOTIFICATION_CHANNEL_ID)
-
-        if channel is not None:
-            return channel
-
-        try:
-            channel = await self.bot.fetch_channel(BOT_NOTIFICATION_CHANNEL_ID)
-        except discord.NotFound:
-            return None
-        except discord.Forbidden:
-            return None
-        except discord.HTTPException:
-            return None
-
-        if not isinstance(channel, discord.TextChannel):
-            return None
-
-        return channel
-
-    async def resolveGuildMember(
-        self,
-        guild: discord.Guild,
-        userId: int,
-    ):
-        member = guild.get_member(userId)
-
-        if member is not None:
-            return member
-
-        try:
-            return await guild.fetch_member(userId)
-        except discord.NotFound:
-            return None
-        except discord.HTTPException:
-            return None
 
     def buildRoleExpiredEmbed(
         self,
