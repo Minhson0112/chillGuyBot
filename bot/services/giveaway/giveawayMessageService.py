@@ -9,7 +9,11 @@ from bot.enums.giveawayType import GiveawayType
 from bot.helper.numberFormatHelper import formatNumber
 from bot.repository.giveawayParticipantRepository import GiveawayParticipantRepository
 from bot.repository.giveawayRepository import GiveawayRepository
-from bot.services.discordTimestampService import discordTimestampService
+from bot.helper.discordTimestampHelper import (
+    formatRelativeTime,
+    formatShortTime,
+    normalizeDatetime,
+)
 
 
 class GiveawayMessageService:
@@ -29,7 +33,8 @@ class GiveawayMessageService:
             description=(
                 f"- Tổ chức bởi: <@{giveaway.created_by_user_id}>\n"
                 f"- Phần thưởng: {self.buildRewardText(giveaway)}\n"
-                f"- Quay thưởng⏰: {discordTimestampService.formatShortTime(giveaway.draw_at)}, {discordTimestampService.formatRelativeTime(giveaway.draw_at)}\n"
+                f"- Quay thưởng⏰: {formatShortTime(giveaway.draw_at)}, "
+                f"{formatRelativeTime(giveaway.draw_at)}\n"
                 f"- Số người tham gia: **{participantCount}**"
             ),
             color=discord.Color.gold(),
@@ -103,7 +108,7 @@ class GiveawayMessageService:
         return guild.icon.url
 
     def resolveEmbedTimestamp(self, value):
-        return discordTimestampService.normalizeDatetime(value)
+        return normalizeDatetime(value)
 
     def buildGiveawayEmbedById(self, giveawayId: int, guild: discord.Guild):
         with getDbSession() as session:

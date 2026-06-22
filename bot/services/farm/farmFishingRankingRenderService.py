@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 from bot.helper.discordResolverHelper import resolveMemberDisplayName
 from bot.config.database import getDbSession
 from bot.repository.fishingHistoryRepository import FishingHistoryRepository
-from bot.services.assetImageService import assetImageService
+from bot.services.asset.assetImageService import assetImageService
 
 
 class FarmFishingRankingRenderService:

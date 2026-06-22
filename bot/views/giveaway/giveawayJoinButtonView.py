@@ -5,7 +5,7 @@ import math
 import discord
 
 from bot.config.emoji import JOIN_BUTTON
-from bot.services.discordTimestampService import discordTimestampService
+from bot.helper.discordTimestampHelper import formatShortDateTime
 from bot.services.giveaway.giveawayMessageService import GiveawayMessageService
 
 
@@ -160,7 +160,7 @@ class GiveawayParticipantPaginationView(discord.ui.View):
         if joinedAt.tzinfo is None:
             joinedAt = joinedAt.replace(tzinfo=timezone.utc)
 
-        joinedAtText = discordTimestampService.formatShortDateTime(joinedAt)
+        joinedAtText = formatShortDateTime(joinedAt)
 
         return f"- <@{participant['userId']}> tham gia lúc {joinedAtText}"
 

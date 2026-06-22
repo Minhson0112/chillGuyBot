@@ -15,7 +15,7 @@ from bot.repository.farmTrainEventRepository import FarmTrainEventRepository
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
 from bot.repository.farmToolEquipmentRepository import FarmToolEquipmentRepository
-from bot.services.assetImageService import assetImageService
+from bot.services.asset.assetImageService import assetImageService
 
 
 class FarmRenderService:

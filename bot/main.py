@@ -15,7 +15,7 @@ from bot.services.anonymousMatch.anonymousMatchCacheService import AnonymousMatc
 from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
 from bot.services.wordle.wordleStartupService import WordleStartupService
 from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryStartupService
-from bot.services.assetImageService import assetImageService
+from bot.services.asset.assetImageService import assetImageService
 from bot.views.giveaway.giveawayJoinButtonView import GiveawayJoinButtonView
 from bot.views.giveaway.giveawayRerollView import GiveawayRerollView
 from bot.views.lotto.lottoBuyTicketView import LottoBuyTicketView

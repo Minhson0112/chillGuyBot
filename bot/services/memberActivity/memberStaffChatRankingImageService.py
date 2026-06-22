@@ -4,7 +4,7 @@ from PIL import ImageDraw, ImageFont
 
 from bot.helper.discordResolverHelper import resolveMemberDisplayName
 from bot.helper.numberFormatHelper import formatNumber
-from bot.services.assetImageService import assetImageService
+from bot.services.asset.assetImageService import assetImageService
 
 class MemberStaffChatRankingImageService:
     FONT_PATH = "bot/assets/fonts/arial.ttf"

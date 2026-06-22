@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.repository.shopItemRepository import ShopItemRepository
-from bot.services.assetImageService import assetImageService
+from bot.services.asset.assetImageService import assetImageService
 
 
 class FarmShopRenderService:

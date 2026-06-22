@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from bot.config.database import getDbSession
 from bot.helper.timeFormatHelper import formatCompactDuration
 from bot.repository.foodRecipeRepository import FoodRecipeRepository
-from bot.services.assetImageService import assetImageService
+from bot.services.asset.assetImageService import assetImageService
 
 
 class FarmRecipeRenderService:

@@ -7,7 +7,7 @@ from bot.helper.discordResolverHelper import resolveMemberDisplayName
 from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.repository.farmTrainEventHistoryRepository import FarmTrainEventHistoryRepository
-from bot.services.assetImageService import assetImageService
+from bot.services.asset.assetImageService import assetImageService
 
 
 class FarmTrainRankingRenderService:

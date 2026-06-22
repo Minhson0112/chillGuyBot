@@ -4,7 +4,7 @@ from PIL import ImageDraw, ImageFont
 
 from bot.helper.discordResolverHelper import resolveMemberDisplayName
 from bot.helper.timeFormatHelper import formatHoursMinutesSeconds
-from bot.services.assetImageService import assetImageService
+from bot.services.asset.assetImageService import assetImageService
 
 
 class MemberVoiceRankingImageService:

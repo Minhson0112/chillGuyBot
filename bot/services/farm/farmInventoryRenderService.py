@@ -9,7 +9,7 @@ from bot.config.database import getDbSession
 from bot.repository.userInventoryRepository import UserInventoryRepository
 from bot.repository.userToolRepository import UserToolRepository
 from bot.enums.toolStatus import ToolStatus
-from bot.services.assetImageService import assetImageService
+from bot.services.asset.assetImageService import assetImageService
 
 
 class FarmInventoryRenderService:
