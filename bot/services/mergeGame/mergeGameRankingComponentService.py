@@ -5,6 +5,7 @@ from discord.http import Route
 from bot.config.database import getDbSession
 from bot.config.emoji import SATURN, SUN
 from bot.enums.discordComponentType import DiscordComponentType
+from bot.helper.timeFormatHelper import formatMillisecondsMinutesSeconds
 from bot.repository.mergeGamePlayHistoryRepository import MergeGamePlayHistoryRepository
 
 
@@ -183,7 +184,7 @@ class MergeGameRankingComponentService:
         displayName = self.resolveDisplayName(guild, topMember)
         avatarUrl = self.resolveAvatarUrl(guild, topMember.user_id)
         score = self.formatNumber(topMember.best_score)
-        sunTime = self.formatSunTime(topMember.fastest_sun_time)
+        sunTime = formatMillisecondsMinutesSeconds(topMember.fastest_sun_time)
 
         return {
             "type": DiscordComponentType.SECTION,
@@ -239,16 +240,6 @@ class MergeGameRankingComponentService:
 
     def formatNumber(self, value):
         return f"{int(value):,}".replace(",", ".")
-
-    def formatSunTime(self, value):
-        if value is None:
-            return "--:--"
-
-        totalSeconds = int(value) // 1000
-        minutes = totalSeconds // 60
-        seconds = totalSeconds % 60
-
-        return f"{minutes:02d}:{seconds:02d}"
 
     def buildEmptyMessage(self, rankingType: str):
         if rankingType == self.RANKING_TYPE_SUN:

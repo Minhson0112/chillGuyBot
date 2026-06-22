@@ -4,6 +4,7 @@ import discord
 
 from bot.config.database import getDbSession
 from bot.config.emoji import SATURN, SUN
+from bot.helper.timeFormatHelper import formatMillisecondsMinutesSeconds
 from bot.repository.mergeGamePlayHistoryRepository import MergeGamePlayHistoryRepository
 
 
@@ -39,7 +40,7 @@ class MyMergeGameService:
 
     def buildMemberStatsEmbed(self, member, memberStats, year: int, month: int):
         bestScore = self.formatOptionalNumber(memberStats.best_score)
-        fastestSunTime = self.formatSunTime(memberStats.fastest_sun_time)
+        fastestSunTime = formatMillisecondsMinutesSeconds(memberStats.fastest_sun_time)
 
         embed = discord.Embed(
             title=f"Mergeverse của {member.display_name} - {month:02d}/{year}",
@@ -70,13 +71,3 @@ class MyMergeGameService:
             return "--"
 
         return self.formatNumber(value)
-
-    def formatSunTime(self, value):
-        if value is None:
-            return "--:--"
-
-        totalSeconds = int(value) // 1000
-        minutes = totalSeconds // 60
-        seconds = totalSeconds % 60
-
-        return f"{minutes:02d}:{seconds:02d}"

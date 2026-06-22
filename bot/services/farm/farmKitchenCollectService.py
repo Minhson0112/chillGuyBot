@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmKitchenRepository import FarmKitchenRepository
 from bot.repository.farmRepository import FarmRepository
@@ -57,7 +58,7 @@ class FarmKitchenCollectService:
 
                 return {
                     "success": False,
-                    "message": f"Món ăn chưa nấu xong. Còn **{self.formatRemainingTime(remainingSeconds)}**.",
+                    "message": f"Món ăn chưa nấu xong. Còn **{formatMinutesSeconds(remainingSeconds)}**.",
                 }
 
             resultQuantity = recipe.result_quantity * farmKitchen.cooking_quantity
@@ -77,9 +78,3 @@ class FarmKitchenCollectService:
                 "success": True,
                 "message": f"Bạn đã nhận **{resultQuantity}** {buildItemText(resultItem)}.",
             }
-
-    def formatRemainingTime(self, remainingSeconds: int):
-        minutes = remainingSeconds // 60
-        seconds = remainingSeconds % 60
-
-        return f"{minutes}:{seconds:02d}"

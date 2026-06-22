@@ -5,6 +5,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatCompactDuration
 from bot.repository.foodRecipeRepository import FoodRecipeRepository
 from bot.services.assetImageService import assetImageService
 
@@ -200,7 +201,7 @@ class FarmRecipeRenderService:
             font=font,
             priceText=self.formatPrice(resultItem.sell_price),
             levelText=str(recipe.required_farm_level),
-            timeText=self.formatCookingTime(recipe.cooking_seconds),
+            timeText=formatCompactDuration(recipe.cooking_seconds),
         )
 
         x = self.INFO_RIGHT_X - infoWidth
@@ -250,7 +251,7 @@ class FarmRecipeRenderService:
 
         self.drawInlineText(
             draw=draw,
-            text=self.formatCookingTime(recipe.cooking_seconds),
+            text=formatCompactDuration(recipe.cooking_seconds),
             x=x,
             y=y,
             font=font,
@@ -451,18 +452,6 @@ class FarmRecipeRenderService:
             return "-"
 
         return f"{price:,}"
-
-    def formatCookingTime(self, cookingSeconds: int):
-        minutes = cookingSeconds // 60
-        seconds = cookingSeconds % 60
-
-        if minutes <= 0:
-            return f"{seconds}s"
-
-        if seconds <= 0:
-            return f"{minutes}m"
-
-        return f"{minutes}m{seconds:02d}s"
 
     def convertImageToBuffer(self, image: Image.Image):
         buffer = BytesIO()

@@ -5,6 +5,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.config.farmLevel import FARM_MAX_LEVEL, FARM_LEVEL_REQUIRED_EXP
 from bot.helper.farmItemHelper import getItemEmoji
@@ -263,7 +264,7 @@ class FarmRenderService:
         if remainingSeconds <= 0:
             return "Có thể thu hoạch"
 
-        return self.formatRemainingTime(remainingSeconds)
+        return formatMinutesSeconds(remainingSeconds)
 
     def buildChickenCoopEmbedData(self, chickenCoop):
         if chickenCoop is None:
@@ -294,7 +295,7 @@ class FarmRenderService:
         if remainingSeconds <= 0:
             return "Đang đói"
 
-        return f"Chưa đói - còn {self.formatRemainingTime(remainingSeconds)}"
+        return f"Chưa đói - còn {formatMinutesSeconds(remainingSeconds)}"
 
     def buildEggCollectText(self, chickenCoop):
         if chickenCoop.last_collected_egg_at is None:
@@ -307,7 +308,7 @@ class FarmRenderService:
         if remainingSeconds <= 0:
             return "Có thể lấy"
 
-        return f"Còn {self.formatRemainingTime(remainingSeconds)}"
+        return f"Còn {formatMinutesSeconds(remainingSeconds)}"
 
     def buildCowShedEmbedData(self, cowShed):
         if cowShed is None:
@@ -338,7 +339,7 @@ class FarmRenderService:
         if remainingSeconds <= 0:
             return "Đang đói"
 
-        return f"Chưa đói - còn {self.formatRemainingTime(remainingSeconds)}"
+        return f"Chưa đói - còn {formatMinutesSeconds(remainingSeconds)}"
 
     def buildMilkCollectText(self, cowShed):
         if cowShed.last_collected_milk_at is None:
@@ -351,13 +352,7 @@ class FarmRenderService:
         if remainingSeconds <= 0:
             return "Có thể vắt"
 
-        return f"Còn {self.formatRemainingTime(remainingSeconds)}"
-
-    def formatRemainingTime(self, remainingSeconds: int):
-        minutes = remainingSeconds // 60
-        seconds = remainingSeconds % 60
-
-        return f"{minutes}:{seconds:02d}"
+        return f"Còn {formatMinutesSeconds(remainingSeconds)}"
 
     def resolveLandImageKey(self, cropArea):
         if cropArea is not None and cropArea.is_dry:
@@ -483,7 +478,7 @@ class FarmRenderService:
         if remainingSeconds <= 0:
             return "Có thể nhận món"
 
-        return self.formatRemainingTime(remainingSeconds)
+        return formatMinutesSeconds(remainingSeconds)
 
     def renderFarmStatusInfo(self, baseImage: Image.Image, farm):
         self.renderChillCoinInfo(baseImage, farm)

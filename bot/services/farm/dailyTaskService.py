@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from bot.cache.userDailyTaskCache import userDailyTaskCache, userDailyTaskLoadedCache
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.helper.timeFormatHelper import formatCompactDuration
 from bot.repository.dailyTaskMasterRepository import DailyTaskMasterRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.memberRepository import MemberRepository
@@ -328,8 +329,8 @@ class DailyTaskService:
     ):
         if task.task_type == self.TASK_TYPE_VOICE_TIME:
             return (
-                f"{self.formatDuration(progressValue)}"
-                f"/{self.formatDuration(task.required_value)}"
+                f"{formatCompactDuration(progressValue)}"
+                f"/{formatCompactDuration(task.required_value)}"
             )
 
         return (
@@ -352,18 +353,6 @@ class DailyTaskService:
         emptyBlock = totalBlock - filledBlock
 
         return "█" * filledBlock + "░" * emptyBlock
-
-    def formatDuration(self, seconds: int):
-        minutes = seconds // 60
-        remainSeconds = seconds % 60
-
-        if minutes <= 0:
-            return f"{remainSeconds}s"
-
-        if remainSeconds <= 0:
-            return f"{minutes}m"
-
-        return f"{minutes}m{remainSeconds:02d}s"
 
     def getTodayDate(self):
         return datetime.now(self.GMT7).date()

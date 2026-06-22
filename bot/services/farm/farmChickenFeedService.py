@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmChickenCoopRepository import FarmChickenCoopRepository
 from bot.repository.farmRepository import FarmRepository
@@ -49,7 +50,7 @@ class FarmChickenFeedService:
 
                 return {
                     "success": False,
-                    "message": f"Gà chưa đói. Có thể cho ăn sau **{self.formatRemainingTime(remainingSeconds)}**.",
+                    "message": f"Gà chưa đói. Có thể cho ăn sau **{formatMinutesSeconds(remainingSeconds)}**.",
                 }
 
             wheatItem = itemRepository.findByCode(self.WHEAT_ITEM_CODE)
@@ -111,9 +112,3 @@ class FarmChickenFeedService:
         remainingSeconds = int((hungryAt - now).total_seconds())
 
         return max(remainingSeconds, 0)
-
-    def formatRemainingTime(self, remainingSeconds: int):
-        minutes = remainingSeconds // 60
-        seconds = remainingSeconds % 60
-
-        return f"{minutes}:{seconds:02d}"

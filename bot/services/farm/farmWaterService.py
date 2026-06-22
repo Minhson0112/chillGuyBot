@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
 from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
@@ -81,7 +82,7 @@ class FarmWaterService:
             if growthReductionSeconds > 0:
                 message += (
                     f"\nBình tưới đã giúp cây phát triển nhanh hơn "
-                    f"**{self.formatRemainingTime(growthReductionSeconds)}**."
+                    f"**{formatMinutesSeconds(growthReductionSeconds)}**."
                 )
 
             if wateringCanBroken:
@@ -143,9 +144,3 @@ class FarmWaterService:
             return True
 
         return False
-
-    def formatRemainingTime(self, remainingSeconds: int):
-        minutes = remainingSeconds // 60
-        seconds = remainingSeconds % 60
-
-        return f"{minutes}:{seconds:02d}"

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
@@ -64,7 +65,7 @@ class FarmCowMilkCollectService:
 
                 return {
                     "success": False,
-                    "message": f"Chưa thể vắt sữa. Có thể vắt sau **{self.formatRemainingTime(remainingSeconds)}**.",
+                    "message": f"Chưa thể vắt sữa. Có thể vắt sau **{formatMinutesSeconds(remainingSeconds)}**.",
                 }
 
             milkItem = itemRepository.findByCode(self.MILK_ITEM_CODE)
@@ -202,9 +203,3 @@ class FarmCowMilkCollectService:
         remainingSeconds = int((collectableAt - now).total_seconds())
 
         return max(remainingSeconds, 0)
-
-    def formatRemainingTime(self, remainingSeconds: int):
-        minutes = remainingSeconds // 60
-        seconds = remainingSeconds % 60
-
-        return f"{minutes}:{seconds:02d}"

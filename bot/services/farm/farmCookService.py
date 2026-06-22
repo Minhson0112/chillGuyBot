@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmKitchenRepository import FarmKitchenRepository
 from bot.repository.farmRepository import FarmRepository
@@ -132,7 +133,7 @@ class FarmCookService:
 
             message = (
                 f"Bạn đã bắt đầu nấu **{cookingQuantity}** {resultItemText}. "
-                f"Thời gian nấu: **{self.formatRemainingTime(totalCookingSeconds)}**."
+                f"Thời gian nấu: **{formatMinutesSeconds(totalCookingSeconds)}**."
             )
 
             if dailyTaskMessage is not None:
@@ -159,7 +160,7 @@ class FarmCookService:
             remainingSeconds = int((farmKitchen.finished_at - now).total_seconds())
 
             if remainingSeconds > 0:
-                return f"Nhà bếp đang nấu món khác. Còn **{self.formatRemainingTime(remainingSeconds)}**."
+                return f"Nhà bếp đang nấu món khác. Còn **{formatMinutesSeconds(remainingSeconds)}**."
 
             return "Món trong bếp đã nấu xong. Hãy nhận món trước khi nấu món mới."
 
@@ -220,9 +221,3 @@ class FarmCookService:
                 userInventory=inventory,
                 quantity=requiredQuantity,
             )
-
-    def formatRemainingTime(self, remainingSeconds: int):
-        minutes = remainingSeconds // 60
-        seconds = remainingSeconds % 60
-
-        return f"{minutes}:{seconds:02d}"

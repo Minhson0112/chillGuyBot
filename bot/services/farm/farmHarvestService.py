@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
@@ -57,7 +58,7 @@ class FarmHarvestService:
 
                 return {
                     "success": False,
-                    "message": f"Cây chưa thể thu hoạch. Còn **{self.formatRemainingTime(remainingSeconds)}**.",
+                    "message": f"Cây chưa thể thu hoạch. Còn **{formatMinutesSeconds(remainingSeconds)}**.",
                 }
 
             crop = farmCropArea.crop
@@ -221,12 +222,6 @@ class FarmHarvestService:
             totalPestSeconds += max(currentPestSeconds, 0)
 
         return max(totalPestSeconds, 0)
-
-    def formatRemainingTime(self, remainingSeconds: int):
-        minutes = remainingSeconds // 60
-        seconds = remainingSeconds % 60
-
-        return f"{minutes}:{seconds:02d}"
 
     def formatNumber(self, number: int):
         return f"{number:,}"

@@ -31,6 +31,7 @@ from bot.views.farm.removeToolSelectView import RemoveToolSelectView
 from bot.views.farm.useToolSelectView import UseToolSelectView
 from bot.views.farm.myToolBagPaginationView import MyToolBagPaginationView
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 
 
 class MyFarmView(discord.ui.View):
@@ -688,7 +689,11 @@ class MyFarmView(discord.ui.View):
                     "itemName": item.name,
                     "iconImageKey": item.icon_image_key,
                     "quantity": seedInventory.quantity,
-                    "growthTimeText": self.formatGrowthTime(totalGrowthSeconds),
+                    "growthTimeText": (
+                        "-"
+                        if totalGrowthSeconds is None
+                        else formatMinutesSeconds(totalGrowthSeconds)
+                    ),
                 })
 
             return seedOptions
@@ -765,15 +770,6 @@ class MyFarmView(discord.ui.View):
                 })
 
             return toolOptions
-
-    def formatGrowthTime(self, totalGrowthSeconds: int):
-        if totalGrowthSeconds is None:
-            return "-"
-
-        minutes = totalGrowthSeconds // 60
-        seconds = totalGrowthSeconds % 60
-
-        return f"{minutes}:{seconds:02d}"
 
     async def refreshFarmMessage(
         self,

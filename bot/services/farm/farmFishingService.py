@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
@@ -261,7 +262,7 @@ class FarmFishingService:
 
         return {
             "canFish": False,
-            "remainingTimeText": self.formatRemainingTime(remainingSeconds),
+            "remainingTimeText": formatMinutesSeconds(remainingSeconds),
         }
 
     def getFishingSuccessRate(self, fishingRodEquipment):
@@ -384,9 +385,3 @@ class FarmFishingService:
         weight = round(weight, 2)
 
         return Decimal(str(weight))
-
-    def formatRemainingTime(self, remainingSeconds: int):
-        minutes = remainingSeconds // 60
-        seconds = remainingSeconds % 60
-
-        return f"{minutes}:{seconds:02d}"

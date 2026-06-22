@@ -2,6 +2,7 @@ from io import BytesIO
 
 from PIL import ImageDraw, ImageFont
 
+from bot.helper.timeFormatHelper import formatHoursMinutesSeconds
 from bot.services.assetImageService import assetImageService
 
 
@@ -43,7 +44,7 @@ class MemberVoiceRankingImageService:
             displayName = await self.resolveMemberDisplayName(guild, member.user_id)
             displayName = self.truncateText(displayName, 24)
 
-            voiceTime = self.formatVoiceSeconds(member.voice_seconds)
+            voiceTime = formatHoursMinutesSeconds(int(member.voice_seconds))
 
             nameBox = (
                 self.NAME_BOX_LEFT,
@@ -107,15 +108,6 @@ class MemberVoiceRankingImageService:
             return f"{text[:maxLength - 3]}..."
 
         return text
-
-    def formatVoiceSeconds(self, value):
-        totalSeconds = int(value)
-
-        hours = totalSeconds // 3600
-        minutes = (totalSeconds % 3600) // 60
-        seconds = totalSeconds % 60
-
-        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
     def getFont(self, fontSize):
         try:

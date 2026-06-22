@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from discord.ext import commands
 
 from bot.config.database import getDbSession
+from bot.helper.timeFormatHelper import formatHoursMinutesSeconds
 from bot.repository.memberDailyActivityRepository import MemberDailyActivityRepository
 
 
@@ -39,7 +40,7 @@ class MyVoiceRank(commands.Cog):
             )
             return
 
-        voiceTime = self.formatVoiceSeconds(rankData["voice_seconds"])
+        voiceTime = formatHoursMinutesSeconds(int(rankData["voice_seconds"]))
         rank = rankData["rank"]
         totalRankedMemberCount = rankData["total_ranked_member_count"]
 
@@ -48,15 +49,6 @@ class MyVoiceRank(commands.Cog):
             f"Thời gian voice: **{voiceTime}**",
             mention_author=False,
         )
-
-    def formatVoiceSeconds(self, value):
-        totalSeconds = int(value)
-
-        hours = totalSeconds // 3600
-        minutes = (totalSeconds % 3600) // 60
-        seconds = totalSeconds % 60
-
-        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
 async def setup(bot):
