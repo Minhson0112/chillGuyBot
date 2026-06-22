@@ -85,39 +85,6 @@ class MemberDailyActivityRepository:
             .all()
         )
 
-    def findTopVoiceMembersByMonth(self, year, month, limit=10):
-        startDate, endDate = self.getMonthRange(year, month)
-
-        totalChatCount = func.sum(MemberDailyActivity.total_chat_count).label("total_chat_count")
-        levelChatCount = func.sum(MemberDailyActivity.level_chat_count).label("level_chat_count")
-        voiceSeconds = func.sum(MemberDailyActivity.voice_seconds).label("voice_seconds")
-
-        return (
-            self.session.query(
-                Member.user_id,
-                Member.global_name,
-                Member.username,
-                Member.nick,
-                totalChatCount,
-                levelChatCount,
-                voiceSeconds,
-            )
-            .join(Member, Member.user_id == MemberDailyActivity.user_id)
-            .filter(
-                MemberDailyActivity.activity_date >= startDate,
-                MemberDailyActivity.activity_date < endDate,
-            )
-            .group_by(
-                Member.user_id,
-                Member.global_name,
-                Member.username,
-                Member.nick,
-            )
-            .order_by(desc(voiceSeconds))
-            .limit(limit)
-            .all()
-        )
-
     def getMonthRange(self, year, month):
         startDate = date(year, month, 1)
 
@@ -338,13 +305,3 @@ class MemberDailyActivityRepository:
             "voice_seconds": targetRankData.voice_seconds,
             "total_ranked_member_count": totalRankedMemberCount,
         }
-
-def getMonthRange(self, year, month):
-    startDate = date(year, month, 1)
-
-    if month == 12:
-        endDate = date(year + 1, 1, 1)
-    else:
-        endDate = date(year, month + 1, 1)
-
-    return startDate, endDate
