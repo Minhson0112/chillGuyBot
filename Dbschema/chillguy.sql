@@ -1921,3 +1921,32 @@ CREATE TABLE booster_custom_role (
             OR (status = 'removed' AND removed_at IS NOT NULL)
         )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='booster custom roles';
+
+# update giveaway subscription reward types
+ALTER TABLE giveaway
+    DROP CHECK chk_giveaway_type,
+    DROP CHECK chk_giveaway_reward_by_type,
+    ADD CONSTRAINT chk_giveaway_type
+        CHECK (
+            type IN (
+                'chill_coin',
+                'cowoncy',
+                'vnd',
+                'discord_nitro',
+                'netflix',
+                'spotify',
+                'custom'
+            )
+        ),
+    ADD CONSTRAINT chk_giveaway_reward_by_type
+        CHECK (
+            (type = 'chill_coin' AND reward_chill_coin IS NOT NULL AND reward_chill_coin > 0)
+            OR (type = 'cowoncy' AND reward_cowoncy IS NOT NULL AND reward_cowoncy > 0)
+            OR (type = 'vnd' AND reward_vnd IS NOT NULL AND reward_vnd > 0)
+            OR (
+                type IN ('discord_nitro', 'netflix', 'spotify')
+                AND reward_text IS NOT NULL
+                AND TRIM(reward_text) <> ''
+            )
+            OR (type = 'custom' AND reward_text IS NOT NULL)
+        );
