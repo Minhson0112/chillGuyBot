@@ -3,7 +3,7 @@ import discord
 from bot.config.channel import TICKET_CHANNEL_ID
 from bot.config.database import getDbSession
 from bot.config.decoration import FOOTER_DECORATION_IMG_URL
-from bot.config.emoji import CHILL_COIN, COWONCCY, JOIN_BUTTON, VND, WING_L, WING_R
+from bot.config.emoji import JOIN_BUTTON, WING_L, WING_R
 from bot.enums.giveawayStatus import GiveawayStatus
 from bot.enums.giveawayType import GiveawayType
 from bot.helper.numberFormatHelper import formatNumber
@@ -17,10 +17,6 @@ from bot.helper.discordTimestampHelper import (
 
 
 class GiveawayMessageService:
-    REWARD_UNIT_CHILL_COIN = "chill coin"
-    REWARD_UNIT_COWONCY = "cowoncy"
-    REWARD_UNIT_VND = "VND"
-
     def buildGiveawayEmbed(
         self,
         giveaway,
@@ -58,36 +54,23 @@ class GiveawayMessageService:
     def buildRewardText(self, giveaway):
         rewardEmoji = self.resolveRewardEmoji(giveaway.type)
         rewardUnit = self.resolveRewardUnit(giveaway.type)
-        rewardAmount = self.resolveRewardAmount(giveaway)
+
+        giveawayType = GiveawayType(giveaway.type)
+
+        if giveawayType.isSubscription:
+            return f"{rewardEmoji} **{giveaway.reward_text}** {rewardUnit}"
 
         if giveaway.type == GiveawayType.CUSTOM.value:
             return giveaway.reward_text or "Custom"
 
+        rewardAmount = self.resolveRewardAmount(giveaway)
         return f"{rewardEmoji} **{formatNumber(rewardAmount)}** {rewardUnit}"
 
     def resolveRewardEmoji(self, giveawayType: str):
-        if giveawayType == GiveawayType.CHILL_COIN.value:
-            return CHILL_COIN
-
-        if giveawayType == GiveawayType.COWONCY.value:
-            return COWONCCY
-
-        if giveawayType == GiveawayType.VND.value:
-            return VND
-
-        return ""
+        return GiveawayType(giveawayType).emoji
 
     def resolveRewardUnit(self, giveawayType: str):
-        if giveawayType == GiveawayType.CHILL_COIN.value:
-            return self.REWARD_UNIT_CHILL_COIN
-
-        if giveawayType == GiveawayType.COWONCY.value:
-            return self.REWARD_UNIT_COWONCY
-
-        if giveawayType == GiveawayType.VND.value:
-            return self.REWARD_UNIT_VND
-
-        return ""
+        return GiveawayType(giveawayType).unit
 
     def resolveRewardAmount(self, giveaway):
         if giveaway.type == GiveawayType.CHILL_COIN.value:

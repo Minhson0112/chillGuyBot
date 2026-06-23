@@ -26,6 +26,7 @@ class CreateGiveawayCommand(commands.Cog):
         title="Tiêu đề giveaway",
         giveaway_type="Loại phần thưởng giveaway",
         reward="Giá trị phần thưởng",
+        reward_text="Thời hạn phần thưởng subscription, ví dụ: 1 tháng",
         winners="Số người thắng",
         duration="Thời gian tới lúc quay thưởng, tính bằng giây",
         limit_role="Role bắt buộc để được tham gia giveaway",
@@ -36,6 +37,9 @@ class CreateGiveawayCommand(commands.Cog):
             app_commands.Choice(name=GiveawayType.COWONCY.value, value=GiveawayType.COWONCY.value),
             app_commands.Choice(name=GiveawayType.VND.value, value=GiveawayType.VND.value),
             app_commands.Choice(name=GiveawayType.CHILL_COIN.value, value=GiveawayType.CHILL_COIN.value),
+            app_commands.Choice(name=GiveawayType.DISCORD_NITRO.value, value=GiveawayType.DISCORD_NITRO.value),
+            app_commands.Choice(name=GiveawayType.NETFLIX.value, value=GiveawayType.NETFLIX.value),
+            app_commands.Choice(name=GiveawayType.SPOTIFY.value, value=GiveawayType.SPOTIFY.value),
         ],
     )
     @guildOnly()
@@ -45,9 +49,10 @@ class CreateGiveawayCommand(commands.Cog):
         interaction: discord.Interaction,
         title: str,
         giveaway_type: app_commands.Choice[str],
-        reward: int,
         winners: int,
         duration: int,
+        reward: int | None = None,
+        reward_text: str | None = None,
         limit_role: discord.Role | None = None,
     ):
         await interaction.response.defer(ephemeral=True)
@@ -56,6 +61,7 @@ class CreateGiveawayCommand(commands.Cog):
             title=title,
             giveawayType=giveaway_type.value,
             reward=reward,
+            rewardText=reward_text,
             winnerCount=winners,
             durationSeconds=duration,
             channelId=interaction.channel_id,

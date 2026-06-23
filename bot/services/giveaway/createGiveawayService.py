@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, timezone
 
-from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.enums.giveawayType import GiveawayType
 from bot.repository.giveawayRepository import GiveawayRepository
@@ -13,11 +12,12 @@ class CreateGiveawayService:
         self,
         title: str,
         giveawayType: str,
-        reward: int,
         winnerCount: int,
         durationSeconds: int,
         channelId: int,
         createdByUserId: int,
+        reward: int | None = None,
+        rewardText: str | None = None,
         limitRoleId: int | None = None,
     ):
         title = title.strip()
@@ -28,17 +28,34 @@ class CreateGiveawayService:
                 "message": "Tiêu đề giveaway không được để trống.",
             }
 
-        if giveawayType not in self.getAllowedGiveawayTypes():
+        try:
+            giveawayTypeEnum = GiveawayType(giveawayType)
+        except ValueError:
             return {
                 "success": False,
                 "message": "Loại giveaway không hợp lệ.",
             }
 
-        if reward <= 0:
+        if giveawayTypeEnum not in self.getAllowedGiveawayTypes():
+            return {
+                "success": False,
+                "message": "Loại giveaway không hợp lệ.",
+            }
+
+        if giveawayTypeEnum.isMonetary and (reward is None or reward <= 0):
             return {
                 "success": False,
                 "message": "Phần thưởng phải lớn hơn 0.",
             }
+
+        if giveawayTypeEnum.isSubscription:
+            rewardText = rewardText.strip() if rewardText is not None else ""
+
+            if rewardText == "":
+                return {
+                    "success": False,
+                    "message": "Thời hạn phần thưởng subscription không được để trống.",
+                }
 
         if winnerCount <= 0:
             return {
@@ -54,7 +71,7 @@ class CreateGiveawayService:
 
         now = datetime.now(self.GMT7).replace(tzinfo=None)
         drawAt = now + timedelta(seconds=durationSeconds)
-        rewardData = self.buildRewardData(giveawayType, reward)
+        rewardData = self.buildRewardData(giveawayTypeEnum, reward, rewardText)
 
         with getDbSession() as session:
             giveawayRepository = GiveawayRepository(session)
@@ -69,6 +86,7 @@ class CreateGiveawayService:
                 rewardChillCoin=rewardData["rewardChillCoin"],
                 rewardCowoncy=rewardData["rewardCowoncy"],
                 rewardVnd=rewardData["rewardVnd"],
+                rewardText=rewardData["rewardText"],
                 limitRoleId=limitRoleId,
             )
 
@@ -100,25 +118,31 @@ class CreateGiveawayService:
 
     def getAllowedGiveawayTypes(self):
         return {
-            GiveawayType.CHILL_COIN.value,
-            GiveawayType.COWONCY.value,
-            GiveawayType.VND.value,
+            giveawayType
+            for giveawayType in GiveawayType
+            if giveawayType.isMonetary or giveawayType.isSubscription
         }
 
-    def buildRewardData(self, giveawayType: str, reward: int):
+    def buildRewardData(
+        self,
+        giveawayType: GiveawayType,
+        reward: int | None,
+        rewardText: str | None,
+    ):
         rewardData = {
             "rewardChillCoin": None,
             "rewardCowoncy": None,
             "rewardVnd": None,
+            "rewardText": rewardText if giveawayType.isSubscription else None,
         }
 
-        if giveawayType == GiveawayType.CHILL_COIN.value:
+        if giveawayType == GiveawayType.CHILL_COIN:
             rewardData["rewardChillCoin"] = reward
 
-        if giveawayType == GiveawayType.COWONCY.value:
+        if giveawayType == GiveawayType.COWONCY:
             rewardData["rewardCowoncy"] = reward
 
-        if giveawayType == GiveawayType.VND.value:
+        if giveawayType == GiveawayType.VND:
             rewardData["rewardVnd"] = reward
 
         return rewardData
