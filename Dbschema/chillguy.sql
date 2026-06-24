@@ -1950,3 +1950,19 @@ ALTER TABLE giveaway
             )
             OR (type = 'custom' AND reward_text IS NOT NULL)
         );
+
+# add fishing ready notification tracking
+ALTER TABLE farm_fish_pond
+    ADD COLUMN is_fishing_ready_notified TINYINT(1) NOT NULL DEFAULT 0
+        COMMENT 'whether fishing ready notification was sent'
+        AFTER last_fished_at;
+
+# store fixed fishing cooldown completion time
+ALTER TABLE farm_fish_pond
+    ADD COLUMN next_fishable_at DATETIME DEFAULT NULL
+        COMMENT 'next fishable at'
+        AFTER last_fished_at;
+
+UPDATE farm_fish_pond
+SET next_fishable_at = DATE_ADD(last_fished_at, INTERVAL 5 MINUTE)
+WHERE last_fished_at IS NOT NULL;

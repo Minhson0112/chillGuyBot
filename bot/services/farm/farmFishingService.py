@@ -69,7 +69,6 @@ class FarmFishingService:
 
             cooldownResult = self.checkFishingCooldown(
                 fishPond=fishPond,
-                cooldownReductionSeconds=fishingCooldownReductionSeconds,
             )
 
             if not cooldownResult["canFish"]:
@@ -117,7 +116,18 @@ class FarmFishingService:
                 quantity=fishingCatchQuantity,
             )
 
-            farmFishPondRepository.markFished(fishPond)
+            lastFishedAt = datetime.now()
+            cooldownSeconds = max(
+                self.FISHING_COOLDOWN_SECONDS - fishingCooldownReductionSeconds,
+                0,
+            )
+            nextFishableAt = lastFishedAt + timedelta(seconds=cooldownSeconds)
+
+            farmFishPondRepository.markFished(
+                farmFishPond=fishPond,
+                lastFishedAt=lastFishedAt,
+                nextFishableAt=nextFishableAt,
+            )
 
             fishingSuccessRate = self.getFishingSuccessRate(fishingRodEquipment)
             fishingRodBroken = self.consumeFishingRodDurability(fishingRodEquipment)
@@ -237,22 +247,15 @@ class FarmFishingService:
     def checkFishingCooldown(
         self,
         fishPond,
-        cooldownReductionSeconds: int = 0,
     ):
-        if fishPond.last_fished_at is None:
+        if fishPond.next_fishable_at is None:
             return {
                 "canFish": True,
                 "remainingTimeText": None,
             }
 
-        cooldownSeconds = max(
-            self.FISHING_COOLDOWN_SECONDS - cooldownReductionSeconds,
-            0,
-        )
-
         now = datetime.now()
-        nextFishAt = fishPond.last_fished_at + timedelta(seconds=cooldownSeconds)
-        remainingSeconds = int((nextFishAt - now).total_seconds())
+        remainingSeconds = int((fishPond.next_fishable_at - now).total_seconds())
 
         if remainingSeconds <= 0:
             return {
