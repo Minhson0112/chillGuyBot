@@ -33,6 +33,12 @@ class FarmCowShed(Base):
         default=False,
         comment="whether milk ready notification was sent",
     )
+    is_hungry_notified = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        comment="whether hungry notification was sent",
+    )
 
     created_at = Column(DateTime, nullable=False, server_default=func.now(), comment="created at")
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now(), comment="updated at")

@@ -39,6 +39,7 @@ class FarmCowShedRepository:
         
         farmCowShed.last_collected_milk_at = datetime.now()
         farmCowShed.is_milk_ready_notified = False
+        farmCowShed.is_hungry_notified = False
 
         self.session.flush()
 
@@ -46,6 +47,7 @@ class FarmCowShedRepository:
     
     def markFed(self, farmCowShed: FarmCowShed):
         farmCowShed.last_fed_at = datetime.now()
+        farmCowShed.is_hungry_notified = False
 
         self.session.flush()
 
@@ -87,6 +89,35 @@ class FarmCowShedRepository:
         self.session.flush()
 
         return farmCowShed
+
+    def findHungryCowShedsNeedNotification(
+        self,
+        now: datetime,
+        hungryIntervalMinutes: int,
+    ):
+        hungryThresholdAt = now - timedelta(minutes=hungryIntervalMinutes)
+
+        return (
+            self.session.query(FarmCowShed)
+            .options(
+                joinedload(FarmCowShed.farm).joinedload(Farm.member),
+            )
+            .filter(
+                FarmCowShed.cow_count > 0,
+                or_(
+                    FarmCowShed.last_fed_at.is_(None),
+                    FarmCowShed.last_fed_at <= hungryThresholdAt,
+                ),
+                FarmCowShed.is_hungry_notified.is_(False),
+            )
+            .all()
+        )
+
+    def markHungryNotified(self, farmCowShed: FarmCowShed):
+        farmCowShed.is_hungry_notified = True
+        self.session.flush()
+
+        return farmCowShed
     
     def findStarvedCowSheds(self, now: datetime, starvationHours: int):
         thresholdAt = now - timedelta(hours=starvationHours)
@@ -122,6 +153,7 @@ class FarmCowShedRepository:
         farmCowShed.last_fed_at = None
         farmCowShed.last_collected_milk_at = None
         farmCowShed.is_milk_ready_notified = False
+        farmCowShed.is_hungry_notified = False
 
         self.session.flush()
 

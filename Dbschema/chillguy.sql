@@ -1977,3 +1977,14 @@ ALTER TABLE farm_cow_shed
     ADD COLUMN is_milk_ready_notified TINYINT(1) NOT NULL DEFAULT 0
         COMMENT 'whether milk ready notification was sent'
         AFTER last_collected_milk_at;
+
+# add animal hungry notification tracking
+ALTER TABLE farm_chicken_coop
+    ADD COLUMN is_hungry_notified TINYINT(1) NOT NULL DEFAULT 0
+        COMMENT 'whether hungry notification was sent'
+        AFTER is_egg_ready_notified;
+
+ALTER TABLE farm_cow_shed
+    ADD COLUMN is_hungry_notified TINYINT(1) NOT NULL DEFAULT 0
+        COMMENT 'whether hungry notification was sent'
+        AFTER is_milk_ready_notified;
