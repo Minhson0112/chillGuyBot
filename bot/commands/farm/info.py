@@ -44,3 +44,7 @@ class Info(commands.Cog):
                 f"{itemText}\n"
                 f"{description}"
             )
+
+
+async def setup(bot):
+    await bot.add_cog(Info(bot))
