@@ -237,6 +237,8 @@ async def main():
         "bot.tasks.farmHarvestReadyCheckTask",
         "bot.tasks.farmCookReadyCheckTask",
         "bot.tasks.farmFishingReadyCheckTask",
+        "bot.tasks.farmEggReadyCheckTask",
+        "bot.tasks.farmMilkReadyCheckTask",
         "bot.tasks.farmMarketAutoBuyTask",
         "bot.tasks.memberDailyActivityFlushTask",
         "bot.tasks.giveawayDrawTask",

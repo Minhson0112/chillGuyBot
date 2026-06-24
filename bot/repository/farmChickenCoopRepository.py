@@ -42,6 +42,7 @@ class FarmChickenCoopRepository:
             farmChickenCoop.chicken_2_y = 520
         
         farmChickenCoop.last_collected_egg_at = datetime.now()
+        farmChickenCoop.is_egg_ready_notified = False
 
         self.session.flush()
 
@@ -55,6 +56,36 @@ class FarmChickenCoopRepository:
     
     def markEggCollected(self, farmChickenCoop: FarmChickenCoop):
         farmChickenCoop.last_collected_egg_at = datetime.now()
+        farmChickenCoop.is_egg_ready_notified = False
+        self.session.flush()
+
+        return farmChickenCoop
+
+    def findEggReadyCoopsNeedNotification(
+        self,
+        now: datetime,
+        eggCollectIntervalMinutes: int,
+        hungryIntervalMinutes: int,
+    ):
+        collectableThresholdAt = now - timedelta(minutes=eggCollectIntervalMinutes)
+        hungryThresholdAt = now - timedelta(minutes=hungryIntervalMinutes)
+
+        return (
+            self.session.query(FarmChickenCoop)
+            .options(
+                joinedload(FarmChickenCoop.farm).joinedload(Farm.member),
+            )
+            .filter(
+                FarmChickenCoop.chicken_count > 0,
+                FarmChickenCoop.last_collected_egg_at <= collectableThresholdAt,
+                FarmChickenCoop.last_fed_at > hungryThresholdAt,
+                FarmChickenCoop.is_egg_ready_notified.is_(False),
+            )
+            .all()
+        )
+
+    def markEggReadyNotified(self, farmChickenCoop: FarmChickenCoop):
+        farmChickenCoop.is_egg_ready_notified = True
         self.session.flush()
 
         return farmChickenCoop
@@ -93,6 +124,7 @@ class FarmChickenCoopRepository:
         farmChickenCoop.chicken_2_y = None
         farmChickenCoop.last_fed_at = None
         farmChickenCoop.last_collected_egg_at = None
+        farmChickenCoop.is_egg_ready_notified = False
 
         self.session.flush()
 

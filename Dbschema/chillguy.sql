@@ -1966,3 +1966,14 @@ ALTER TABLE farm_fish_pond
 UPDATE farm_fish_pond
 SET next_fishable_at = DATE_ADD(last_fished_at, INTERVAL 5 MINUTE)
 WHERE last_fished_at IS NOT NULL;
+
+# add egg and milk ready notification tracking
+ALTER TABLE farm_chicken_coop
+    ADD COLUMN is_egg_ready_notified TINYINT(1) NOT NULL DEFAULT 0
+        COMMENT 'whether egg ready notification was sent'
+        AFTER last_collected_egg_at;
+
+ALTER TABLE farm_cow_shed
+    ADD COLUMN is_milk_ready_notified TINYINT(1) NOT NULL DEFAULT 0
+        COMMENT 'whether milk ready notification was sent'
+        AFTER last_collected_milk_at;
