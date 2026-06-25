@@ -2,7 +2,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot.config.userId import MOD_ADMIN_USER_IDS
 from bot.services.autoResponder.showAllAutoResponseService import ShowAllAutoResponseService
 from bot.validation.guildValidation import chillStationOnly
 from bot.views.autoResponder.autoResponderPaginationView import AutoResponderPaginationView
@@ -16,7 +15,7 @@ class ShowAllAutoResponse(commands.Cog):
     @app_commands.command(name="showallautoresponse", description="Hiển thị toàn bộ auto response")
     @chillStationOnly()
     async def showAllAutoResponse(self, interaction: discord.Interaction):
-        if interaction.user.id not in MOD_ADMIN_USER_IDS:
+        if not self.showAllAutoResponseService.canShowAllAutoResponse(interaction.user.id):
             await interaction.response.send_message("Bạn không có quyền dùng lệnh này.")
             return
 
