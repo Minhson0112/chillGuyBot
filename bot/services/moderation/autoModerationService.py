@@ -25,9 +25,6 @@ class AutoModerationService:
         self.wordPattern = re.compile(r"\w+", flags=re.UNICODE)
 
     async def handleMessage(self, bot, message: discord.Message):
-        if message.author.bot:
-            return
-
         if message.guild is None:
             return
 
