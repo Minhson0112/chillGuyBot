@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
-from bot.helper.discordTimestampHelper import formatRelativeTime
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
@@ -61,11 +61,11 @@ class FarmCowMilkCollectService:
                 }
 
             if not self.canCollectMilk(cowShed, now):
-                collectableAt = self.getMilkCollectableAt(cowShed)
+                remainingSeconds = self.calculateMilkCollectRemainingSeconds(cowShed, now)
 
                 return {
                     "success": False,
-                    "message": f"Chưa thể vắt sữa. Có thể vắt sau **{formatRelativeTime(collectableAt)}**.",
+                    "message": f"Chưa thể vắt sữa. Có thể vắt sau **{formatMinutesSeconds(remainingSeconds)}**.",
                 }
 
             milkItem = itemRepository.findByCode(self.MILK_ITEM_CODE)
@@ -190,11 +190,16 @@ class FarmCowMilkCollectService:
         if cowShed.last_collected_milk_at is None:
             return True
 
-        collectableAt = self.getMilkCollectableAt(cowShed)
+        collectableAt = cowShed.last_collected_milk_at + timedelta(
+            minutes=self.MILK_COLLECT_INTERVAL_MINUTES,
+        )
 
         return now >= collectableAt
 
-    def getMilkCollectableAt(self, cowShed):
-        return cowShed.last_collected_milk_at + timedelta(
+    def calculateMilkCollectRemainingSeconds(self, cowShed, now: datetime):
+        collectableAt = cowShed.last_collected_milk_at + timedelta(
             minutes=self.MILK_COLLECT_INTERVAL_MINUTES,
         )
+        remainingSeconds = int((collectableAt - now).total_seconds())
+
+        return max(remainingSeconds, 0)

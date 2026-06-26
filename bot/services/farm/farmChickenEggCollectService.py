@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
-from bot.helper.discordTimestampHelper import formatRelativeTime
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmChickenCoopRepository import FarmChickenCoopRepository
 from bot.repository.farmRepository import FarmRepository
@@ -57,11 +57,11 @@ class FarmChickenEggCollectService:
                 }
 
             if not self.canCollectEgg(chickenCoop, now):
-                collectableAt = self.getEggCollectableAt(chickenCoop)
+                remainingSeconds = self.calculateEggCollectRemainingSeconds(chickenCoop, now)
 
                 return {
                     "success": False,
-                    "message": f"Chưa thể lấy trứng. Có thể lấy sau **{formatRelativeTime(collectableAt)}**.",
+                    "message": f"Chưa thể lấy trứng. Có thể lấy sau **{formatMinutesSeconds(remainingSeconds)}**.",
                 }
 
             eggItem = itemRepository.findByCode(self.EGG_ITEM_CODE)
@@ -120,11 +120,16 @@ class FarmChickenEggCollectService:
         if chickenCoop.last_collected_egg_at is None:
             return True
 
-        collectableAt = self.getEggCollectableAt(chickenCoop)
+        collectableAt = chickenCoop.last_collected_egg_at + timedelta(
+            minutes=self.EGG_COLLECT_INTERVAL_MINUTES,
+        )
 
         return now >= collectableAt
 
-    def getEggCollectableAt(self, chickenCoop):
-        return chickenCoop.last_collected_egg_at + timedelta(
+    def calculateEggCollectRemainingSeconds(self, chickenCoop, now: datetime):
+        collectableAt = chickenCoop.last_collected_egg_at + timedelta(
             minutes=self.EGG_COLLECT_INTERVAL_MINUTES,
         )
+        remainingSeconds = int((collectableAt - now).total_seconds())
+
+        return max(remainingSeconds, 0)

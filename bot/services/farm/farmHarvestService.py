@@ -2,7 +2,7 @@ from datetime import datetime
 
 from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
-from bot.helper.discordTimestampHelper import formatRelativeTime
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
@@ -55,9 +55,11 @@ class FarmHarvestService:
             now = datetime.now()
 
             if now < farmCropArea.harvestable_at:
+                remainingSeconds = int((farmCropArea.harvestable_at - now).total_seconds())
+
                 return {
                     "success": False,
-                    "message": f"Cây chưa thể thu hoạch. Còn **{formatRelativeTime(farmCropArea.harvestable_at)}**.",
+                    "message": f"Cây chưa thể thu hoạch. Còn **{formatMinutesSeconds(remainingSeconds)}**.",
                 }
 
             crop = farmCropArea.crop

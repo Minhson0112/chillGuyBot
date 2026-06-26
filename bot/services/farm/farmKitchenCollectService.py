@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from bot.config.database import getDbSession
-from bot.helper.discordTimestampHelper import formatRelativeTime
+from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmKitchenRepository import FarmKitchenRepository
 from bot.repository.farmRepository import FarmRepository
@@ -54,9 +54,11 @@ class FarmKitchenCollectService:
             now = datetime.now()
 
             if now < farmKitchen.finished_at:
+                remainingSeconds = int((farmKitchen.finished_at - now).total_seconds())
+
                 return {
                     "success": False,
-                    "message": f"Món ăn chưa nấu xong. Còn **{formatRelativeTime(farmKitchen.finished_at)}**.",
+                    "message": f"Món ăn chưa nấu xong. Còn **{formatMinutesSeconds(remainingSeconds)}**.",
                 }
 
             resultQuantity = recipe.result_quantity * farmKitchen.cooking_quantity
