@@ -13,7 +13,7 @@ from bot.repository.memberRepository import MemberRepository
 class Bingo(commands.Cog):
     MAX_BET = 500
     CARD_SIZE = 5
-    BALL_POOL = list(range(1, 10))
+    BALL_POOL = list(range(1, 11))
 
     NUMBER_EMOJIS = {
         1: "1️⃣",
@@ -25,6 +25,7 @@ class Bingo(commands.Cog):
         7: "7️⃣",
         8: "8️⃣",
         9: "9️⃣",
+        10: "🔟",
     }
 
     def __init__(self, bot):
@@ -93,11 +94,11 @@ class Bingo(commands.Cog):
         await asyncio.sleep(0.8)
 
         matchCount = self.countMatches(playerCard, drawNumbers)
-        multiplier = self.calculateMultiplier(matchCount)
+        coinDelta = self.calculateCoinDelta(matchCount, bet)
         applyResult = self.applyBingoResult(
             userId=ctx.author.id,
             bet=bet,
-            multiplier=multiplier,
+            coinDelta=coinDelta,
         )
 
         if not applyResult["success"]:
@@ -116,7 +117,7 @@ class Bingo(commands.Cog):
                 playerCard=playerCard,
                 drawNumbers=drawNumbers,
                 matchCount=matchCount,
-                multiplier=multiplier,
+                payoutText=self.getPayoutText(matchCount),
                 bet=bet,
                 coinDelta=applyResult["coinDelta"],
                 newBalance=applyResult["newBalance"],
@@ -172,7 +173,7 @@ class Bingo(commands.Cog):
         self,
         userId: int,
         bet: int,
-        multiplier: int,
+        coinDelta: int,
     ):
         chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
@@ -196,12 +197,6 @@ class Bingo(commands.Cog):
                     ),
                 }
 
-            if multiplier > 0:
-                reward = bet * multiplier
-                coinDelta = reward - bet
-            else:
-                coinDelta = -bet
-
             member.chill_coin += coinDelta
             newBalance = member.chill_coin
 
@@ -213,17 +208,29 @@ class Bingo(commands.Cog):
                 "newBalance": newBalance,
             }
 
-    def calculateMultiplier(self, matchCount: int):
+    def calculateCoinDelta(self, matchCount: int, bet: int):
         if matchCount == 5:
-            return 5
+            return bet * 9
 
         if matchCount == 4:
-            return 3
+            return bet * 2
 
         if matchCount == 3:
-            return 2
+            return bet // 2
 
-        return 0
+        return -bet
+
+    def getPayoutText(self, matchCount: int):
+        if matchCount == 5:
+            return "x10"
+
+        if matchCount == 4:
+            return "x3"
+
+        if matchCount == 3:
+            return "+50%"
+
+        return "x0"
 
     def countMatches(self, playerCard, drawNumbers):
         return len(set(playerCard).intersection(drawNumbers))
@@ -253,7 +260,7 @@ class Bingo(commands.Cog):
 
         embed.add_field(
             name="Bảng thưởng",
-            value="3 số: x2\n4 số: x3\n5 số: x5",
+            value="3 số: +50%\n4 số: x3\n5 số: x10",
             inline=True,
         )
 
@@ -299,16 +306,16 @@ class Bingo(commands.Cog):
         playerCard,
         drawNumbers,
         matchCount: int,
-        multiplier: int,
+        payoutText: str,
         bet: int,
         coinDelta: int,
         newBalance: int,
     ):
         chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
-        if multiplier > 0:
+        if coinDelta >= 0:
             resultText = (
-                f"Bingo **{matchCount}/{self.CARD_SIZE}** số. Bạn nhận thưởng x{multiplier}.\n"
+                f"Bingo **{matchCount}/{self.CARD_SIZE}** số. Mức thưởng {payoutText}.\n"
                 f"Lãi: **{formatNumber(coinDelta)}** {chillCoinEmoji}"
             )
             color = discord.Color.green()
@@ -344,7 +351,7 @@ class Bingo(commands.Cog):
 
         embed.add_field(
             name="Hệ số",
-            value=f"x{multiplier}" if multiplier > 0 else "x0",
+            value=payoutText,
             inline=True,
         )
 
