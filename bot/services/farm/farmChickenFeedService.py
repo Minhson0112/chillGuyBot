@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
-from bot.helper.timeFormatHelper import formatMinutesSeconds
+from bot.helper.discordTimestampHelper import formatRelativeTime
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmChickenCoopRepository import FarmChickenCoopRepository
 from bot.repository.farmRepository import FarmRepository
@@ -46,11 +46,11 @@ class FarmChickenFeedService:
             now = datetime.now()
 
             if not self.isChickenHungry(chickenCoop, now):
-                remainingSeconds = self.calculateHungryRemainingSeconds(chickenCoop, now)
+                hungryAt = self.getHungryAt(chickenCoop)
 
                 return {
                     "success": False,
-                    "message": f"Gà chưa đói. Có thể cho ăn sau **{formatMinutesSeconds(remainingSeconds)}**.",
+                    "message": f"Gà chưa đói. Có thể cho ăn sau **{formatRelativeTime(hungryAt)}**.",
                 }
 
             wheatItem = itemRepository.findByCode(self.WHEAT_ITEM_CODE)
@@ -107,8 +107,5 @@ class FarmChickenFeedService:
 
         return now >= hungryAt
 
-    def calculateHungryRemainingSeconds(self, chickenCoop, now: datetime):
-        hungryAt = chickenCoop.last_fed_at + timedelta(minutes=self.HUNGRY_INTERVAL_MINUTES)
-        remainingSeconds = int((hungryAt - now).total_seconds())
-
-        return max(remainingSeconds, 0)
+    def getHungryAt(self, chickenCoop):
+        return chickenCoop.last_fed_at + timedelta(minutes=self.HUNGRY_INTERVAL_MINUTES)

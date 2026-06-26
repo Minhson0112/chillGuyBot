@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from bot.config.database import getDbSession
+from bot.helper.discordTimestampHelper import formatRelativeTime
 from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmKitchenRepository import FarmKitchenRepository
@@ -160,7 +161,7 @@ class FarmCookService:
             remainingSeconds = int((farmKitchen.finished_at - now).total_seconds())
 
             if remainingSeconds > 0:
-                return f"Nhà bếp đang nấu món khác. Còn **{formatMinutesSeconds(remainingSeconds)}**."
+                return f"Nhà bếp đang nấu món khác. Còn **{formatRelativeTime(farmKitchen.finished_at)}**."
 
             return "Món trong bếp đã nấu xong. Hãy nhận món trước khi nấu món mới."
 
