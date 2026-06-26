@@ -197,6 +197,7 @@ async def main():
         "bot.commands.farm.findMarketItem",
         "bot.commands.minigame.slot",
         "bot.commands.minigame.blackjack",
+        "bot.commands.minigame.coinflip",
         "bot.commands.mergeverse.topMergeGame",
         "bot.commands.mergeverse.myMergeGame",
         "bot.commands.fortune.fortune",
