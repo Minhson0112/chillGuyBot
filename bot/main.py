@@ -198,6 +198,7 @@ async def main():
         "bot.commands.minigame.slot",
         "bot.commands.minigame.blackjack",
         "bot.commands.minigame.coinflip",
+        "bot.commands.minigame.bingo",
         "bot.commands.mergeverse.topMergeGame",
         "bot.commands.mergeverse.myMergeGame",
         "bot.commands.fortune.fortune",
