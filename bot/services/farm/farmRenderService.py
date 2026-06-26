@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
+from bot.helper.discordTimestampHelper import formatShortTime
 from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.config.farmLevel import FARM_MAX_LEVEL, FARM_LEVEL_REQUIRED_EXP
@@ -574,7 +575,7 @@ class FarmRenderService:
         for hour in self.TRAIN_EVENT_HOURS:
             nextTrainAt = now.replace(hour=hour, minute=0, second=0, microsecond=0)
             if nextTrainAt > now:
-                return nextTrainAt.strftime("%H:%M")
+                return formatShortTime(nextTrainAt)
 
         nextTrainAt = (now + timedelta(days=1)).replace(
             hour=self.TRAIN_EVENT_HOURS[0],
@@ -582,18 +583,21 @@ class FarmRenderService:
             second=0,
             microsecond=0,
         )
-        return nextTrainAt.strftime("%H:%M")
+        return formatShortTime(nextTrainAt)
 
     def buildTrainEventEmbedData(self, farm, trainEvent):
-        if not farm.is_train_event:
-            return {
-                "trainEventText": "Tàu đang ở ga Chill Station, sẽ cập bến farm của bạn sớm thôi.",
-            }
-
         nextTrainText = self.getNextTrainArrivalText()
         nextTrainMessage = (
             f"\nChuyến tàu tiếp theo sẽ đến vào lúc **{nextTrainText}**."
         )
+
+        if not farm.is_train_event:
+            return {
+                "trainEventText": (
+                    "Tàu đang ở ga Chill Station, sẽ cập bến farm của bạn sớm thôi."
+                    f"{nextTrainMessage}"
+                ),
+            }
 
         if trainEvent is None or trainEvent.requiredItem is None:
             return {
