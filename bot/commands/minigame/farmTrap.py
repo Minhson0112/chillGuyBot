@@ -425,7 +425,7 @@ class FarmTrap(commands.Cog):
         embed = discord.Embed(
             title="Farm Trap",
             description=(
-                f"```txt\n{game.formatGrid()}\n```\n"
+                f"{game.formatGrid()}\n\n"
                 f"{statusText}"
             ),
             color=color,
