@@ -157,7 +157,10 @@ class VisitFarmCommand(commands.Cog):
             return
 
         try:
-            renderResult = await self.farmRenderService.renderFarmByMemberId(member.id)
+            renderResult = await self.farmRenderService.renderFarmByMemberId(
+                member.id,
+                includePrivateInfo=False,
+            )
 
             file = discord.File(
                 renderResult["buffer"],

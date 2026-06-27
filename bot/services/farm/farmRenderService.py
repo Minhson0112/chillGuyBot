@@ -116,11 +116,14 @@ class FarmRenderService:
         ToolType.MILK_PAIL.value,
     ]
 
-    async def renderFarmByMemberId(self, memberId: int):
+    async def renderFarmByMemberId(
+        self,
+        memberId: int,
+        includePrivateInfo: bool = True,
+    ):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmTrainEventRepository = FarmTrainEventRepository(session)
-            farmToolEquipmentRepository = FarmToolEquipmentRepository(session)
             
 
             farm = farmRepository.findByUserIdWithRenderData(memberId)
@@ -133,9 +136,17 @@ class FarmRenderService:
             if farm.is_train_event:
                 trainEvent = farmTrainEventRepository.findOpeningEventWithItem()
             
-            toolEquipments = farmToolEquipmentRepository.findByFarmIdWithToolData(farm.id)
+            toolEquipments = None
 
-            image = self.renderFarmImage(farm, toolEquipments)
+            if includePrivateInfo:
+                farmToolEquipmentRepository = FarmToolEquipmentRepository(session)
+                toolEquipments = farmToolEquipmentRepository.findByFarmIdWithToolData(farm.id)
+
+            image = self.renderFarmImage(
+                farm,
+                toolEquipments,
+                includePrivateInfo=includePrivateInfo,
+            )
             embedData = self.buildFarmEmbedData(farm, trainEvent)
 
         avatarImage = await self.getMemberAvatarImage(memberId)
@@ -148,7 +159,12 @@ class FarmRenderService:
             "embedData": embedData,
         }
 
-    def renderFarmImage(self, farm, toolEquipments=None):
+    def renderFarmImage(
+        self,
+        farm,
+        toolEquipments=None,
+        includePrivateInfo: bool = True,
+    ):
         baseImage = assetImageService.getImage(farm.base_image_key)
 
         cropArea = farm.cropArea
@@ -197,9 +213,9 @@ class FarmRenderService:
             trainImage = self.resizeByScale(trainImage, self.TRAIN_SCALE)
             self.pasteSprite(baseImage, trainImage, x=self.TRAIN_X, y=self.TRAIN_Y)
         
-        self.renderToolHotBar(baseImage, toolEquipments)
-
-        self.renderFarmStatusInfo(baseImage, farm)
+        if includePrivateInfo:
+            self.renderToolHotBar(baseImage, toolEquipments)
+            self.renderFarmStatusInfo(baseImage, farm)
 
         return baseImage
 
