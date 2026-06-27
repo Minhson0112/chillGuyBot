@@ -84,3 +84,7 @@ class FarmMarketAutoBuyTask(commands.Cog):
             f"{chr(10).join(itemLines)}\n"
             f"Tổng tiền nhận được: **{notificationSummary['totalPaid']:,}** {chillCoinEmoji}."
         )
+
+
+async def setup(bot):
+    await bot.add_cog(FarmMarketAutoBuyTask(bot))

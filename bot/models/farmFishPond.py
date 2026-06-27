@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -18,6 +18,13 @@ class FarmFishPond(Base):
     )
 
     last_fished_at = Column(DateTime, nullable=True, comment="last fished at")
+    next_fishable_at = Column(DateTime, nullable=True, comment="next fishable at")
+    is_fishing_ready_notified = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        comment="whether fishing ready notification was sent",
+    )
 
     created_at = Column(DateTime, nullable=False, server_default=func.now(), comment="created at")
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now(), comment="updated at")

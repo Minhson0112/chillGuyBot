@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -27,6 +27,18 @@ class FarmCowShed(Base):
 
     last_fed_at = Column(DateTime, nullable=True, comment="last fed at")
     last_collected_milk_at = Column(DateTime, nullable=True, comment="last collected milk at")
+    is_milk_ready_notified = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        comment="whether milk ready notification was sent",
+    )
+    is_hungry_notified = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        comment="whether hungry notification was sent",
+    )
 
     created_at = Column(DateTime, nullable=False, server_default=func.now(), comment="created at")
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now(), comment="updated at")

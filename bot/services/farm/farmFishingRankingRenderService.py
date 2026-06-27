@@ -41,7 +41,7 @@ class FarmFishingRankingRenderService:
 
     FISH_ICON_X = 590
     FISH_TEXT_X = 655
-    FISH_MAX_WIDTH = 260
+    FISH_MAX_WIDTH = 165
 
     WEIGHT_RIGHT_X = 970
     WEIGHT_MAX_WIDTH = 220

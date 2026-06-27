@@ -96,3 +96,7 @@ class FarmHarvestReadyCheckTask(commands.Cog):
                     everyone=False,
                 ),
             )
+
+
+async def setup(bot):
+    await bot.add_cog(FarmHarvestReadyCheckTask(bot))

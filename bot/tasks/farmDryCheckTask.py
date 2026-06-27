@@ -87,3 +87,7 @@ class FarmDryCheckTask(commands.Cog):
                 everyone=False,
             ),
         )
+
+
+async def setup(bot):
+    await bot.add_cog(FarmDryCheckTask(bot))
