@@ -29,6 +29,8 @@ class FarmNpcShopPaginationView(discord.ui.View):
         self.nextButton.disabled = self.currentPage >= self.totalPage
 
     async def updateShopMessage(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
         renderResult = self.farmShopRenderService.renderShopPageToBuffer(
             page=self.currentPage,
         )
@@ -43,7 +45,7 @@ class FarmNpcShopPaginationView(discord.ui.View):
             filename="farm_shop.png",
         )
 
-        await interaction.response.edit_message(
+        await interaction.edit_original_response(
             content=self.GUIDE_TEXT,
             attachments=[file],
             view=self,

@@ -34,9 +34,11 @@ class MyFarmShopPaginationView(discord.ui.View):
 
     @discord.ui.button(label="Lịch sử mua hàng", emoji="🧾", style=discord.ButtonStyle.primary)
     async def historyButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         embed = self.buildPurchaseHistoryEmbed()
 
-        await interaction.response.send_message(
+        await interaction.followup.send(
             embed=embed,
             ephemeral=True,
             allowed_mentions=discord.AllowedMentions.none(),
@@ -57,6 +59,8 @@ class MyFarmShopPaginationView(discord.ui.View):
         await self.refreshShopMessage(interaction)
 
     async def refreshShopMessage(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
         renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
             sellerUserId=self.sellerUserId,
             memberDisplayName=self.sellerDisplayName,
@@ -73,7 +77,7 @@ class MyFarmShopPaginationView(discord.ui.View):
             filename="my_shop.png",
         )
 
-        await interaction.response.edit_message(
+        await interaction.edit_original_response(
             content=self.buildShopContent(),
             attachments=[file],
             view=self,

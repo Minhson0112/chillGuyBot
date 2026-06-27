@@ -30,6 +30,8 @@ class MyToolBagPaginationView(discord.ui.View):
         self.nextButton.disabled = self.currentPage >= self.totalPage
 
     async def updateToolBagMessage(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
         renderResult = self.farmInventoryRenderService.renderToolBagPageToBuffer(
             userId=self.authorId,
             memberDisplayName=self.memberDisplayName,
@@ -46,7 +48,7 @@ class MyToolBagPaginationView(discord.ui.View):
             filename="my_toolbag.png",
         )
 
-        await interaction.response.edit_message(
+        await interaction.edit_original_response(
             content=self.GUIDE_TEXT,
             attachments=[file],
             view=self,

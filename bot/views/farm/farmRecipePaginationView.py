@@ -58,6 +58,8 @@ class FarmRecipePaginationView(discord.ui.View):
         await self.refreshRecipeMessage(interaction)
 
     async def refreshRecipeMessage(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
         renderResult = self.farmRecipeRenderService.renderRecipePageToBuffer(
             page=self.currentPage,
         )
@@ -72,7 +74,7 @@ class FarmRecipePaginationView(discord.ui.View):
             filename="recipes.png",
         )
 
-        await interaction.response.edit_message(
+        await interaction.edit_original_response(
             content=self.COOK_GUIDE_TEXT,
             attachments=[file],
             view=self,

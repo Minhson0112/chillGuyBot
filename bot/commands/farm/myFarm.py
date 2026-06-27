@@ -70,15 +70,18 @@ class MyFarmView(discord.ui.View):
 
     @discord.ui.button(label="Làm mới", emoji="<:reload:1501945504546689095>", style=discord.ButtonStyle.secondary)
     async def refreshButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
         await self.refreshFarmMessage(interaction)
 
     @discord.ui.button(label="Trồng cây", emoji="🌱", style=discord.ButtonStyle.success)
     async def plantCropButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             seedOptions = self.findSeedOptions()
 
             if not seedOptions:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "Bạn không có hạt giống nào trong silo. hãy bấm nút **<:store:1501945501883568331> Shop NPC** để mua hạt giống.",
                     ephemeral=True,
                 )
@@ -89,7 +92,7 @@ class MyFarmView(discord.ui.View):
                 seedOptions=seedOptions,
             )
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 content="Các hạt giống 🌱 bên dưới là các hạt giống trong silo của bạn.<:silo:1501945517880639498>",
                 view=view,
                 ephemeral=True,
@@ -97,18 +100,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Open plant seed select error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi mở danh sách hạt giống.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Tưới nước", emoji="<:watering:1501945506018885743>", style=discord.ButtonStyle.primary)
     async def waterButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             waterResult = self.farmWaterService.waterCrop(self.authorId)
 
             if not waterResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     waterResult["message"],
                     ephemeral=True,
                 )
@@ -121,18 +126,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Water farm error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi tưới nước.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Bắt sâu", emoji="<:bug:1498089075867914281>", style=discord.ButtonStyle.danger)
     async def removePestButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             pestResult = self.farmPestRemoveService.removePest(self.authorId)
 
             if not pestResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     pestResult["message"],
                     ephemeral=True,
                 )
@@ -145,18 +152,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Remove pest farm error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi bắt sâu.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Thu hoạch", emoji="<:harvest:1501945507277438997>", style=discord.ButtonStyle.success)
     async def harvestButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             harvestResult = self.farmHarvestService.harvestCrop(self.authorId)
 
             if not harvestResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     harvestResult["message"],
                     ephemeral=True,
                 )
@@ -169,18 +178,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Harvest farm error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi thu hoạch.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Cho gà ăn", emoji="<:feeding_chicken:1501945509152030860>", style=discord.ButtonStyle.primary)
     async def feedChickenButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             feedResult = self.farmChickenFeedService.feedChicken(self.authorId)
 
             if not feedResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     feedResult["message"],
                     ephemeral=True,
                 )
@@ -193,18 +204,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Feed chicken error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi cho gà ăn.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Cho bò ăn", emoji="<:feed_cow:1501945511241060352>", style=discord.ButtonStyle.primary)
     async def feedCowButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             feedResult = self.farmCowFeedService.feedCow(self.authorId)
 
             if not feedResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     feedResult["message"],
                     ephemeral=True,
                 )
@@ -217,18 +230,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Feed cow error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi cho bò ăn.",
                 ephemeral=True,
             )
     
     @discord.ui.button(label="Lấy trứng", emoji="<:easteregg:1501945513157853345>", style=discord.ButtonStyle.success)
     async def collectEggButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             collectResult = self.farmChickenEggCollectService.collectEgg(self.authorId)
 
             if not collectResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     collectResult["message"],
                     ephemeral=True,
                 )
@@ -241,18 +256,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Collect egg error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi lấy trứng.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Vắt sữa", emoji="<:milking:1501945514651025510>", style=discord.ButtonStyle.success)
     async def collectMilkButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             collectResult = self.farmCowMilkCollectService.collectMilk(self.authorId)
 
             if not collectResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     collectResult["message"],
                     ephemeral=True,
                 )
@@ -265,18 +282,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Collect milk error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi vắt sữa.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Câu cá", emoji="<:fishing:1501945516378816563>", style=discord.ButtonStyle.secondary)
     async def fishingButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             fishingResult = self.farmFishingService.fish(self.authorId)
 
             if not fishingResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     fishingResult["message"],
                     ephemeral=True,
                 )
@@ -289,13 +308,15 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Fishing error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi câu cá.",
                 ephemeral=True,
             )
         
     @discord.ui.button(label="Xem silo", emoji="<:silo:1501945517880639498>", style=discord.ButtonStyle.secondary)
     async def viewMySiloButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             renderResult = self.farmInventoryRenderService.renderSiloPageToBuffer(
                 userId=self.authorId,
@@ -315,7 +336,7 @@ class MyFarmView(discord.ui.View):
                 totalPage=renderResult["totalPage"],
             )
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 file=file,
                 view=view,
                 ephemeral=True,
@@ -323,20 +344,22 @@ class MyFarmView(discord.ui.View):
 
         except FileNotFoundError as e:
             print(f"Silo asset file not found: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Không tìm thấy ảnh asset để render silo.",
                 ephemeral=True,
             )
 
         except Exception as e:
             print(f"Render my silo error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi xem silo của bạn.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Xem barn", emoji="<:barn:1501945519680000041>", style=discord.ButtonStyle.secondary)
     async def viewMyBarnButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             renderResult = self.farmInventoryRenderService.renderBarnPageToBuffer(
                 userId=self.authorId,
@@ -356,7 +379,7 @@ class MyFarmView(discord.ui.View):
                 totalPage=renderResult["totalPage"],
             )
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 file=file,
                 view=view,
                 ephemeral=True,
@@ -364,20 +387,22 @@ class MyFarmView(discord.ui.View):
 
         except FileNotFoundError as e:
             print(f"Barn asset file not found: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Không tìm thấy ảnh asset để render barn.",
                 ephemeral=True,
             )
 
         except Exception as e:
             print(f"Render my barn error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi xem barn của bạn.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Túi dụng cụ", emoji="🎒", style=discord.ButtonStyle.secondary)
     async def viewMyToolBagButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             renderResult = self.farmInventoryRenderService.renderToolBagPageToBuffer(
                 userId=self.authorId,
@@ -397,7 +422,7 @@ class MyFarmView(discord.ui.View):
                 totalPage=renderResult["totalPage"],
             )
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 file=file,
                 view=view,
                 ephemeral=True,
@@ -405,25 +430,27 @@ class MyFarmView(discord.ui.View):
 
         except FileNotFoundError as e:
             print(f"Tool bag asset file not found: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Không tìm thấy ảnh asset để render túi dụng cụ.",
                 ephemeral=True,
             )
 
         except Exception as e:
             print(f"Render my tool bag error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi xem túi dụng cụ của bạn.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Dùng công cụ", emoji="🛠️", style=discord.ButtonStyle.secondary)
     async def useToolButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             toolOptions = self.findToolOptions()
 
             if not toolOptions:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "Bạn không có công cụ nào có thể lắp vào farm. Hãy bấm nút **<:store:1501945501883568331> Shop NPC** để mua công cụ.",
                     ephemeral=True,
                 )
@@ -434,7 +461,7 @@ class MyFarmView(discord.ui.View):
                 toolOptions=toolOptions,
             )
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 content="Các công cụ bên dưới là công cụ trong túi của bạn.",
                 view=view,
                 ephemeral=True,
@@ -442,18 +469,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Open use tool select error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi mở danh sách công cụ.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Gỡ công cụ", emoji="🧰", style=discord.ButtonStyle.secondary)
     async def removeToolButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             toolOptions = self.findEquippedToolOptions()
 
             if not toolOptions:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "Farm của bạn hiện chưa lắp công cụ nào.",
                     ephemeral=True,
                 )
@@ -464,7 +493,7 @@ class MyFarmView(discord.ui.View):
                 toolOptions=toolOptions,
             )
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 content="Các công cụ bên dưới là công cụ đang được lắp trong farm của bạn.",
                 view=view,
                 ephemeral=True,
@@ -472,13 +501,15 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Open remove tool select error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi mở danh sách công cụ đang lắp.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Shop NPC", emoji="<:store:1501945501883568331>", style=discord.ButtonStyle.secondary)
     async def viewNpcShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             renderResult = self.farmShopRenderService.renderShopPageToBuffer(
                 page=1,
@@ -495,7 +526,7 @@ class MyFarmView(discord.ui.View):
                 totalPage=renderResult["totalPage"],
             )
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 file=file,
                 view=view,
                 ephemeral=True,
@@ -503,20 +534,22 @@ class MyFarmView(discord.ui.View):
 
         except FileNotFoundError as e:
             print(f"Farm NPC shop asset file not found: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Không tìm thấy ảnh asset để render shop NPC.",
                 ephemeral=True,
             )
 
         except Exception as e:
             print(f"Render farm NPC shop error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi xem shop NPC.",
                 ephemeral=True,
             )
     
     @discord.ui.button(label="Xem shop của bạn", emoji="<:producemarket:1501945503133208737>", style=discord.ButtonStyle.secondary)
     async def viewMyShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
                 sellerUserId=self.authorId,
@@ -536,7 +569,7 @@ class MyFarmView(discord.ui.View):
                 totalPage=renderResult["totalPage"],
             )
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 content=view.buildShopContent(),
                 file=file,
                 view=view,
@@ -545,20 +578,22 @@ class MyFarmView(discord.ui.View):
 
         except FileNotFoundError as e:
             print(f"My shop asset file not found: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Không tìm thấy ảnh asset để render shop.",
                 ephemeral=True,
             )
 
         except Exception as e:
             print(f"Render my shop error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi xem shop của bạn.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Công thức cooking", emoji="<:cooking:1501948950377267221>", style=discord.ButtonStyle.secondary)
     async def viewRecipeButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             renderResult = self.farmRecipeRenderService.renderRecipePageToBuffer(
                 page=1,
@@ -575,7 +610,7 @@ class MyFarmView(discord.ui.View):
                 totalPage=renderResult["totalPage"],
             )
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 file=file,
                 view=view,
                 ephemeral=True,
@@ -583,25 +618,27 @@ class MyFarmView(discord.ui.View):
 
         except FileNotFoundError as e:
             print(f"Recipe asset file not found: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Không tìm thấy ảnh asset để render công thức nấu ăn.",
                 ephemeral=True,
             )
 
         except Exception as e:
             print(f"Render recipe error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi xem công thức nấu ăn.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Nhận đồ ăn", emoji="<:food:1501945500558164128>", style=discord.ButtonStyle.success)
     async def collectFoodButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             collectResult = self.farmKitchenCollectService.collectFood(self.authorId)
 
             if not collectResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     collectResult["message"],
                     ephemeral=True,
                 )
@@ -614,18 +651,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Collect food error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi nhận đồ ăn.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="Xếp hàng", emoji="🚂", style=discord.ButtonStyle.primary)
     async def trainEventQueueButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             trainResult = self.farmTrainEventQueueService.queueTrain(self.authorId)
 
             if not trainResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     trainResult["message"],
                     ephemeral=True,
                 )
@@ -638,18 +677,20 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Train event queue error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi xếp hàng lên tàu hỏa.",
                 ephemeral=True,
             )
 
     @discord.ui.button(label="+ Ô đất", emoji="<:farmland_wet:1501946998105047241>", style=discord.ButtonStyle.secondary)
     async def unlockPlotButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             unlockResult = self.farmPlotUnlockService.unlockPlot(self.authorId)
 
             if not unlockResult["success"]:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     unlockResult["message"],
                     ephemeral=True,
                 )
@@ -662,7 +703,7 @@ class MyFarmView(discord.ui.View):
 
         except Exception as e:
             print(f"Unlock farm plot error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi mở ô đất.",
                 ephemeral=True,
             )
@@ -787,7 +828,7 @@ class MyFarmView(discord.ui.View):
 
         embed.set_image(url="attachment://my_farm.png")
 
-        await interaction.response.edit_message(
+        await interaction.edit_original_response(
             embed=embed,
             attachments=[file],
             view=self,

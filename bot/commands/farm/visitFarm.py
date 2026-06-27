@@ -28,6 +28,8 @@ class MemberShopPaginationView(discord.ui.View):
         self.nextButton.disabled = self.currentPage >= self.totalPage
 
     async def refreshShopMessage(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
         renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
             sellerUserId=self.sellerUserId,
             memberDisplayName=self.sellerDisplayName,
@@ -46,7 +48,7 @@ class MemberShopPaginationView(discord.ui.View):
         embed = self.buildShopEmbed()
         embed.set_image(url="attachment://member_shop.png")
 
-        await interaction.response.edit_message(
+        await interaction.edit_original_response(
             embed=embed,
             attachments=[file],
             view=self,
@@ -93,6 +95,8 @@ class VisitFarmView(discord.ui.View):
 
     @discord.ui.button(label="Xem shop", emoji="🛒", style=discord.ButtonStyle.primary)
     async def viewShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
         try:
             renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
                 sellerUserId=self.visitedUserId,
@@ -115,7 +119,7 @@ class VisitFarmView(discord.ui.View):
             embed = view.buildShopEmbed()
             embed.set_image(url="attachment://member_shop.png")
 
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 embed=embed,
                 file=file,
                 view=view,
@@ -124,14 +128,14 @@ class VisitFarmView(discord.ui.View):
 
         except FileNotFoundError as e:
             print(f"Visit shop asset file not found: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Không tìm thấy ảnh asset để render shop.",
                 ephemeral=True,
             )
 
         except Exception as e:
             print(f"Visit shop render error: {e}")
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Đã xảy ra lỗi khi xem shop.",
                 ephemeral=True,
             )

@@ -40,6 +40,8 @@ class FindMarketItemView(discord.ui.View):
             )
             return
 
+        await interaction.response.defer()
+
         self.isConfirmed = True
         self.disableButtons()
 
@@ -50,7 +52,7 @@ class FindMarketItemView(discord.ui.View):
             )
 
             if not searchResult["success"]:
-                await interaction.response.edit_message(
+                await interaction.edit_original_response(
                     content=searchResult["message"],
                     embed=None,
                     view=self,
@@ -60,7 +62,7 @@ class FindMarketItemView(discord.ui.View):
 
             embed = self.buildFoundEmbed(searchResult["result"])
 
-            await interaction.response.edit_message(
+            await interaction.edit_original_response(
                 content=None,
                 embed=embed,
                 view=self,
@@ -69,7 +71,7 @@ class FindMarketItemView(discord.ui.View):
 
         except Exception as e:
             print(f"Find market item confirm error: {e}")
-            await interaction.response.edit_message(
+            await interaction.edit_original_response(
                 content="Đã xảy ra lỗi khi tìm shop bán món đồ này.",
                 embed=None,
                 view=self,

@@ -31,6 +31,8 @@ class MySiloPaginationView(discord.ui.View):
         self.nextButton.disabled = self.currentPage >= self.totalPage
 
     async def updateSiloMessage(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
         renderResult = self.farmInventoryRenderService.renderSiloPageToBuffer(
             userId=self.authorId,
             memberDisplayName=self.memberDisplayName,
@@ -47,7 +49,7 @@ class MySiloPaginationView(discord.ui.View):
             filename="my_silo.png",
         )
 
-        await interaction.response.edit_message(
+        await interaction.edit_original_response(
             content=self.GUIDE_TEXT,
             attachments=[file],
             view=self,

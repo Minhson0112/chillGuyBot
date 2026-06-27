@@ -31,6 +31,8 @@ class PlantSeedSelect(discord.ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
         view = self.view
         userInventoryId = int(self.values[0])
 
@@ -39,7 +41,7 @@ class PlantSeedSelect(discord.ui.Select):
             userInventoryId=userInventoryId,
         )
 
-        await interaction.response.edit_message(
+        await interaction.edit_original_response(
             content=result["message"],
             view=None,
         )

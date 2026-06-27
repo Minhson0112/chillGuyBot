@@ -28,6 +28,8 @@ class RemoveToolSelect(discord.ui.Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+
         view = self.view
         userToolId = int(self.values[0])
 
@@ -36,7 +38,7 @@ class RemoveToolSelect(discord.ui.Select):
             userToolId=userToolId,
         )
 
-        await interaction.response.edit_message(
+        await interaction.edit_original_response(
             content=result["message"],
             view=None,
         )
