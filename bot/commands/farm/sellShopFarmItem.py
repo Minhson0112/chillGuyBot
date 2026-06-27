@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 
 from bot.services.farm.farmSellShopService import FarmSellShopService
@@ -21,7 +22,13 @@ class SellShopFarmItemCommand(commands.Cog):
                 quantity=quantity,
             )
 
-            await ctx.reply(sellShopResult["message"])
+            replyMessage = await ctx.reply(sellShopResult["message"])
+
+            if sellShopResult["success"]:
+                try:
+                    await replyMessage.delete(delay=3)
+                except discord.HTTPException:
+                    pass
 
         except Exception as e:
             print(f"Sell shop farm item error: {e}")
