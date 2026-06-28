@@ -1988,3 +1988,40 @@ ALTER TABLE farm_cow_shed
     ADD COLUMN is_hungry_notified TINYINT(1) NOT NULL DEFAULT 0
         COMMENT 'whether hungry notification was sent'
         AFTER is_milk_ready_notified;
+
+# add farm theft tracking
+ALTER TABLE farm
+    ADD COLUMN last_robbed_at DATETIME DEFAULT NULL
+        COMMENT 'last time the farm was robbed',
+    ADD COLUMN robbed_count INT NOT NULL DEFAULT 0
+        COMMENT 'number of times the farm was robbed',
+    ADD CONSTRAINT chk_farm_robbed_count
+        CHECK (robbed_count >= 0);
+
+# add farm theft history
+CREATE TABLE farm_theft_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm theft history id',
+    thief_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of the thief',
+    victim_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of the victim',
+    item_id BIGINT NOT NULL COMMENT 'stolen item id',
+    stolen_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'stolen at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_farm_theft_histories_thief_user_id (thief_user_id),
+    KEY idx_farm_theft_histories_victim_user_id (victim_user_id),
+    KEY idx_farm_theft_histories_item_id (item_id),
+    KEY idx_farm_theft_histories_stolen_at (stolen_at),
+
+    CONSTRAINT fk_farm_theft_histories_thief_user_id
+        FOREIGN KEY (thief_user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_theft_histories_victim_user_id
+        FOREIGN KEY (victim_user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_theft_histories_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm theft history';

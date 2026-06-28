@@ -17,6 +17,7 @@ from bot.models.farmFishPond import FarmFishPond
 from bot.models.farmKitchen import FarmKitchen
 from bot.models.farmMarketListing import FarmMarketListing
 from bot.models.farmToolEquipment import FarmToolEquipment
+from bot.models.farmTheftHistory import FarmTheftHistory
 from bot.models.farmTrainEvent import FarmTrainEvent
 from bot.models.farmTrainEventHistory import FarmTrainEventHistory
 from bot.models.fishingHistory import FishingHistory

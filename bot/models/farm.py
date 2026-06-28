@@ -20,6 +20,8 @@ class Farm(Base):
     farm_exp = Column(Integer, nullable=False, default=0, comment="farm experience")
     base_image_key = Column(String(255), nullable=True, default="base", comment="base image key for farm rendering")
     is_train_event = Column(Boolean, nullable=False, default=False, comment="whether train event is active in farm")
+    last_robbed_at = Column(DateTime, nullable=True, comment="last time the farm was robbed")
+    robbed_count = Column(Integer, nullable=False, default=0, comment="number of times the farm was robbed")
     created_at = Column(DateTime, nullable=False, server_default=func.now(), comment="created at")
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now(), comment="updated at")
 
