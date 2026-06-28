@@ -40,6 +40,14 @@ class FarmRepository:
             .first()
         )
 
+    def findByUserIdForUpdate(self, userId: int):
+        return (
+            self.session.query(Farm)
+            .filter(Farm.user_id == userId)
+            .with_for_update()
+            .first()
+        )
+
     def findByUserIdWithRenderData(self, userId: int):
         return (
             self.session.query(Farm)
@@ -96,6 +104,19 @@ class FarmRepository:
 
     def updateBaseImageKey(self, farm: Farm, baseImageKey: str):
         farm.base_image_key = baseImageKey
+        self.session.flush()
+
+        return farm
+
+    def markRobbed(self, farm: Farm, robbedAt):
+        farm.last_robbed_at = robbedAt
+        farm.robbed_count += 1
+        self.session.flush()
+
+        return farm
+
+    def resetRobbedCount(self, farm: Farm):
+        farm.robbed_count = 0
         self.session.flush()
 
         return farm

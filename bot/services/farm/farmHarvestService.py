@@ -24,7 +24,7 @@ class FarmHarvestService:
             farmToolEquipmentRepository = FarmToolEquipmentRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
 
-            farm = farmRepository.findByUserIdWithRenderData(userId)
+            farm = farmRepository.findByUserIdForUpdate(userId)
 
             if farm is None:
                 return {
@@ -74,11 +74,19 @@ class FarmHarvestService:
             baseHarvestQuantity = farmCropArea.unlocked_plot_count * crop.harvest_quantity_per_plot
             drySeconds = self.calculateTotalDrySeconds(farmCropArea, now)
             pestSeconds = self.calculateTotalPestSeconds(farmCropArea, now)
+            robbedCount = max(farm.robbed_count, 0)
+
+            harvestReductions = self.calculateHarvestReductions(
+                drySeconds=drySeconds,
+                pestSeconds=pestSeconds,
+                robbedCount=robbedCount,
+            )
 
             reducedHarvestQuantity = self.calculateHarvestQuantity(
                 baseHarvestQuantity=baseHarvestQuantity,
                 drySeconds=drySeconds,
                 pestSeconds=pestSeconds,
+                robbedCount=robbedCount,
             )
 
             sickleEquipment = farmToolEquipmentRepository.findByFarmIdAndToolTypeWithToolData(
@@ -101,6 +109,7 @@ class FarmHarvestService:
             )
 
             farmCropAreaRepository.clearCrop(farmCropArea)
+            farmRepository.resetRobbedCount(farm)
             farmRepository.increaseFarmExp(
                 farm,
                 self.HARVEST_EXP_PER_CROP * farmCropArea.unlocked_plot_count,
@@ -112,10 +121,13 @@ class FarmHarvestService:
 
             message = f"Bạn đã thu hoạch **{harvestQuantity}** {cropItemText}."
 
-            if reducedHarvestQuantity < baseHarvestQuantity:
+            if harvestReductions["totalReduction"] > 0:
                 message += (
-                    f"\nSản lượng gốc là **{baseHarvestQuantity}**, "
-                    f"nhưng bị giảm còn **{reducedHarvestQuantity}** do đất khô hoặc sâu bệnh."
+                    f"\nSản lượng gốc là **{baseHarvestQuantity}**."
+                    f"\n- Bị mất **{harvestReductions['pestReduction']}** do sâu bệnh tàn phá."
+                    f"\n- Bị mất **{harvestReductions['dryReduction']}** do đất khô hạn."
+                    f"\n- Bị mất **{harvestReductions['robbedReduction']}** do bị trộm."
+                    f"\nSản lượng còn lại là **{reducedHarvestQuantity}**."
                 )
 
             if sickleBonusQuantity > 0:
@@ -134,16 +146,34 @@ class FarmHarvestService:
         baseHarvestQuantity: int,
         drySeconds: int,
         pestSeconds: int,
+        robbedCount: int = 0,
     ):
-        dryReduction = drySeconds // self.DRY_REDUCTION_SECONDS_PER_QUANTITY
-        pestReduction = pestSeconds // self.PEST_REDUCTION_SECONDS_PER_QUANTITY
+        harvestReductions = self.calculateHarvestReductions(
+            drySeconds=drySeconds,
+            pestSeconds=pestSeconds,
+            robbedCount=robbedCount,
+        )
 
-        harvestQuantity = baseHarvestQuantity - dryReduction - pestReduction
-
-        if baseHarvestQuantity <= 0:
-            return 0
+        harvestQuantity = baseHarvestQuantity - harvestReductions["totalReduction"]
 
         return max(harvestQuantity, 1)
+
+    def calculateHarvestReductions(
+        self,
+        drySeconds: int,
+        pestSeconds: int,
+        robbedCount: int,
+    ):
+        dryReduction = max(drySeconds, 0) // self.DRY_REDUCTION_SECONDS_PER_QUANTITY
+        pestReduction = max(pestSeconds, 0) // self.PEST_REDUCTION_SECONDS_PER_QUANTITY
+        robbedReduction = max(robbedCount, 0)
+
+        return {
+            "dryReduction": dryReduction,
+            "pestReduction": pestReduction,
+            "robbedReduction": robbedReduction,
+            "totalReduction": dryReduction + pestReduction + robbedReduction,
+        }
 
     def calculateSickleBonusQuantity(
         self,

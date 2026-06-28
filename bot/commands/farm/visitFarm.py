@@ -3,6 +3,7 @@ from discord.ext import commands
 
 from bot.services.farm.farmMarketShopRenderService import FarmMarketShopRenderService
 from bot.services.farm.farmRenderService import FarmRenderService
+from bot.services.farm.farmTheftService import FarmTheftService
 
 
 class MemberShopPaginationView(discord.ui.View):
@@ -92,6 +93,29 @@ class VisitFarmView(discord.ui.View):
         self.visitedUserId = visitedUserId
         self.visitedDisplayName = visitedDisplayName
         self.farmMarketShopRenderService = FarmMarketShopRenderService()
+        self.farmTheftService = FarmTheftService()
+
+    @discord.ui.button(label="Ăn trộm nông sản", emoji="👺", style=discord.ButtonStyle.danger)
+    async def stealCropButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(ephemeral=True)
+
+        try:
+            theftResult = self.farmTheftService.stealCrop(
+                thiefUserId=interaction.user.id,
+                victimUserId=self.visitedUserId,
+            )
+
+            await interaction.followup.send(
+                theftResult["message"],
+                ephemeral=True,
+            )
+
+        except Exception as e:
+            print(f"Farm theft error: {e}")
+            await interaction.followup.send(
+                "Đã xảy ra lỗi khi ăn trộm nông sản.",
+                ephemeral=True,
+            )
 
     @discord.ui.button(label="Xem shop", emoji="🛒", style=discord.ButtonStyle.primary)
     async def viewShopButton(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -154,6 +178,10 @@ class VisitFarmCommand(commands.Cog):
 
         if member.bot:
             await ctx.reply("Bot không có nông trại để ghé thăm.")
+            return
+
+        if member.id == ctx.author.id:
+            await ctx.reply("Bạn không thể ghé thăm nông trại của chính mình.")
             return
 
         try:

@@ -10,6 +10,14 @@ class MemberRepository:
     def findByUserId(self, userId):
         return self.session.query(Member).filter(Member.user_id == userId).first()
 
+    def findByUserIdForUpdate(self, userId):
+        return (
+            self.session.query(Member)
+            .filter(Member.user_id == userId)
+            .with_for_update()
+            .first()
+        )
+
     def findByUserIdWithChat(self, userId):
         return (
             self.session.query(Member)

@@ -2008,7 +2008,7 @@ CREATE TABLE farm_theft_histories (
 
     PRIMARY KEY (id),
 
-    KEY idx_farm_theft_histories_thief_user_id (thief_user_id),
+    KEY idx_farm_theft_histories_thief_stolen_at (thief_user_id, stolen_at),
     KEY idx_farm_theft_histories_victim_user_id (victim_user_id),
     KEY idx_farm_theft_histories_item_id (item_id),
     KEY idx_farm_theft_histories_stolen_at (stolen_at),
