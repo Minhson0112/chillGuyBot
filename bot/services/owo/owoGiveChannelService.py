@@ -179,7 +179,9 @@ class OwoGiveChannelService:
         return (
             "# <a:CS_decorate:1366286592758779995> Cảm Ơn Donate <a:CS_decorate:1366286658260963450>\n"
             f"Thay mặt {LOGO} cảm ơn {senderMember.mention} rất nhiều <a:CS_tim1:1466240640089325588>, "
-            f"chúng tớ đã nhận được {donatedCowoncy:,} cowoncy, chúc bạn một ngày tốt lành."
+            f"chúng tớ đã nhận được {donatedCowoncy:,} cowoncy, chúc bạn một ngày tốt lành.\n"
+            "Đừng quên xem qua đặc quyền dành cho donator tại "
+            "https://discord.com/channels/1356994231918530690/1502996579366338620/1516263538962862090 nhé."
         )
 
     def buildExchangeCoinMessage(

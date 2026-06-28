@@ -227,6 +227,7 @@ async def main():
         "bot.events.memberLeaveEvent",
         "bot.events.memberUpdateEvent",
         "bot.events.messageCreateEvent",
+        "bot.events.boosterMessageEvent",
         "bot.events.autoModerationEvent",
         "bot.events.autoResponderEvent",
         "bot.events.anonymousMatchMessageRelayEvent",
