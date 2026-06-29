@@ -19,6 +19,13 @@ class BaseSkinMasterRepository:
             .first()
         )
 
+    def findAll(self):
+        return (
+            self.session.query(BaseSkinMaster)
+            .order_by(BaseSkinMaster.required_farm_level.asc(), BaseSkinMaster.id.asc())
+            .all()
+        )
+
     def findActive(self):
         return (
             self.session.query(BaseSkinMaster)

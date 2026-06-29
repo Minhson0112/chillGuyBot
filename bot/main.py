@@ -162,6 +162,7 @@ async def main():
         "bot.commands.farm.cash",
         "bot.commands.farm.buy",
         "bot.commands.farm.buySkin",
+        "bot.commands.farm.shopSkin",
         "bot.commands.farm.mySkin",
         "bot.commands.farm.useSkin",
         "bot.commands.farm.mySilo",

@@ -298,3 +298,12 @@ ASSET_IMAGE_PATHS = {
     "train" : "bot/assets/images/farm/buildings/train.png",
     "item_bug": "bot/assets/images/farm/animals/bug.png",
 }
+
+ASSET_IMAGE_URLS = {
+    "sakura": "https://cdn.discordapp.com/attachments/1357327625051443291/1521040655864827995/builed_farm.png?ex=6a4362ff&is=6a42117f&hm=ad0428d37763eb7a2a816309270bef159f6585af4bd386cf7c89f564924c91a5&",
+    "snow": "https://cdn.discordapp.com/attachments/1357327625051443291/1521040778145697832/builed_farm.png?ex=6a43631d&is=6a42119d&hm=15703d6ee576cf9a2c70d3ef9c367776ae6be02b6fd72fa4113e45038600acdb&",
+    "christmas": "https://cdn.discordapp.com/attachments/1357327625051443291/1521040202422812803/builed_farm.png?ex=6a436293&is=6a421113&hm=20df58ce957240ff63a67cbeaa8aac16980d631bdf86adf86eddf1efd2b2c2ca&",
+    "halloween": "https://cdn.discordapp.com/attachments/1357327625051443291/1521040500650414141/builed_farm.png?ex=6a4362da&is=6a42115a&hm=340b3c7a040a28e7b5bbc7105cb37f8fad6bcc9cd05869c6de91d74a95f28402&",
+    "newYear": "https://cdn.discordapp.com/attachments/1357327625051443291/1521040891815661639/builed_farm.png?ex=6a436338&is=6a4211b8&hm=a17601f2baa70b07038847f9d7d9a0cdfd4f3a0cb4735879cdb3918304dfd2a0&",
+    "cyberpunk": "https://cdn.discordapp.com/attachments/1357327625051443291/1521040362888757248/builed_farm.png?ex=6a4362ba&is=6a42113a&hm=0d5e0b90dcbb147014d84ed0a78cd3070de6ed4c02a58fa2f41618d1ecbf7908&",
+}
