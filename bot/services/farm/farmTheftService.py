@@ -12,7 +12,7 @@ from bot.repository.userInventoryRepository import UserInventoryRepository
 
 class FarmTheftService:
     THEFT_COOLDOWN_HOURS = 2
-    STOLEN_QUANTITY = 1
+    THEFT_PERCENT = 20
 
     def stealCrop(self, thiefUserId: int, victimUserId: int):
         if thiefUserId == victimUserId:
@@ -73,11 +73,12 @@ class FarmTheftService:
                 return cropResult
 
             cropItem = cropResult["cropItem"]
+            stolenQuantity = self.calculateStolenQuantity(victimFarm.cropArea)
 
             userInventoryRepository.addOrCreate(
                 userId=thiefUserId,
                 itemId=cropItem.id,
-                quantity=self.STOLEN_QUANTITY,
+                quantity=stolenQuantity,
             )
             farmTheftHistoryRepository.create(
                 thiefUserId=thiefUserId,
@@ -85,17 +86,29 @@ class FarmTheftService:
                 itemId=cropItem.id,
                 stolenAt=now,
             )
-            farmRepository.markRobbed(victimFarm, now)
+            farmRepository.markRobbed(
+                farm=victimFarm,
+                robbedAt=now,
+                stolenQuantity=stolenQuantity,
+            )
 
             session.commit()
 
             return {
                 "success": True,
                 "message": (
-                    f"Bạn đã ăn trộm được **{self.STOLEN_QUANTITY}** "
+                    f"Bạn đã ăn trộm được **{stolenQuantity}** "
                     f"{buildItemText(cropItem)}."
                 ),
             }
+
+    def calculateStolenQuantity(self, farmCropArea):
+        crop = farmCropArea.crop
+        maxHarvestQuantity = (
+            farmCropArea.unlocked_plot_count * crop.harvest_quantity_per_plot
+        )
+
+        return max(maxHarvestQuantity * self.THEFT_PERCENT // 100, 1)
 
     def validateVictimCooldown(self, victimFarm, now: datetime, cooldown: timedelta):
         if victimFarm.last_robbed_at is None:

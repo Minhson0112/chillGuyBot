@@ -108,9 +108,9 @@ class FarmRepository:
 
         return farm
 
-    def markRobbed(self, farm: Farm, robbedAt):
+    def markRobbed(self, farm: Farm, robbedAt, stolenQuantity: int):
         farm.last_robbed_at = robbedAt
-        farm.robbed_count += 1
+        farm.robbed_count += stolenQuantity
         self.session.flush()
 
         return farm
