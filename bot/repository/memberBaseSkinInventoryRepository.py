@@ -34,6 +34,28 @@ class MemberBaseSkinInventoryRepository:
             .first()
         )
 
+    def findByUserIdForUpdate(self, userId: int):
+        return (
+            self.session.query(MemberBaseSkinInventory)
+            .filter(MemberBaseSkinInventory.user_id == userId)
+            .order_by(MemberBaseSkinInventory.id.asc())
+            .with_for_update()
+            .all()
+        )
+
+    def setUsing(self, inventories, selectedInventoryId: int):
+        selectedInventory = None
+
+        for inventory in inventories:
+            inventory.is_using = inventory.id == selectedInventoryId
+
+            if inventory.is_using:
+                selectedInventory = inventory
+
+        self.session.flush()
+
+        return selectedInventory
+
     def create(self, userId: int, baseSkinId: int, isUsing: bool = False):
         inventory = MemberBaseSkinInventory(
             user_id=userId,
