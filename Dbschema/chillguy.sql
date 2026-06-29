@@ -2090,9 +2090,58 @@ VALUES (
     0,
     1,
     1
+), (
+    'sakura',
+    'sakura',
+    'sakura',
+    NULL,
+    40000,
+    2,
+    1
+), (
+    'snow',
+    'snow',
+    'snow',
+    NULL,
+    30000,
+    2,
+    1
+), (
+    'christmas',
+    'christmas',
+    'christmas',
+    NULL,
+    200000,
+    3,
+    0
+), (
+    'halloween',
+    'halloween',
+    'halloween',
+    NULL,
+    300000,
+    3,
+    0
+), (
+    'newYear',
+    'newYear',
+    'newYear',
+    NULL,
+    150000,
+    3,
+    0
+), (
+    'cyberpunk',
+    'cyberpunk',
+    'cyberpunk',
+    NULL,
+    80000,
+    4,
+    1
 )
 ON DUPLICATE KEY UPDATE
     name = VALUES(name),
+    base_image_key = VALUES(base_image_key),
     description = VALUES(description),
     buy_price = VALUES(buy_price),
     required_farm_level = VALUES(required_farm_level),

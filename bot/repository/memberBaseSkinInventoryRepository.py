@@ -24,6 +24,16 @@ class MemberBaseSkinInventoryRepository:
             .all()
         )
 
+    def findUsingByUserId(self, userId: int):
+        return (
+            self.session.query(MemberBaseSkinInventory)
+            .options(joinedload(MemberBaseSkinInventory.baseSkin))
+            .filter(MemberBaseSkinInventory.user_id == userId)
+            .filter(MemberBaseSkinInventory.is_using.is_(True))
+            .order_by(MemberBaseSkinInventory.id.asc())
+            .first()
+        )
+
     def create(self, userId: int, baseSkinId: int, isUsing: bool = False):
         inventory = MemberBaseSkinInventory(
             user_id=userId,

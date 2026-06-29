@@ -16,6 +16,7 @@ from bot.repository.farmTrainEventRepository import FarmTrainEventRepository
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
 from bot.repository.farmToolEquipmentRepository import FarmToolEquipmentRepository
+from bot.repository.memberBaseSkinInventoryRepository import MemberBaseSkinInventoryRepository
 from bot.services.asset.assetImageService import assetImageService
 
 
@@ -124,12 +125,19 @@ class FarmRenderService:
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmTrainEventRepository = FarmTrainEventRepository(session)
-            
+            memberBaseSkinInventoryRepository = MemberBaseSkinInventoryRepository(session)
 
             farm = farmRepository.findByUserIdWithRenderData(memberId)
 
             if farm is None:
                 raise ValueError(f"Farm not found for member id: {memberId}")
+
+            usingBaseSkinInventory = memberBaseSkinInventoryRepository.findUsingByUserId(memberId)
+
+            if usingBaseSkinInventory is None or usingBaseSkinInventory.baseSkin is None:
+                raise ValueError(f"Using base skin not found for member id: {memberId}")
+
+            baseImageKey = usingBaseSkinInventory.baseSkin.base_image_key
 
             trainEvent = None
 
@@ -144,6 +152,7 @@ class FarmRenderService:
 
             image = self.renderFarmImage(
                 farm,
+                baseImageKey,
                 toolEquipments,
                 includePrivateInfo=includePrivateInfo,
             )
@@ -162,10 +171,11 @@ class FarmRenderService:
     def renderFarmImage(
         self,
         farm,
+        baseImageKey: str,
         toolEquipments=None,
         includePrivateInfo: bool = True,
     ):
-        baseImage = assetImageService.getImage(farm.base_image_key)
+        baseImage = assetImageService.getImage(baseImageKey)
 
         cropArea = farm.cropArea
 

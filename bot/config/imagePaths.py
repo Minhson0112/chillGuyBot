@@ -1,5 +1,11 @@
 ASSET_IMAGE_PATHS = {
     "base": "bot/assets/images/farm/base/base.png",
+    "sakura": "bot/assets/images/farm/base/base_sakura.png",
+    "snow": "bot/assets/images/farm/base/base_winter.png",
+    "christmas": "bot/assets/images/farm/base/base_christmas.png",
+    "halloween": "bot/assets/images/farm/base/base_halloween.png",
+    "newYear": "bot/assets/images/farm/base/base_new_year.png",
+    "cyberpunk": "bot/assets/images/farm/base/base_cyber.png",
     "farm_land_wet" : "bot/assets/images/farm/base/farmland_wet.png",
     "farm_land_dry" : "bot/assets/images/farm/base/farmland_dry.png",
     "hot_bar" : "bot/assets/images/farm/ui/hot_bar.png",
