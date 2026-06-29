@@ -161,6 +161,7 @@ async def main():
         "bot.commands.farm.shopFarm",
         "bot.commands.farm.cash",
         "bot.commands.farm.buy",
+        "bot.commands.farm.buySkin",
         "bot.commands.farm.mySilo",
         "bot.commands.farm.plant",
         "bot.commands.farm.myBarn",
