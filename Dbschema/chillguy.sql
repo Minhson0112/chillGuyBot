@@ -2025,3 +2025,90 @@ CREATE TABLE farm_theft_histories (
         FOREIGN KEY (item_id) REFERENCES items(id)
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm theft history';
+
+# add farm base skin master
+CREATE TABLE base_skin_master (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'base skin id',
+    code VARCHAR(100) NOT NULL COMMENT 'unique base skin code',
+    name VARCHAR(255) NOT NULL COMMENT 'base skin name',
+    base_image_key VARCHAR(255) NOT NULL COMMENT 'farm base image key',
+    description VARCHAR(500) DEFAULT NULL COMMENT 'base skin description',
+    buy_price INT NOT NULL DEFAULT 0 COMMENT 'buy price in chill coin',
+    required_farm_level INT NOT NULL DEFAULT 1 COMMENT 'required farm level',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'is active',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_base_skin_master_code (code),
+    UNIQUE KEY uq_base_skin_master_image_key (base_image_key),
+    KEY idx_base_skin_master_active_level (is_active, required_farm_level),
+
+    CONSTRAINT chk_base_skin_master_buy_price
+        CHECK (buy_price >= 0),
+    CONSTRAINT chk_base_skin_master_required_farm_level
+        CHECK (required_farm_level >= 1)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm base skin master';
+
+# add base skin inventory for each member
+CREATE TABLE member_base_skin_inventory (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'member base skin inventory id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    base_skin_id BIGINT NOT NULL COMMENT 'base skin id',
+    is_using TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'is currently in use',
+    acquired_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'acquired at',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_member_base_skin_inventory_user_skin (user_id, base_skin_id),
+    KEY idx_member_base_skin_inventory_user_id (user_id),
+    KEY idx_member_base_skin_inventory_base_skin_id (base_skin_id),
+
+    CONSTRAINT fk_member_base_skin_inventory_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_member_base_skin_inventory_base_skin_id
+        FOREIGN KEY (base_skin_id) REFERENCES base_skin_master(id)
+        ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='base skins owned by members';
+
+INSERT INTO base_skin_master (
+    code,
+    name,
+    base_image_key,
+    description,
+    buy_price,
+    required_farm_level,
+    is_active
+)
+VALUES (
+    'base',
+    'Mặc định',
+    'base',
+    'Base farm mặc định',
+    0,
+    1,
+    1
+)
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    description = VALUES(description),
+    buy_price = VALUES(buy_price),
+    required_farm_level = VALUES(required_farm_level),
+    is_active = VALUES(is_active);
+
+INSERT INTO member_base_skin_inventory (
+    user_id,
+    base_skin_id,
+    is_using
+)
+SELECT
+    farm.user_id,
+    baseSkin.id,
+    1
+FROM farm
+JOIN base_skin_master baseSkin
+    ON baseSkin.code = 'base'
+ON DUPLICATE KEY UPDATE
+    is_using = VALUES(is_using);

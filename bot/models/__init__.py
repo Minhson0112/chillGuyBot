@@ -1,6 +1,7 @@
 from bot.models.anonymousMatchQueue import AnonymousMatchQueue
 from bot.models.anonymousMatchSession import AnonymousMatchSession
 from bot.models.autoResponder import AutoResponder
+from bot.models.baseSkinMaster import BaseSkinMaster
 from bot.models.chat import Chat
 from bot.models.chillCoinExchangeCowoncyHistory import ChillCoinExchangeCowoncyHistory
 from bot.models.chillCoinTransaction import ChillCoinTransaction
@@ -34,6 +35,7 @@ from bot.models.lottoEvent import LottoEvent
 from bot.models.lottoTicket import LottoTicket
 from bot.models.lottoTicketPurchase import LottoTicketPurchase
 from bot.models.member import Member
+from bot.models.memberBaseSkinInventory import MemberBaseSkinInventory
 from bot.models.memberDailyActivity import MemberDailyActivity
 from bot.models.memberDailyFortune import MemberDailyFortune
 from bot.models.memberModerationHistory import MemberModerationHistory

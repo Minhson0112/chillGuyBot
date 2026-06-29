@@ -1,9 +1,11 @@
+from bot.repository.baseSkinMasterRepository import BaseSkinMasterRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
 from bot.repository.farmChickenCoopRepository import FarmChickenCoopRepository
 from bot.repository.farmCowShedRepository import FarmCowShedRepository
 from bot.repository.farmFishPondRepository import FarmFishPondRepository
 from bot.repository.farmKitchenRepository import FarmKitchenRepository
+from bot.repository.memberBaseSkinInventoryRepository import MemberBaseSkinInventoryRepository
 
 
 class FarmInitializeService:
@@ -19,11 +21,30 @@ class FarmInitializeService:
         farmCowShedRepository = FarmCowShedRepository(session)
         farmFishPondRepository = FarmFishPondRepository(session)
         farmKitchenRepository = FarmKitchenRepository(session)
+        baseSkinMasterRepository = BaseSkinMasterRepository(session)
+        memberBaseSkinInventoryRepository = MemberBaseSkinInventoryRepository(session)
 
         farm = farmRepository.findByUserId(userId)
 
         if farm is None:
             farm = farmRepository.createDefaultFarm(userId)
+
+        baseSkin = baseSkinMasterRepository.findByCode("base")
+
+        if baseSkin is None:
+            raise ValueError("Default base skin not found")
+
+        baseSkinInventory = memberBaseSkinInventoryRepository.findByUserIdAndBaseSkinId(
+            userId=userId,
+            baseSkinId=baseSkin.id,
+        )
+
+        if baseSkinInventory is None:
+            memberBaseSkinInventoryRepository.create(
+                userId=userId,
+                baseSkinId=baseSkin.id,
+                isUsing=True,
+            )
 
         farmCropArea = farmCropAreaRepository.findByFarmId(farm.id)
 
