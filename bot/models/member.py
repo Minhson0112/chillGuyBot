@@ -40,6 +40,8 @@ class Member(Base):
         cascade="all, delete-orphan",
     )
     fishingHistories = relationship("FishingHistory", back_populates="member", cascade="all, delete-orphan")
+    cookingHistories = relationship("FarmCookingHistory", back_populates="member", cascade="all, delete-orphan")
+    harvestHistories = relationship("FarmHarvestHistory", back_populates="member", cascade="all, delete-orphan")
     mergeGamePlayHistories = relationship("MergeGamePlayHistory", back_populates="member", cascade="all, delete-orphan")
     marketListings = relationship(
         "FarmMarketListing",

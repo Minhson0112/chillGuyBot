@@ -2161,3 +2161,55 @@ JOIN base_skin_master baseSkin
     ON baseSkin.code = 'base'
 ON DUPLICATE KEY UPDATE
     is_using = VALUES(is_using);
+
+# add farm harvest history
+CREATE TABLE farm_harvest_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm harvest history id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of the farm owner',
+    item_id BIGINT NOT NULL COMMENT 'harvested crop item id',
+    quantity INT NOT NULL COMMENT 'harvested quantity including tool bonus',
+    is_perfect_harvest TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'whether no crops were lost to pests, dryness, or theft',
+    harvested_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'harvested at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_farm_harvest_histories_user_harvested_at (user_id, harvested_at),
+    KEY idx_farm_harvest_histories_item_id (item_id),
+    KEY idx_farm_harvest_histories_perfect_harvested_at (is_perfect_harvest, harvested_at),
+
+    CONSTRAINT fk_farm_harvest_histories_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_harvest_histories_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_farm_harvest_histories_quantity
+        CHECK (quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm harvest history';
+
+# add farm cooking history
+CREATE TABLE farm_cooking_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm cooking history id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    item_id BIGINT NOT NULL COMMENT 'received food item id',
+    quantity INT NOT NULL COMMENT 'received quantity',
+    received_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'received at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_farm_cooking_histories_user_received_at (user_id, received_at),
+    KEY idx_farm_cooking_histories_item_id (item_id),
+
+    CONSTRAINT fk_farm_cooking_histories_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_cooking_histories_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_farm_cooking_histories_quantity
+        CHECK (quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm cooking history';

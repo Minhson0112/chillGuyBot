@@ -3,6 +3,7 @@ from datetime import datetime
 from bot.config.database import getDbSession
 from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
+from bot.repository.farmCookingHistoryRepository import FarmCookingHistoryRepository
 from bot.repository.farmKitchenRepository import FarmKitchenRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
@@ -12,6 +13,7 @@ class FarmKitchenCollectService:
     def collectFood(self, userId: int):
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
+            farmCookingHistoryRepository = FarmCookingHistoryRepository(session)
             farmKitchenRepository = FarmKitchenRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
 
@@ -65,6 +67,11 @@ class FarmKitchenCollectService:
             resultItem = recipe.resultItem
 
             userInventoryRepository.addOrCreate(
+                userId=userId,
+                itemId=resultItem.id,
+                quantity=resultQuantity,
+            )
+            farmCookingHistoryRepository.create(
                 userId=userId,
                 itemId=resultItem.id,
                 quantity=resultQuantity,

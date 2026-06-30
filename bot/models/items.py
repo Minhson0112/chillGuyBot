@@ -29,6 +29,8 @@ class Item(Base):
     shopItem = relationship("ShopItem", back_populates="item", uselist=False, cascade="all, delete-orphan")
     inventories = relationship("UserInventory", back_populates="item", cascade="all, delete-orphan")
     fishingHistories = relationship("FishingHistory", back_populates="item")
+    cookingHistories = relationship("FarmCookingHistory", back_populates="item")
+    harvestHistories = relationship("FarmHarvestHistory", back_populates="item")
     marketListings = relationship("FarmMarketListing", back_populates="item")
     foodRecipe = relationship(
         "FoodRecipe",
