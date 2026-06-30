@@ -7,6 +7,7 @@ from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
 from bot.repository.farmCropAreaRepository import FarmCropAreaRepository
+from bot.repository.farmHarvestHistoryRepository import FarmHarvestHistoryRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.farmToolEquipmentRepository import FarmToolEquipmentRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
@@ -21,6 +22,7 @@ class FarmHarvestService:
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmCropAreaRepository = FarmCropAreaRepository(session)
+            farmHarvestHistoryRepository = FarmHarvestHistoryRepository(session)
             farmToolEquipmentRepository = FarmToolEquipmentRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
 
@@ -106,6 +108,13 @@ class FarmHarvestService:
                 userId=userId,
                 itemId=crop.crop_item_id,
                 quantity=harvestQuantity,
+            )
+            farmHarvestHistoryRepository.create(
+                userId=userId,
+                itemId=crop.crop_item_id,
+                quantity=harvestQuantity,
+                isPerfectHarvest=harvestReductions["totalReduction"] == 0,
+                harvestedAt=now,
             )
 
             farmCropAreaRepository.clearCrop(farmCropArea)
