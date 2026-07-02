@@ -1,3 +1,6 @@
+from bot.enums.gender import Gender
+
+
 MOD_ROLE_IDS = {
     "staff": 1357334550858170368,
     "mod": 1357253452174069860,
@@ -45,3 +48,18 @@ STAFF_ROLE_ID = 1357334550858170368
 INTERSHIP_ROLE_ID = 1501227092388479159
 
 DEFAULT_BOOSTER_ROLE_ID = 1357336606943608934
+
+GENDER_ROLES = {
+    Gender.MALE: {
+        "roleId": 1463038354898550795,
+        "label": "Nam",
+    },
+    Gender.FEMALE: {
+        "roleId": 1463037306222018704,
+        "label": "Nữ",
+    },
+    Gender.LGBTQ_PLUS: {
+        "roleId": 1463039267008942122,
+        "label": "LGBTQ+",
+    },
+}
