@@ -1,5 +1,5 @@
 from bot.models.member import Member
-from sqlalchemy import func, extract
+from sqlalchemy import case, extract, func
 from sqlalchemy.orm import joinedload
 from datetime import date
 
@@ -113,6 +113,22 @@ class MemberRepository:
 
     def countAllMembers(self) -> int:
         return self.session.query(func.count(Member.user_id)).scalar() or 0
+
+    def countMembersByPermission(self) -> dict:
+        staffCount, modCount, adminCount = (
+            self.session.query(
+                func.sum(case((Member.is_staff.is_(True), 1), else_=0)),
+                func.sum(case((Member.is_mod.is_(True), 1), else_=0)),
+                func.sum(case((Member.is_admin.is_(True), 1), else_=0)),
+            )
+            .one()
+        )
+
+        return {
+            "staffCount": staffCount or 0,
+            "modCount": modCount or 0,
+            "adminCount": adminCount or 0,
+        }
 
     def updateIsPartner(self, userId, isPartner):
         member = self.findByUserId(userId)
