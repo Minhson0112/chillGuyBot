@@ -20,6 +20,17 @@ class MemberDailyActivityRepository:
             .first()
         )
 
+    def getTotalVoiceSecondsByUserId(self, userId):
+        totalVoiceSeconds = (
+            self.session.query(
+                func.coalesce(func.sum(MemberDailyActivity.voice_seconds), 0)
+            )
+            .filter(MemberDailyActivity.user_id == userId)
+            .scalar()
+        )
+
+        return int(totalVoiceSeconds or 0)
+
     def create(self, activityData):
         activity = MemberDailyActivity(**activityData)
         self.session.add(activity)
