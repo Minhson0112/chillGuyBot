@@ -51,7 +51,7 @@ class MemberInfoService:
 
         return {
             "member": member,
-            "nickname": discordMember.nick or member.nick or "Không có",
+            "nickname": discordMember.display_name,
             "genderLabel": self.getGenderLabel(discordMember),
             "muteCount": muteCount,
             "totalChatCount": (chat.total_chat_count if chat else 0) + pendingChatCount,
