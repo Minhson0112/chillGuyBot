@@ -299,6 +299,7 @@ ASSET_IMAGE_PATHS = {
     "item_bug": "bot/assets/images/farm/animals/bug.png",
     "memberInfo": "bot/assets/images/ui/memberInfo.png",
     "serverInfo": "bot/assets/images/ui/serverInfo.png",
+    "dailyTask": "bot/assets/images/farm/ui/dailytask.png",
 }
 
 ASSET_IMAGE_URLS = {
