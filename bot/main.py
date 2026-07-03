@@ -208,6 +208,7 @@ async def main():
         "bot.commands.mergeverse.topMergeGame",
         "bot.commands.mergeverse.myMergeGame",
         "bot.commands.fortune.fortune",
+        "bot.commands.funny.kiss",
         "bot.commands.farm.giftcode",
         "bot.commands.giveaway.createGiveaway",
         "bot.commands.farm.createFarm",
