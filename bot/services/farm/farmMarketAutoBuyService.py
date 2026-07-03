@@ -7,7 +7,7 @@ from bot.repository.memberRepository import MemberRepository
 
 
 class FarmMarketAutoBuyService:
-    EXPIRED_HOURS = 47
+    EXPIRED_HOURS = 5
 
     def autoBuyExpiredListings(self, botUserId: int):
         with getDbSession() as session:

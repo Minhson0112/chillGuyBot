@@ -9,6 +9,8 @@ from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmBuyShopService:
+    SELLER_BONUS_RATE_PERCENT = 20
+
     DAILY_TASK_TYPE_BUY_MARKET_ITEM = "buy_market_item"
 
     def buyShopItem(
@@ -72,8 +74,10 @@ class FarmBuyShopService:
                     ),
                 }
 
+            sellerPayout = self.calculateSellerPayout(marketListing.price)
+
             buyer.chill_coin -= marketListing.price
-            seller.chill_coin += marketListing.price
+            seller.chill_coin += sellerPayout
 
             userInventoryRepository.addOrCreate(
                 userId=buyerUserId,
@@ -108,10 +112,27 @@ class FarmBuyShopService:
             if dailyTaskMessage is not None:
                 message += f"\n\n{dailyTaskMessage}"
 
+            notificationData = None
+
+            if seller.is_allow_notifications:
+                notificationData = {
+                    "sellerUserId": seller.user_id,
+                    "buyerDisplayName": self.getSellerDisplayName(buyer),
+                    "quantity": marketListing.quantity,
+                    "itemText": itemText,
+                    "listingPrice": marketListing.price,
+                    "sellerPayout": sellerPayout,
+                }
+
             return {
                 "success": True,
                 "message": message,
+                "notificationData": notificationData,
             }
+
+    def calculateSellerPayout(self, listingPrice: int):
+        payoutRatePercent = 100 + self.SELLER_BONUS_RATE_PERCENT
+        return (listingPrice * payoutRatePercent + 99) // 100
 
     def getSellerDisplayName(self, seller):
         if seller.nick:

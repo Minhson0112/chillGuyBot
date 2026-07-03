@@ -1,8 +1,4 @@
-import math
-
-from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
-from bot.config.emoji import FARM_GAME_EMOJI
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
@@ -10,7 +6,8 @@ from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmSellShopService:
-    MARKET_PRICE_BONUS_RATE = 1.1
+    MAX_QUANTITY_PER_LISTING = 10
+    SELLER_BONUS_RATE_PERCENT = 20
 
     DAILY_TASK_TYPE_SELL_MARKET_ITEM = "sell_market_item"
 
@@ -27,6 +24,15 @@ class FarmSellShopService:
             return {
                 "success": False,
                 "message": "Số lượng đăng bán phải lớn hơn 0.",
+            }
+
+        if quantity > self.MAX_QUANTITY_PER_LISTING:
+            return {
+                "success": False,
+                "message": (
+                    f"Mỗi slot shop chỉ được đăng bán tối đa "
+                    f"**{self.MAX_QUANTITY_PER_LISTING}** item."
+                ),
             }
 
         with getDbSession() as session:
@@ -50,7 +56,6 @@ class FarmSellShopService:
 
             item = userInventory.item
             itemText = buildItemText(item)
-            chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
 
             if not item.is_sellable:
                 return {
@@ -73,8 +78,7 @@ class FarmSellShopService:
                     ),
                 }
 
-            unitMarketPrice = self.calculateMarketUnitPrice(item.sell_price)
-            totalMarketPrice = unitMarketPrice * quantity
+            totalMarketPrice = item.sell_price * quantity
 
             userInventoryRepository.decreaseQuantity(
                 userInventory=userInventory,
@@ -101,21 +105,20 @@ class FarmSellShopService:
 
             session.commit()
 
-            message = (
-                f"Bạn đã đăng bán **{quantity}** {itemText} lên shop riêng.\n"
-                f"Giá gốc mỗi món: **{formatNumber(item.sell_price)}** {chillCoinEmoji}\n"
-                f"Giá shop riêng mỗi món: **{formatNumber(unitMarketPrice)}** {chillCoinEmoji}\n"
-                f"Tổng giá bán: **{formatNumber(totalMarketPrice)}** {chillCoinEmoji}\n"
-                f"ID đăng bán: **{farmMarketListing.id}**"
-            )
-
-            if dailyTaskMessage is not None:
-                message += f"\n\n{dailyTaskMessage}"
+            memberSellerPayout = self.calculateMemberSellerPayout(totalMarketPrice)
 
             return {
                 "success": True,
-                "message": message,
+                "result": {
+                    "quantity": quantity,
+                    "itemText": itemText,
+                    "totalMarketPrice": totalMarketPrice,
+                    "memberSellerPayout": memberSellerPayout,
+                    "listingId": farmMarketListing.id,
+                    "dailyTaskMessage": dailyTaskMessage,
+                },
             }
 
-    def calculateMarketUnitPrice(self, sellPrice: int):
-        return math.ceil(sellPrice * self.MARKET_PRICE_BONUS_RATE)
+    def calculateMemberSellerPayout(self, listingPrice: int):
+        payoutRatePercent = 100 + self.SELLER_BONUS_RATE_PERCENT
+        return (listingPrice * payoutRatePercent + 99) // 100

@@ -515,7 +515,7 @@ CREATE TABLE farm_market_listings (
     item_id BIGINT NOT NULL COMMENT 'listed item id',
     quantity BIGINT NOT NULL DEFAULT 1 COMMENT 'listed item quantity',
 
-    price INT NOT NULL COMMENT 'selling price after 10 percent bonus',
+    price INT NOT NULL COMMENT 'total base selling price',
 
     is_sold TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'whether item has been sold',
 

@@ -32,7 +32,7 @@ class FarmMarketListing(Base):
     )
 
     quantity = Column(BigInteger, nullable=False, default=1, comment="listed item quantity")
-    price = Column(Integer, nullable=False, comment="selling price after 10 percent bonus")
+    price = Column(Integer, nullable=False, comment="total base selling price")
     is_sold = Column(Boolean, nullable=False, default=False, comment="whether item has been sold")
 
     created_at = Column(DateTime, nullable=False, server_default=func.now(), comment="created at")
