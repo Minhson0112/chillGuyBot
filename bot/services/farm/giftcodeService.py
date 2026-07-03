@@ -8,10 +8,14 @@ from bot.repository.giftcodeClaimHistoryRepository import GiftcodeClaimHistoryRe
 from bot.repository.giftcodeRepository import GiftcodeRepository
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
+from bot.services.farm.farmToolBuyService import FarmToolBuyService
 
 
 class GiftcodeService:
     GMT7 = timezone(timedelta(hours=7))
+
+    def __init__(self):
+        self.farmToolBuyService = FarmToolBuyService()
 
     def claimGiftcode(
         self,
@@ -79,11 +83,22 @@ class GiftcodeService:
                 if reward.quantity <= 0:
                     continue
 
-                userInventoryRepository.addOrCreate(
-                    userId=userId,
-                    itemId=reward.item_id,
-                    quantity=reward.quantity,
-                )
+                if self.farmToolBuyService.canHandle(reward.item):
+                    for _ in range(reward.quantity):
+                        toolResult = self.farmToolBuyService.buyTool(
+                            session=session,
+                            userId=userId,
+                            item=reward.item,
+                        )
+
+                        if not toolResult["success"]:
+                            return toolResult
+                else:
+                    userInventoryRepository.addOrCreate(
+                        userId=userId,
+                        itemId=reward.item_id,
+                        quantity=reward.quantity,
+                    )
 
                 rewardItemMessages.append(
                     f"**{formatNumber(reward.quantity)}** {buildItemText(reward.item)}"
