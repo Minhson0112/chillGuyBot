@@ -5,7 +5,9 @@ from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
+from bot.services.farm.farmMarketListingReclaimService import FarmMarketListingReclaimService
 from bot.services.farm.farmMarketShopRenderService import FarmMarketShopRenderService
+from bot.views.farm.farmMarketListingReclaimView import FarmMarketListingReclaimView
 
 
 class MyFarmShopPaginationView(discord.ui.View):
@@ -24,6 +26,7 @@ class MyFarmShopPaginationView(discord.ui.View):
         self.sellerDisplayName = sellerDisplayName
         self.currentPage = currentPage
         self.totalPage = totalPage
+        self.farmMarketListingReclaimService = FarmMarketListingReclaimService()
         self.farmMarketShopRenderService = FarmMarketShopRenderService()
 
         self.updateButtonState()
@@ -44,6 +47,36 @@ class MyFarmShopPaginationView(discord.ui.View):
             allowed_mentions=discord.AllowedMentions.none(),
         )
 
+    @discord.ui.button(label="Lấy lại đồ", emoji="↩️", style=discord.ButtonStyle.primary)
+    async def reclaimButton(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+
+        reclaimOptions = self.farmMarketListingReclaimService.findReclaimOptions(
+            sellerUserId=self.sellerUserId,
+            page=self.currentPage,
+            perPage=self.farmMarketShopRenderService.PER_PAGE,
+        )
+
+        if not reclaimOptions:
+            await interaction.followup.send(
+                "Trang shop này không có món đồ nào để lấy lại.",
+                ephemeral=True,
+            )
+            return
+
+        view = FarmMarketListingReclaimView(
+            authorId=self.sellerUserId,
+            reclaimOptions=reclaimOptions,
+            shopView=self,
+            shopInteraction=interaction,
+        )
+
+        await interaction.followup.send(
+            content="Chọn món đồ bạn muốn lấy lại về kho.",
+            view=view,
+            ephemeral=True,
+        )
+
     @discord.ui.button(label="Trước", emoji="⬅️", style=discord.ButtonStyle.secondary)
     async def previousButton(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.currentPage > 1:
@@ -61,6 +94,9 @@ class MyFarmShopPaginationView(discord.ui.View):
     async def refreshShopMessage(self, interaction: discord.Interaction):
         await interaction.response.defer()
 
+        await self.refreshShopMessageByInteraction(interaction)
+
+    async def refreshShopMessageByInteraction(self, interaction: discord.Interaction):
         renderResult = self.farmMarketShopRenderService.renderMemberShopPageToBuffer(
             sellerUserId=self.sellerUserId,
             memberDisplayName=self.sellerDisplayName,

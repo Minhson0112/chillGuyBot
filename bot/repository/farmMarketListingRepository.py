@@ -116,6 +116,7 @@ class FarmMarketListingRepository:
                 asc(FarmMarketListing.created_at),
                 asc(FarmMarketListing.id),
             )
+            .with_for_update()
             .all()
         )
     
@@ -160,8 +161,13 @@ class FarmMarketListingRepository:
                 joinedload(FarmMarketListing.seller),
             )
             .filter(FarmMarketListing.id == listingId)
+            .with_for_update()
             .first()
         )
+
+    def delete(self, farmMarketListing: FarmMarketListing):
+        self.session.delete(farmMarketListing)
+        self.session.flush()
     
     def findFirstOpenListingByItemId(self, itemId: int):
         return (
