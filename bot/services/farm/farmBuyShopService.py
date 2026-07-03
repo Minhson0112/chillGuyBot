@@ -1,6 +1,13 @@
+from datetime import datetime, timedelta
+
 from bot.helper.numberFormatHelper import formatNumber
 from bot.config.database import getDbSession
 from bot.config.emoji import FARM_GAME_EMOJI
+from bot.config.farmMarket import (
+    DAILY_MEMBER_SELLER_BONUS_LIMIT,
+    FARM_MARKET_TIMEZONE,
+    MEMBER_SELLER_BONUS_RATE_PERCENT,
+)
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
 from bot.repository.memberRepository import MemberRepository
@@ -9,13 +16,12 @@ from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 
 class FarmBuyShopService:
-    SELLER_BONUS_RATE_PERCENT = 20
-
     DAILY_TASK_TYPE_BUY_MARKET_ITEM = "buy_market_item"
 
     def buyShopItem(
         self,
         buyerUserId: int,
+        botUserId: int,
         listingId: int,
     ):
         with getDbSession() as session:
@@ -24,7 +30,7 @@ class FarmBuyShopService:
             userInventoryRepository = UserInventoryRepository(session)
             dailyTaskProgressService = DailyTaskProgressService(session)
 
-            buyer = memberRepository.findByUserId(buyerUserId)
+            buyer = memberRepository.findByUserIdForUpdate(buyerUserId)
 
             if buyer is None:
                 return {
@@ -52,7 +58,9 @@ class FarmBuyShopService:
                     "message": "Bạn không thể mua món hàng do chính mình đăng bán.",
                 }
 
-            seller = marketListing.seller
+            seller = memberRepository.findByUserIdForUpdate(
+                marketListing.seller_user_id,
+            )
 
             if seller is None:
                 return {
@@ -74,7 +82,14 @@ class FarmBuyShopService:
                     ),
                 }
 
-            sellerPayout = self.calculateSellerPayout(marketListing.price)
+            bonusResult = self.calculateSellerBonus(
+                farmMarketListingRepository=farmMarketListingRepository,
+                sellerUserId=seller.user_id,
+                botUserId=botUserId,
+                listingPrice=marketListing.price,
+            )
+            sellerBonus = bonusResult["sellerBonus"]
+            sellerPayout = marketListing.price + sellerBonus
 
             buyer.chill_coin -= marketListing.price
             seller.chill_coin += sellerPayout
@@ -121,7 +136,10 @@ class FarmBuyShopService:
                     "quantity": marketListing.quantity,
                     "itemText": itemText,
                     "listingPrice": marketListing.price,
+                    "sellerBonus": sellerBonus,
                     "sellerPayout": sellerPayout,
+                    "dailyBonusLimit": DAILY_MEMBER_SELLER_BONUS_LIMIT,
+                    "isBonusLimitReached": bonusResult["isBonusLimitReached"],
                 }
 
             return {
@@ -130,9 +148,46 @@ class FarmBuyShopService:
                 "notificationData": notificationData,
             }
 
-    def calculateSellerPayout(self, listingPrice: int):
-        payoutRatePercent = 100 + self.SELLER_BONUS_RATE_PERCENT
-        return (listingPrice * payoutRatePercent + 99) // 100
+    def calculateSellerBonus(
+        self,
+        farmMarketListingRepository,
+        sellerUserId: int,
+        botUserId: int,
+        listingPrice: int,
+    ):
+        now = datetime.now(FARM_MARKET_TIMEZONE).replace(tzinfo=None)
+        soldFrom = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        soldBefore = soldFrom + timedelta(days=1)
+        soldListings = (
+            farmMarketListingRepository.findMemberSoldListingsBySellerUserIdAndSoldAtRange(
+                sellerUserId=sellerUserId,
+                botUserId=botUserId,
+                soldFrom=soldFrom,
+                soldBefore=soldBefore,
+            )
+        )
+        usedBonus = sum(
+            self.calculateFullSellerBonus(soldListing.price)
+            for soldListing in soldListings
+        )
+        remainingBonus = max(
+            0,
+            DAILY_MEMBER_SELLER_BONUS_LIMIT - usedBonus,
+        )
+        fullSellerBonus = self.calculateFullSellerBonus(listingPrice)
+        sellerBonus = min(fullSellerBonus, remainingBonus)
+
+        return {
+            "sellerBonus": sellerBonus,
+            "isBonusLimitReached": (
+                usedBonus + sellerBonus >= DAILY_MEMBER_SELLER_BONUS_LIMIT
+            ),
+        }
+
+    def calculateFullSellerBonus(self, listingPrice: int):
+        return (
+            listingPrice * MEMBER_SELLER_BONUS_RATE_PERCENT + 99
+        ) // 100
 
     def getSellerDisplayName(self, seller):
         if seller.nick:

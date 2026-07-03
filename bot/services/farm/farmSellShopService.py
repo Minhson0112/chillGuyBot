@@ -1,4 +1,8 @@
 from bot.config.database import getDbSession
+from bot.config.farmMarket import (
+    DAILY_MEMBER_SELLER_BONUS_LIMIT,
+    MEMBER_SELLER_BONUS_RATE_PERCENT,
+)
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
@@ -7,7 +11,6 @@ from bot.services.farm.dailyTaskProgressService import DailyTaskProgressService
 
 class FarmSellShopService:
     MAX_QUANTITY_PER_LISTING = 10
-    SELLER_BONUS_RATE_PERCENT = 20
 
     DAILY_TASK_TYPE_SELL_MARKET_ITEM = "sell_market_item"
 
@@ -114,11 +117,12 @@ class FarmSellShopService:
                     "itemText": itemText,
                     "totalMarketPrice": totalMarketPrice,
                     "memberSellerPayout": memberSellerPayout,
+                    "dailyMemberSellerBonusLimit": DAILY_MEMBER_SELLER_BONUS_LIMIT,
                     "listingId": farmMarketListing.id,
                     "dailyTaskMessage": dailyTaskMessage,
                 },
             }
 
     def calculateMemberSellerPayout(self, listingPrice: int):
-        payoutRatePercent = 100 + self.SELLER_BONUS_RATE_PERCENT
+        payoutRatePercent = 100 + MEMBER_SELLER_BONUS_RATE_PERCENT
         return (listingPrice * payoutRatePercent + 99) // 100

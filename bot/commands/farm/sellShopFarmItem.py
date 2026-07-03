@@ -42,6 +42,8 @@ class SellShopFarmItemCommand(commands.Cog):
                     f"**{formatNumber(result['totalMarketPrice'])}** {chillCoinEmoji}.\n\n"
                     f"{GIFT} Nếu member mua, bạn sẽ nhận được bonus **20%** giá trị item, "
                     f"tổng cộng **{formatNumber(result['memberSellerPayout'])}** "
+                    f"{chillCoinEmoji}. Tổng bonus market tối đa mỗi ngày là "
+                    f"**{formatNumber(result['dailyMemberSellerBonusLimit'])}** "
                     f"{chillCoinEmoji}."
                 ),
                 color=discord.Color.green(),

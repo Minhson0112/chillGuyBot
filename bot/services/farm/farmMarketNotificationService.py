@@ -24,6 +24,17 @@ class FarmMarketNotificationService:
         buyerDisplayName = discord.utils.escape_markdown(
             notificationData["buyerDisplayName"],
         )
+        bonusText = (
+            f"Trong đó bonus: **{formatNumber(notificationData['sellerBonus'])}** "
+            f"{chillCoinEmoji}."
+        )
+
+        if notificationData["isBonusLimitReached"]:
+            bonusText += (
+                f" Bạn đã chạm giới hạn bonus market "
+                f"**{formatNumber(notificationData['dailyBonusLimit'])}** "
+                f"{chillCoinEmoji} trong ngày."
+            )
 
         await notificationChannel.send(
             content=(
@@ -34,8 +45,8 @@ class FarmMarketNotificationService:
                 f"Giá người mua trả: "
                 f"**{formatNumber(notificationData['listingPrice'])}** {chillCoinEmoji}\n"
                 f"Bạn nhận được: "
-                f"**{formatNumber(notificationData['sellerPayout'])}** {chillCoinEmoji} "
-                f"(đã tăng 20%)."
+                f"**{formatNumber(notificationData['sellerPayout'])}** {chillCoinEmoji}.\n"
+                f"{bonusText}"
             ),
             allowed_mentions=discord.AllowedMentions(
                 users=[discord.Object(id=notificationData["sellerUserId"])],

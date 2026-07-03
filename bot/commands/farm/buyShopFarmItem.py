@@ -19,6 +19,7 @@ class BuyShopFarmItemCommand(commands.Cog):
         try:
             buyShopResult = self.farmBuyShopService.buyShopItem(
                 buyerUserId=ctx.author.id,
+                botUserId=self.bot.user.id,
                 listingId=listingId,
             )
 

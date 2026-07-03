@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, or_
 from sqlalchemy.orm import joinedload
 
+from bot.config.farmMarket import FARM_MARKET_TIMEZONE
 from bot.models.farmMarketListing import FarmMarketListing
 
 
@@ -95,7 +96,9 @@ class FarmMarketListingRepository:
     ):
         farmMarketListing.is_sold = True
         farmMarketListing.buyer_user_id = buyerUserId
-        farmMarketListing.sold_at = datetime.now()
+        farmMarketListing.sold_at = datetime.now(FARM_MARKET_TIMEZONE).replace(
+            tzinfo=None,
+        )
 
         self.session.flush()
 
@@ -203,5 +206,27 @@ class FarmMarketListingRepository:
                 desc(FarmMarketListing.id),
             )
             .limit(limit)
+            .all()
+        )
+
+    def findMemberSoldListingsBySellerUserIdAndSoldAtRange(
+        self,
+        sellerUserId: int,
+        botUserId: int,
+        soldFrom: datetime,
+        soldBefore: datetime,
+    ):
+        return (
+            self.session.query(FarmMarketListing)
+            .filter(FarmMarketListing.seller_user_id == sellerUserId)
+            .filter(FarmMarketListing.is_sold.is_(True))
+            .filter(FarmMarketListing.sold_at >= soldFrom)
+            .filter(FarmMarketListing.sold_at < soldBefore)
+            .filter(
+                or_(
+                    FarmMarketListing.buyer_user_id.is_(None),
+                    FarmMarketListing.buyer_user_id != botUserId,
+                )
+            )
             .all()
         )
