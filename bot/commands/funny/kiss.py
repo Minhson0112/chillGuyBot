@@ -40,9 +40,12 @@ class KissCommand(commands.Cog):
             target=member.mention,
         )
         gifUrl = random.choice(KISS)
+        gifEmbed = discord.Embed()
+        gifEmbed.set_image(url=gifUrl)
 
         await ctx.reply(
-            content=f"{message}\n{gifUrl}",
+            content=message,
+            embed=gifEmbed,
             mention_author=False,
         )
 
