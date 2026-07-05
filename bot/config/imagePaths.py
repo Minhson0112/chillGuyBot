@@ -300,6 +300,13 @@ ASSET_IMAGE_PATHS = {
     "memberInfo": "bot/assets/images/ui/memberInfo.png",
     "serverInfo": "bot/assets/images/ui/serverInfo.png",
     "dailyTask": "bot/assets/images/farm/ui/dailytask.png",
+    "bear": "bot/assets/images/serverItem/bear.png",
+    "chocolate": "bot/assets/images/serverItem/chocolate.png",
+    "grass_ring": "bot/assets/images/serverItem/grass_ring.png",
+    "bronze_ring": "bot/assets/images/serverItem/bronze_ring.png",
+    "silver_ring": "bot/assets/images/serverItem/silver_ring.png",
+    "gold_ring": "bot/assets/images/serverItem/gold_ring.png",
+    "diamond_ring": "bot/assets/images/serverItem/diamond_ring.png",
 }
 
 ASSET_IMAGE_URLS = {

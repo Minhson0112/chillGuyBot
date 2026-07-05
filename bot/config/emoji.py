@@ -285,6 +285,17 @@ BLACKJACK_CARD_EMOJI = {
 
 UPSIDE_DOWN_CARD = "<:backmaroon:1500473196657250405>"
 
+SERVER_ITEM_EMOJI = {
+    "bear": "<:bear:1523170319336996904>",
+    "chocolate": "<:chocolate:1523170320884826253>",
+    "grass_ring": "<:grass_ring:1523170328426053785>",
+    "bronze_ring": "<:bronze_ring:1523170327054651582>",
+    "silver_ring": "<:silver_ring:1523170325393834044>",
+    "gold_ring": "<:gold_ring:1523170323476774972>",
+    "diamond_ring": "<:diamond_ring:1523170322164093066>",
+}
+
+
 WING_L = "<a:CS_canh1:1507029918976970974>"
 WING_R = "<a:CS_canh2:1507029920738443455>"
 CHILL_COIN = "<:cs_coin:1495116560191324383>"
