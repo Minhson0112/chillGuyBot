@@ -2213,3 +2213,115 @@ CREATE TABLE farm_cooking_histories (
     CONSTRAINT chk_farm_cooking_histories_quantity
         CHECK (quantity > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm cooking history';
+
+# add server item and couple system
+CREATE TABLE server_item_master (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'server item id',
+    name VARCHAR(255) NOT NULL COMMENT 'server item name',
+    type VARCHAR(50) NOT NULL COMMENT 'server item type',
+    price_cowoncy BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'item price in cowoncy',
+    price_chill_coin BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'item price in chill coin',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'whether item is active',
+    icon_image_key VARCHAR(255) NOT NULL COMMENT 'icon image key',
+    intimacy_points INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'intimacy points granted by item',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+    KEY idx_server_item_master_type_active (type, is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='master table for server items';
+
+CREATE TABLE server_user_inventory (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'server user inventory id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    item_id BIGINT NOT NULL COMMENT 'server item id',
+    quantity BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'item quantity',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_server_user_inventory_user_item (user_id, item_id),
+    KEY idx_server_user_inventory_item_id (item_id),
+
+    CONSTRAINT fk_server_user_inventory_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_server_user_inventory_item_id
+        FOREIGN KEY (item_id) REFERENCES server_item_master(id)
+        ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='server item inventory for members';
+
+CREATE TABLE server_item_gift_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'server item gift history id',
+    giver_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of gift giver',
+    receiver_user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of gift receiver',
+    item_id BIGINT NOT NULL COMMENT 'gifted server item id',
+    quantity BIGINT UNSIGNED NOT NULL COMMENT 'gifted item quantity',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+    KEY idx_server_item_gift_histories_giver_created_at (giver_user_id, created_at),
+    KEY idx_server_item_gift_histories_receiver_created_at (receiver_user_id, created_at),
+    KEY idx_server_item_gift_histories_item_id (item_id),
+
+    CONSTRAINT fk_server_item_gift_histories_giver_user_id
+        FOREIGN KEY (giver_user_id) REFERENCES member(user_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_server_item_gift_histories_receiver_user_id
+        FOREIGN KEY (receiver_user_id) REFERENCES member(user_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_server_item_gift_histories_item_id
+        FOREIGN KEY (item_id) REFERENCES server_item_master(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_server_item_gift_histories_distinct_users
+        CHECK (giver_user_id <> receiver_user_id),
+
+    CONSTRAINT chk_server_item_gift_histories_quantity
+        CHECK (quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='server item gift history';
+
+CREATE TABLE couple (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'couple id',
+    user_1_id BIGINT UNSIGNED NOT NULL COMMENT 'first discord user id',
+    user_2_id BIGINT UNSIGNED NOT NULL COMMENT 'second discord user id',
+    intimacy_points BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'couple intimacy points',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    divorcing_at DATETIME DEFAULT NULL COMMENT 'divorcing at',
+    couple_role_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord couple role id',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_couple_users (user_1_id, user_2_id),
+    KEY idx_couple_user_2_id (user_2_id),
+    KEY idx_couple_divorcing_at (divorcing_at),
+
+    CONSTRAINT fk_couple_user_1_id
+        FOREIGN KEY (user_1_id) REFERENCES member(user_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_couple_user_2_id
+        FOREIGN KEY (user_2_id) REFERENCES member(user_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_couple_distinct_users
+        CHECK (user_1_id <> user_2_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='server couple relationships';
+
+CREATE TABLE couple_daily_voice_activity (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'couple daily voice activity id',
+    couple_id BIGINT NOT NULL COMMENT 'couple id',
+    activity_date DATE NOT NULL COMMENT 'activity date in GMT+7',
+    voice_seconds BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'seconds both users were in the same voice channel',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_couple_daily_voice_activity_couple_date (couple_id, activity_date),
+    KEY idx_couple_daily_voice_activity_date_voice (activity_date, voice_seconds),
+
+    CONSTRAINT fk_couple_daily_voice_activity_couple_id
+        FOREIGN KEY (couple_id) REFERENCES couple(id)
+        ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily time couples spent together in voice';
