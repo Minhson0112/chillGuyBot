@@ -7,6 +7,8 @@ from bot.models.chillCoinExchangeCowoncyHistory import ChillCoinExchangeCowoncyH
 from bot.models.chillCoinTransaction import ChillCoinTransaction
 from bot.models.crop import Crop
 from bot.models.cropGrowthStage import CropGrowthStage
+from bot.models.couple import Couple
+from bot.models.coupleDailyVoiceActivity import CoupleDailyVoiceActivity
 from bot.models.dailyCheckinHistory import DailyCheckinHistory
 from bot.models.dailyCheckinReward import DailyCheckinReward
 from bot.models.dailyTaskMaster import DailyTaskMaster
@@ -51,6 +53,9 @@ from bot.models.owoExchangeCoinHistory import OwoExchangeCoinHistory
 from bot.models.partner import Partner
 from bot.models.roleShop import RoleShop
 from bot.models.serverInvite import ServerInvite
+from bot.models.serverItemGiftHistory import ServerItemGiftHistory
+from bot.models.serverItemMaster import ServerItemMaster
+from bot.models.serverUserInventory import ServerUserInventory
 from bot.models.shopItem import ShopItem
 from bot.models.toolTemplate import ToolTemplate
 from bot.models.tournamentEntry import TournamentEntry
