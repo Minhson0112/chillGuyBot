@@ -43,3 +43,4 @@ class ServerItemMaster(Base):
 
     inventories = relationship("ServerUserInventory", back_populates="item")
     giftHistories = relationship("ServerItemGiftHistory", back_populates="item")
+    purchases = relationship("ServerItemPurchase", back_populates="item")

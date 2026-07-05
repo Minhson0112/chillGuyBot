@@ -55,6 +55,7 @@ from bot.models.roleShop import RoleShop
 from bot.models.serverInvite import ServerInvite
 from bot.models.serverItemGiftHistory import ServerItemGiftHistory
 from bot.models.serverItemMaster import ServerItemMaster
+from bot.models.serverItemPurchase import ServerItemPurchase
 from bot.models.serverUserInventory import ServerUserInventory
 from bot.models.shopItem import ShopItem
 from bot.models.toolTemplate import ToolTemplate

@@ -12,7 +12,11 @@ class MemberPaymentTransaction(Base):
 
     user_id = Column(BIGINT(unsigned=True), ForeignKey("member.user_id", ondelete="CASCADE"), nullable=False, comment="discord user id")
 
-    payment_target_type = Column(String(50), nullable=False, comment="payment target type: role_shop, lotto_ticket")
+    payment_target_type = Column(
+        String(50),
+        nullable=False,
+        comment="payment target type: role_shop, lotto_ticket, server_item",
+    )
     payment_target_id = Column(BigInteger, nullable=False, comment="target purchase record id")
 
     status = Column(String(50), nullable=False, comment="payment status: pending_payment, paid, cancelled, expired")
@@ -32,4 +36,3 @@ class MemberPaymentTransaction(Base):
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now(), comment="updated at")
 
     member = relationship("Member")
-

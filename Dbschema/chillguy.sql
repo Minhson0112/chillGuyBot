@@ -1802,7 +1802,7 @@ CREATE TABLE member_payment_transaction (
 
     user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
 
-    payment_target_type VARCHAR(50) NOT NULL COMMENT 'payment target type: role_shop, lotto_ticket',
+    payment_target_type VARCHAR(50) NOT NULL COMMENT 'payment target type: role_shop, lotto_ticket, server_item',
     payment_target_id BIGINT NOT NULL COMMENT 'target purchase record id',
 
     status VARCHAR(50) NOT NULL COMMENT 'payment status: pending_payment, paid, cancelled, expired',
@@ -2325,3 +2325,49 @@ CREATE TABLE couple_daily_voice_activity (
         FOREIGN KEY (couple_id) REFERENCES couple(id)
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='daily time couples spent together in voice';
+
+# add server item purchase registration
+CREATE TABLE server_item_purchase (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'server item purchase id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    item_id BIGINT NOT NULL COMMENT 'server item id',
+    quantity BIGINT UNSIGNED NOT NULL COMMENT 'item quantity',
+    status VARCHAR(50) NOT NULL COMMENT 'purchase status: pending_payment, paid, cancelled, expired',
+    payment_type VARCHAR(50) DEFAULT NULL COMMENT 'actual payment type: cowoncy, chill_coin',
+    payment_amount BIGINT UNSIGNED DEFAULT NULL COMMENT 'actual payment amount',
+    registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'registered at',
+    paid_at DATETIME DEFAULT NULL COMMENT 'paid at',
+    expired_at DATETIME DEFAULT NULL COMMENT 'expired at',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+    KEY idx_server_item_purchase_user_status (user_id, status),
+    KEY idx_server_item_purchase_item_status (item_id, status),
+    KEY idx_server_item_purchase_status_registered_at (status, registered_at),
+
+    CONSTRAINT fk_server_item_purchase_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_server_item_purchase_item_id
+        FOREIGN KEY (item_id) REFERENCES server_item_master(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_server_item_purchase_quantity
+        CHECK (quantity > 0),
+
+    CONSTRAINT chk_server_item_purchase_status
+        CHECK (status IN ('pending_payment', 'paid', 'cancelled', 'expired')),
+
+    CONSTRAINT chk_server_item_purchase_payment_type
+        CHECK (payment_type IS NULL OR payment_type IN ('cowoncy', 'chill_coin')),
+
+    CONSTRAINT chk_server_item_purchase_payment_amount
+        CHECK (payment_amount IS NULL OR payment_amount > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='server item purchase registrations';
+
+ALTER TABLE member_payment_transaction
+    DROP CHECK chk_member_payment_target_type,
+    ADD CONSTRAINT chk_member_payment_target_type
+        CHECK (payment_target_type IN ('role_shop', 'lotto_ticket', 'server_item'));
