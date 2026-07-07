@@ -7,6 +7,7 @@ from bot.config.emoji import CHILL_COIN, COWONCCY, LOVE
 from bot.config.imagePaths import ASSET_IMAGE_PATHS
 from bot.enums.discordComponentType import DiscordComponentType
 from bot.helper.numberFormatHelper import formatNumber
+from bot.helper.serverItemHelper import buildServerItemText
 from bot.repository.serverItemMasterRepository import ServerItemMasterRepository
 
 
@@ -23,7 +24,6 @@ class ServerItemShopMessageService:
             "allowed_mentions": {
                 "parse": [],
             },
-            "attachments": self.buildAttachmentPayloads(files),
             "components": [
                 {
                     "type": DiscordComponentType.CONTAINER,
@@ -33,16 +33,24 @@ class ServerItemShopMessageService:
             ],
         }
 
+        if files:
+            payload["attachments"] = self.buildAttachmentPayloads(files)
+
         try:
-            await ctx.bot.http.request(
-                Route(
-                    "POST",
-                    "/channels/{channel_id}/messages",
-                    channel_id=ctx.channel.id,
-                ),
-                files=files,
-                form=self.buildMultipartPayload(payload, files),
+            route = Route(
+                "POST",
+                "/channels/{channel_id}/messages",
+                channel_id=ctx.channel.id,
             )
+
+            if files:
+                await ctx.bot.http.request(
+                    route,
+                    files=files,
+                    form=self.buildMultipartPayload(payload, files),
+                )
+            else:
+                await ctx.bot.http.request(route, json=payload)
         finally:
             for file in files:
                 file.close()
@@ -85,15 +93,20 @@ class ServerItemShopMessageService:
 
     def buildItemComponents(self, serverItem):
         imageFileName = self.buildImageFileName(serverItem)
+        saleStatus = "Đang mở bán" if serverItem.is_active else "Chưa mở bán"
+        buttonStyle = 3 if serverItem.is_active else 2
+        buttonLabel = f"Mua {serverItem.name}" if serverItem.is_active else "Chưa mở bán"
+        serverItemText = buildServerItemText(serverItem)
 
         return [
             {
                 "type": DiscordComponentType.TEXT_DISPLAY,
                 "content": (
-                    f"## {serverItem.name}\n"
+                    f"## {serverItemText}\n"
                     f"**Giá cowoncy:** **{formatNumber(serverItem.price_cowoncy)}** {COWONCCY}\n"
                     f"**Giá chillcoin:** **{formatNumber(serverItem.price_chill_coin)}** {CHILL_COIN}\n"
-                    f"**Điểm thân mật:** **{formatNumber(serverItem.intimacy_points)}** {LOVE}"
+                    f"**Điểm thân mật:** **{formatNumber(serverItem.intimacy_points)}** {LOVE}\n"
+                    f"**Trạng thái:** **{saleStatus}**"
                 ),
             },
             {
@@ -112,10 +125,10 @@ class ServerItemShopMessageService:
                 "components": [
                     {
                         "type": DiscordComponentType.BUTTON,
-                        "style": 3,
-                        "label": f"Mua {serverItem.name}",
+                        "style": buttonStyle,
+                        "label": buttonLabel,
                         "custom_id": self.buildBuyCustomId(serverItem.id),
-                        "disabled": True,
+                        "disabled": not serverItem.is_active,
                     },
                 ],
             },

@@ -142,6 +142,7 @@ async def main():
         "bot.commands.server.stealEmoji",
         "bot.commands.server.topInvite",
         "bot.commands.server.loveShop",
+        "bot.commands.server.cancelLoveShop",
         "bot.commands.partner.checkServer",
         "bot.commands.partner.createPartner",
         "bot.commands.partner.editPartnerLink",

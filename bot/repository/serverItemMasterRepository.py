@@ -11,3 +11,13 @@ class ServerItemMasterRepository:
             .order_by(ServerItemMaster.type.asc(), ServerItemMaster.id.asc())
             .all()
         )
+
+    def findActiveById(self, serverItemId: int):
+        return (
+            self.session.query(ServerItemMaster)
+            .filter(
+                ServerItemMaster.id == serverItemId,
+                ServerItemMaster.is_active.is_(True),
+            )
+            .first()
+        )
