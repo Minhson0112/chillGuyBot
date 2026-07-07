@@ -42,7 +42,7 @@ class ServerItemPurchaseCancelService:
                 pendingPurchase.expired_at = None
 
                 pendingPayment = memberPaymentTransactionRepository.findPendingPaymentByTarget(
-                    paymentTargetType=MemberPaymentTargetType.SERVER_ITEM.value,
+                    paymentTargetType=MemberPaymentTargetType.LOVE_SHOP.value,
                     paymentTargetId=pendingPurchase.id,
                 )
 

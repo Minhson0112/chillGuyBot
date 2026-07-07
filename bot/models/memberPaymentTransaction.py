@@ -15,7 +15,7 @@ class MemberPaymentTransaction(Base):
     payment_target_type = Column(
         String(50),
         nullable=False,
-        comment="payment target type: role_shop, lotto_ticket, server_item",
+        comment="payment target type: role_shop, lotto_ticket, server_item, love_shop",
     )
     payment_target_id = Column(BigInteger, nullable=False, comment="target purchase record id")
 

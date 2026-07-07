@@ -11,6 +11,7 @@ from bot.enums.paymentType import PaymentType
 from bot.services.farm.chillCoinGiveService import ChillCoinGiveService
 from bot.services.memberPayment.memberPaymentService import MemberPaymentService
 from bot.services.roleShop.roleShopPaymentService import RoleShopPaymentService
+from bot.services.serverItem.serverItemPaymentService import ServerItemPaymentService
 
 
 class GiveChillCoinCommand(commands.Cog):
@@ -19,6 +20,7 @@ class GiveChillCoinCommand(commands.Cog):
         self.chillCoinGiveService = ChillCoinGiveService()
         self.memberPaymentService = MemberPaymentService()
         self.roleShopPaymentService = RoleShopPaymentService()
+        self.serverItemPaymentService = ServerItemPaymentService()
 
     @commands.command(name="give")
     async def give(self, ctx: commands.Context, member: discord.Member = None, amount: int = None):
@@ -103,6 +105,15 @@ class GiveChillCoinCommand(commands.Cog):
 
         if paymentTargetType == MemberPaymentTargetType.ROLE_SHOP.value:
             await self.handleRolePayment(
+                ctx=ctx,
+                receiverMember=receiverMember,
+                memberPaymentTransactionId=pendingPaymentResult["memberPaymentTransactionId"],
+                amount=amount,
+            )
+            return
+
+        if paymentTargetType == MemberPaymentTargetType.LOVE_SHOP.value:
+            await self.handleLoveShopPayment(
                 ctx=ctx,
                 receiverMember=receiverMember,
                 memberPaymentTransactionId=pendingPaymentResult["memberPaymentTransactionId"],
@@ -260,6 +271,82 @@ class GiveChillCoinCommand(commands.Cog):
             mention_author=False,
         )
 
+    async def handleLoveShopPayment(
+        self,
+        ctx: commands.Context,
+        receiverMember: discord.Member,
+        memberPaymentTransactionId: int,
+        amount: int,
+    ):
+        paymentResult = self.serverItemPaymentService.verifyPayment(
+            memberPaymentTransactionId=memberPaymentTransactionId,
+            paymentType=PaymentType.CHILL_COIN.value,
+            paymentAmount=amount,
+        )
+
+        if not paymentResult["success"]:
+            await ctx.reply(
+                embed=self.buildLoveShopPaymentFailedEmbed(
+                    ctx=ctx,
+                    paymentResult=paymentResult,
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+                mention_author=False,
+            )
+            return
+
+        giveResult = self.chillCoinGiveService.giveCoin(
+            fromUserId=ctx.author.id,
+            toUserId=receiverMember.id,
+            amount=amount,
+            transactionType=ChillCoinTransactionType.LOVE_SHOP_PAYMENT.value,
+            note="Love shop payment by chill coin",
+            skipDailyReceiveLimit=True,
+        )
+
+        if not giveResult["success"]:
+            await ctx.reply(
+                embed=self.buildPaymentErrorEmbed(
+                    title="Chuyển chill coin thất bại",
+                    description=giveResult["message"],
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+                mention_author=False,
+            )
+            return
+
+        completeResult = self.serverItemPaymentService.completePayment(
+            memberPaymentTransactionId=paymentResult["memberPaymentTransactionId"],
+            paymentType=PaymentType.CHILL_COIN.value,
+            paymentAmount=amount,
+        )
+
+        if not completeResult["success"]:
+            await ctx.reply(
+                embed=self.buildPaymentErrorEmbed(
+                    title="Cập nhật giao dịch love shop thất bại",
+                    description=(
+                        f"Người thanh toán: {ctx.author.mention}\n"
+                        f"Nội dung lỗi: {completeResult['message']}"
+                    ),
+                ),
+                allowed_mentions=discord.AllowedMentions.none(),
+                mention_author=False,
+            )
+            return
+
+        await ctx.reply(
+            embed=self.buildLoveShopPaymentCompletedEmbed(
+                member=ctx.author,
+                itemName=completeResult["itemName"],
+                itemEmoji=completeResult["itemEmoji"],
+                quantity=completeResult["quantity"],
+                chillCoinAmount=amount,
+            ),
+            allowed_mentions=discord.AllowedMentions.none(),
+            mention_author=False,
+        )
+
     def buildPaymentFailedEmbed(
         self,
         ctx: commands.Context,
@@ -288,6 +375,35 @@ class GiveChillCoinCommand(commands.Cog):
 
         return embed
 
+    def buildLoveShopPaymentFailedEmbed(
+        self,
+        ctx: commands.Context,
+        paymentResult: dict,
+    ):
+        embed = discord.Embed(
+            title="Thanh toán love shop chưa hoàn tất",
+            description=(
+                f"Người thanh toán: {ctx.author.mention}\n"
+                f"Nội dung: {paymentResult['message']}"
+            ),
+            color=discord.Color.orange(),
+        )
+
+        itemName = paymentResult.get("itemName")
+
+        if itemName is not None:
+            embed.add_field(
+                name="Item đang chờ thanh toán",
+                value=self.buildServerItemText(
+                    itemName=itemName,
+                    itemEmoji=paymentResult.get("itemEmoji"),
+                    quantity=paymentResult.get("quantity"),
+                ),
+                inline=False,
+            )
+
+        return embed
+
     def buildRolePaymentCompletedEmbed(
         self,
         member: discord.Member,
@@ -310,6 +426,37 @@ class GiveChillCoinCommand(commands.Cog):
         )
 
         return embed
+
+    def buildLoveShopPaymentCompletedEmbed(
+        self,
+        member: discord.Member,
+        itemName: str,
+        itemEmoji: str | None,
+        quantity: int,
+        chillCoinAmount: int,
+    ):
+        chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
+
+        embed = discord.Embed(
+            title="Thanh toán love shop thành công",
+            description=(
+                f"Người mua: {member.mention}\n"
+                f"Item đã mua: {self.buildServerItemText(itemName, itemEmoji, quantity)}\n"
+                f"Số tiền: **{formatNumber(chillCoinAmount)}** {chillCoinEmoji}\n"
+                "Xem kho của bạn bằng lệnh `cg inv`"
+            ),
+            color=discord.Color.green(),
+        )
+
+        return embed
+
+    def buildServerItemText(self, itemName: str, itemEmoji: str | None, quantity: int | None):
+        itemText = f"**{itemName}**" if itemEmoji is None else f"{itemEmoji} **{itemName}**"
+
+        if quantity is None:
+            return itemText
+
+        return f"{itemText} x**{formatNumber(quantity)}**"
 
     def buildPaymentErrorEmbed(
         self,

@@ -1802,7 +1802,7 @@ CREATE TABLE member_payment_transaction (
 
     user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
 
-    payment_target_type VARCHAR(50) NOT NULL COMMENT 'payment target type: role_shop, lotto_ticket, server_item',
+    payment_target_type VARCHAR(50) NOT NULL COMMENT 'payment target type: role_shop, lotto_ticket, server_item, love_shop',
     payment_target_id BIGINT NOT NULL COMMENT 'target purchase record id',
 
     status VARCHAR(50) NOT NULL COMMENT 'payment status: pending_payment, paid, cancelled, expired',
@@ -1835,7 +1835,7 @@ CREATE TABLE member_payment_transaction (
         CHECK (status IN ('pending_payment', 'paid', 'cancelled', 'expired')),
 
     CONSTRAINT chk_member_payment_target_type
-        CHECK (payment_target_type IN ('role_shop', 'lotto_ticket')),
+        CHECK (payment_target_type IN ('role_shop', 'lotto_ticket', 'server_item', 'love_shop')),
 
     CONSTRAINT chk_member_payment_required_cowoncy_amount
         CHECK (required_cowoncy_amount IS NULL OR required_cowoncy_amount > 0),
@@ -2370,4 +2370,4 @@ CREATE TABLE server_item_purchase (
 ALTER TABLE member_payment_transaction
     DROP CHECK chk_member_payment_target_type,
     ADD CONSTRAINT chk_member_payment_target_type
-        CHECK (payment_target_type IN ('role_shop', 'lotto_ticket', 'server_item'));
+        CHECK (payment_target_type IN ('role_shop', 'lotto_ticket', 'server_item', 'love_shop'));

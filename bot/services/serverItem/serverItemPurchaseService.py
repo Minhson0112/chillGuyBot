@@ -65,7 +65,7 @@ class ServerItemPurchaseService:
 
             memberPaymentTransactionRepository.createPendingPayment(
                 userId=userId,
-                paymentTargetType=MemberPaymentTargetType.SERVER_ITEM.value,
+                paymentTargetType=MemberPaymentTargetType.LOVE_SHOP.value,
                 paymentTargetId=serverItemPurchase.id,
                 requiredCowoncyAmount=requiredCowoncyAmount,
                 requiredChillCoinAmount=requiredChillCoinAmount,
@@ -88,7 +88,7 @@ class ServerItemPurchaseService:
         serverItemPurchaseRepository: ServerItemPurchaseRepository,
         pendingPayment,
     ):
-        if pendingPayment.payment_target_type != MemberPaymentTargetType.SERVER_ITEM.value:
+        if pendingPayment.payment_target_type != MemberPaymentTargetType.LOVE_SHOP.value:
             return {
                 "success": False,
                 "message": "Bạn đang có giao dịch khác đang chờ thanh toán. Hãy thanh toán hoặc hủy giao dịch đó trước.",
@@ -103,13 +103,13 @@ class ServerItemPurchaseService:
             }
 
         return {
-                "success": False,
-                "message": (
-                    "Bạn đang có giao dịch love shop đang chờ thanh toán.\n"
-                    f"Item đang chờ: {buildServerItemText(pendingPurchase.item)} x**{formatNumber(pendingPurchase.quantity)}**.\n"
-                    "Hãy thanh toán hoặc dùng `cg cancelloveshop` để hủy giao dịch."
-                ),
-            }
+            "success": False,
+            "message": (
+                "Bạn đang có giao dịch love shop đang chờ thanh toán.\n"
+                f"Item đang chờ: {buildServerItemText(pendingPurchase.item)} x**{formatNumber(pendingPurchase.quantity)}**.\n"
+                "Hãy thanh toán hoặc dùng `cg cancelloveshop` để hủy giao dịch."
+            ),
+        }
 
     def normalizePrice(self, price):
         if price is None or price <= 0:
