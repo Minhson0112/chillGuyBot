@@ -12,6 +12,7 @@ class Couple(Base):
         UniqueConstraint("user_1_id", "user_2_id", name="uq_couple_users"),
         Index("idx_couple_user_2_id", "user_2_id"),
         Index("idx_couple_divorcing_at", "divorcing_at"),
+        Index("idx_couple_ring_item_id", "ring_item_id"),
         CheckConstraint(
             "user_1_id <> user_2_id",
             name="chk_couple_distinct_users",
@@ -39,6 +40,12 @@ class Couple(Base):
     )
     created_at = Column(DateTime, nullable=False, server_default=func.now(), comment="created at")
     divorcing_at = Column(DateTime, nullable=True, comment="divorcing at")
+    ring_item_id = Column(
+        BIGINT,
+        ForeignKey("server_item_master.id", ondelete="RESTRICT"),
+        nullable=True,
+        comment="server item ring used for marriage",
+    )
     couple_role_id = Column(
         BIGINT(unsigned=True),
         nullable=True,
@@ -47,6 +54,7 @@ class Couple(Base):
 
     user1 = relationship("Member", foreign_keys=[user_1_id])
     user2 = relationship("Member", foreign_keys=[user_2_id])
+    ringItem = relationship("ServerItemMaster", foreign_keys=[ring_item_id])
     dailyVoiceActivities = relationship(
         "CoupleDailyVoiceActivity",
         back_populates="couple",

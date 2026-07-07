@@ -52,12 +52,14 @@ class CoupleRepository:
         user1Id: int,
         user2Id: int,
         intimacyPoints: int,
+        ringItemId: int | None = None,
     ):
         firstUserId, secondUserId = self.normalizeUserPair(user1Id, user2Id)
         couple = Couple(
             user_1_id=firstUserId,
             user_2_id=secondUserId,
             intimacy_points=intimacyPoints,
+            ring_item_id=ringItemId,
         )
 
         self.session.add(couple)
