@@ -14,7 +14,10 @@ class BreakupCommand(commands.Cog):
         if ctx.guild is None:
             return
 
-        result = self.coupleBreakupService.breakupCurrentCouple(ctx.author.id)
+        result = await self.coupleBreakupService.breakupCurrentCouple(
+            guild=ctx.guild,
+            userId=ctx.author.id,
+        )
 
         if not result["success"]:
             await ctx.reply(
