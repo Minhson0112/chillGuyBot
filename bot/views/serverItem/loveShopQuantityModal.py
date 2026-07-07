@@ -1,3 +1,5 @@
+import traceback
+
 import discord
 
 from bot.config.channel import PAYMENT_CHANNEL_ID
@@ -22,7 +24,7 @@ class LoveShopQuantityModal(discord.ui.Modal, title="Mua item love shop"):
 
     async def on_submit(self, interaction: discord.Interaction):
         try:
-            quantity = int(str(self.quantity).strip())
+            quantity = int(self.quantity.value.strip())
         except ValueError:
             await interaction.response.send_message(
                 "Số lượng item không hợp lệ.",
@@ -30,26 +32,36 @@ class LoveShopQuantityModal(discord.ui.Modal, title="Mua item love shop"):
             )
             return
 
-        result = self.serverItemPurchaseService.createPendingPurchase(
-            userId=interaction.user.id,
-            itemId=self.itemId,
-            quantity=quantity,
-        )
+        await interaction.response.defer(ephemeral=True)
 
-        if not result["success"]:
-            await interaction.response.send_message(
-                result["message"],
+        try:
+            result = self.serverItemPurchaseService.createPendingPurchase(
+                userId=interaction.user.id,
+                itemId=self.itemId,
+                quantity=quantity,
+            )
+
+            if not result["success"]:
+                await interaction.followup.send(
+                    result["message"],
+                    ephemeral=True,
+                )
+                return
+
+            await interaction.followup.send(
+                f"Bạn đã đăng kí mua **{formatNumber(result['quantity'])}** x {self.buildItemText(result)} thành công.\n"
+                f"Để hoàn tất giao dịch, bạn hãy chuyển phí giao dịch cho <@{OWNER_ID}> ở kênh <#{PAYMENT_CHANNEL_ID}>.\n\n"
+                f"Số tiền cần chuyển: {self.buildPaymentText(result)}\n\n"
+                "Để hủy giao dịch hãy dùng lệnh `cg cancelloveshop`",
                 ephemeral=True,
             )
-            return
-
-        await interaction.response.send_message(
-            f"Bạn đã đăng kí mua **{formatNumber(result['quantity'])}** x {self.buildItemText(result)} thành công.\n"
-            f"Để hoàn tất giao dịch, bạn hãy chuyển phí giao dịch cho <@{OWNER_ID}> ở kênh <#{PAYMENT_CHANNEL_ID}>.\n\n"
-            f"Số tiền cần chuyển: {self.buildPaymentText(result)}\n\n"
-            "Để hủy giao dịch hãy dùng lệnh `cg cancelloveshop`",
-            ephemeral=True,
-        )
+        except Exception as e:
+            print(f"Love shop purchase submit error: {e}")
+            traceback.print_exception(type(e), e, e.__traceback__)
+            await interaction.followup.send(
+                "Đã xảy ra lỗi khi đăng kí mua item love shop. Vui lòng thử lại sau.",
+                ephemeral=True,
+            )
 
     def buildPaymentText(self, result: dict):
         prices = []
