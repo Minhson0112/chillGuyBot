@@ -2290,12 +2290,14 @@ CREATE TABLE couple (
     intimacy_points BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'couple intimacy points',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
     divorcing_at DATETIME DEFAULT NULL COMMENT 'divorcing at',
+    ring_item_id BIGINT DEFAULT NULL COMMENT 'server item ring used for marriage',
     couple_role_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord couple role id',
 
     PRIMARY KEY (id),
     UNIQUE KEY uq_couple_users (user_1_id, user_2_id),
     KEY idx_couple_user_2_id (user_2_id),
     KEY idx_couple_divorcing_at (divorcing_at),
+    KEY idx_couple_ring_item_id (ring_item_id),
 
     CONSTRAINT fk_couple_user_1_id
         FOREIGN KEY (user_1_id) REFERENCES member(user_id)
@@ -2303,6 +2305,10 @@ CREATE TABLE couple (
 
     CONSTRAINT fk_couple_user_2_id
         FOREIGN KEY (user_2_id) REFERENCES member(user_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_couple_ring_item_id
+        FOREIGN KEY (ring_item_id) REFERENCES server_item_master(id)
         ON DELETE RESTRICT,
 
     CONSTRAINT chk_couple_distinct_users

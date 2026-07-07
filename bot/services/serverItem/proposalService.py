@@ -116,6 +116,7 @@ class ProposalService:
                 user1Id=proposerUserId,
                 user2Id=targetUserId,
                 intimacyPoints=ringItem.intimacy_points,
+                ringItemId=ringItem.id,
             )
             serverUserInventoryRepository.decreaseQuantity(ringInventory, 1)
             session.commit()

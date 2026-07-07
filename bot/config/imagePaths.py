@@ -307,6 +307,7 @@ ASSET_IMAGE_PATHS = {
     "silver_ring": "bot/assets/images/serverItem/silver_ring.png",
     "gold_ring": "bot/assets/images/serverItem/gold_ring.png",
     "diamond_ring": "bot/assets/images/serverItem/diamond_ring.png",
+    "couple_banner": "bot/assets/images/ui/couple.png",
 }
 
 ASSET_IMAGE_URLS = {

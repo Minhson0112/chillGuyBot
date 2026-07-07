@@ -30,6 +30,8 @@ class MemberInfo(commands.Cog):
                 "Không tìm thấy thông tin member trong database.")
             return
 
+        await self.fillPartnerDisplayName(interaction.guild, memberInfo)
+
         imageBuffer = await self.memberInfoImageService.buildMemberInfoImage(
             target,
             memberInfo,
@@ -40,6 +42,22 @@ class MemberInfo(commands.Cog):
         )
 
         await interaction.followup.send(file=file)
+
+    async def fillPartnerDisplayName(self, guild, memberInfo):
+        partnerUserId = memberInfo.get("partnerUserId")
+
+        if partnerUserId is None or guild is None:
+            return
+
+        partnerMember = guild.get_member(partnerUserId)
+
+        if partnerMember is None:
+            try:
+                partnerMember = await guild.fetch_member(partnerUserId)
+            except (discord.NotFound, discord.HTTPException):
+                return
+
+        memberInfo["partnerName"] = partnerMember.display_name
 
 
 async def setup(bot):

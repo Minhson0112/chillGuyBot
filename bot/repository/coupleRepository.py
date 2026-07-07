@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import or_
 
 from bot.models.couple import Couple
@@ -52,12 +54,14 @@ class CoupleRepository:
         user1Id: int,
         user2Id: int,
         intimacyPoints: int,
+        ringItemId: int | None = None,
     ):
         firstUserId, secondUserId = self.normalizeUserPair(user1Id, user2Id)
         couple = Couple(
             user_1_id=firstUserId,
             user_2_id=secondUserId,
             intimacy_points=intimacyPoints,
+            ring_item_id=ringItemId,
         )
 
         self.session.add(couple)
@@ -66,6 +70,11 @@ class CoupleRepository:
 
     def addIntimacyPoints(self, couple, points: int):
         couple.intimacy_points += points
+        self.session.flush()
+        return couple
+
+    def breakupCouple(self, couple):
+        couple.divorcing_at = datetime.now()
         self.session.flush()
         return couple
 

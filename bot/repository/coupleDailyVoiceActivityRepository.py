@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from bot.models.coupleDailyVoiceActivity import CoupleDailyVoiceActivity
 
 
@@ -40,3 +42,11 @@ class CoupleDailyVoiceActivityRepository:
         self.session.flush()
 
         return activity, previousVoiceSeconds
+
+    def getTotalVoiceSecondsByCoupleId(self, coupleId: int):
+        return (
+            self.session.query(func.coalesce(func.sum(CoupleDailyVoiceActivity.voice_seconds), 0))
+            .filter(CoupleDailyVoiceActivity.couple_id == coupleId)
+            .scalar()
+            or 0
+        )

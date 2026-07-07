@@ -147,6 +147,8 @@ async def main():
         "bot.commands.server.propose",
         "bot.commands.server.setCoupleRole",
         "bot.commands.server.gift",
+        "bot.commands.server.myLove",
+        "bot.commands.server.breakup",
         "bot.commands.partner.checkServer",
         "bot.commands.partner.createPartner",
         "bot.commands.partner.editPartnerLink",

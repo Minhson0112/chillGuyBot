@@ -1,3 +1,5 @@
+from sqlalchemy import and_, func, or_
+
 from bot.models.serverItemGiftHistory import ServerItemGiftHistory
 
 
@@ -22,3 +24,22 @@ class ServerItemGiftHistoryRepository:
         self.session.add(serverItemGiftHistory)
         self.session.flush()
         return serverItemGiftHistory
+
+    def countGiftHistoriesBetweenUsers(self, user1Id: int, user2Id: int):
+        return (
+            self.session.query(func.count(ServerItemGiftHistory.id))
+            .filter(
+                or_(
+                    and_(
+                        ServerItemGiftHistory.giver_user_id == user1Id,
+                        ServerItemGiftHistory.receiver_user_id == user2Id,
+                    ),
+                    and_(
+                        ServerItemGiftHistory.giver_user_id == user2Id,
+                        ServerItemGiftHistory.receiver_user_id == user1Id,
+                    ),
+                ),
+            )
+            .scalar()
+            or 0
+        )
