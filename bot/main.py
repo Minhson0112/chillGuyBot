@@ -143,6 +143,7 @@ async def main():
         "bot.commands.server.topInvite",
         "bot.commands.server.loveShop",
         "bot.commands.server.cancelLoveShop",
+        "bot.commands.server.inventory",
         "bot.commands.partner.checkServer",
         "bot.commands.partner.createPartner",
         "bot.commands.partner.editPartnerLink",

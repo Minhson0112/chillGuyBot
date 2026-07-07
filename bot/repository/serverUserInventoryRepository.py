@@ -15,6 +15,14 @@ class ServerUserInventoryRepository:
             .first()
         )
 
+    def findByUserId(self, userId: int):
+        return (
+            self.session.query(ServerUserInventory)
+            .filter(ServerUserInventory.user_id == userId)
+            .order_by(ServerUserInventory.item_id.asc())
+            .all()
+        )
+
     def upsertQuantity(self, userId: int, itemId: int, quantity: int):
         serverUserInventory = self.findByUserIdAndItemId(
             userId=userId,
