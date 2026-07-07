@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import or_
 
 from bot.models.couple import Couple
@@ -68,6 +70,11 @@ class CoupleRepository:
 
     def addIntimacyPoints(self, couple, points: int):
         couple.intimacy_points += points
+        self.session.flush()
+        return couple
+
+    def breakupCouple(self, couple):
+        couple.divorcing_at = datetime.now()
         self.session.flush()
         return couple
 
