@@ -28,7 +28,7 @@ class ServerUserInventoryService:
 
     def buildInventoryItemLine(self, inventoryItem):
         return (
-            f"ID `{inventoryItem.item_id}` | "
+            f"ID `{inventoryItem.id}` | "
             f"{buildServerItemText(inventoryItem.item)} | "
             f"Số lượng: **{formatNumber(inventoryItem.quantity)}**"
         )
