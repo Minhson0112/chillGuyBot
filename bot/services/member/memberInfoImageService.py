@@ -15,6 +15,7 @@ class MemberInfoImageService:
     AVATAR_RADIUS = 12
 
     NICKNAME_BOX = (148, 675, 507, 721)
+    PARTNER_NAME_BOX = (126, 823, 530, 887)
 
     VALUE_BOX_LEFT = 1135
     VALUE_BOX_RIGHT = 1518
@@ -89,6 +90,7 @@ class MemberInfoImageService:
             4: formatNumber(member.warning_count),
             5: formatNumber(memberInfo["totalChatCount"]),
             6: formatHoursMinutesSeconds(memberInfo["totalVoiceSeconds"]),
+            7: memberInfo["marriageStatus"],
             8: str(memberInfo["farmLevel"]) if memberInfo["farmLevel"] else "Chưa có",
         }
 
@@ -104,6 +106,23 @@ class MemberInfoImageService:
             self.NICKNAME_BOX,
             memberInfo["nickname"],
             nicknameFont,
+            self.NICKNAME_COLOR,
+            strokeWidth=2,
+            strokeFill=self.NICKNAME_STROKE_COLOR,
+        )
+
+        partnerNameFont = self.getFitFont(
+            draw,
+            memberInfo["partnerName"],
+            28,
+            self.PARTNER_NAME_BOX[2] - self.PARTNER_NAME_BOX[0],
+            20,
+        )
+        self.drawCenteredText(
+            draw,
+            self.PARTNER_NAME_BOX,
+            memberInfo["partnerName"],
+            partnerNameFont,
             self.NICKNAME_COLOR,
             strokeWidth=2,
             strokeFill=self.NICKNAME_STROKE_COLOR,

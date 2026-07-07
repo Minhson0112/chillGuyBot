@@ -10,6 +10,7 @@ from bot.repository.farmRepository import FarmRepository
 from bot.repository.memberDailyActivityRepository import MemberDailyActivityRepository
 from bot.repository.memberModerationHistoryRepository import MemberModerationHistoryRepository
 from bot.repository.memberRepository import MemberRepository
+from bot.repository.coupleRepository import CoupleRepository
 
 
 class MemberInfoService:
@@ -22,6 +23,7 @@ class MemberInfoService:
             chatRepository = ChatRepository(session)
             memberDailyActivityRepository = MemberDailyActivityRepository(session)
             farmRepository = FarmRepository(session)
+            coupleRepository = CoupleRepository(session)
 
             member = memberRepository.findByUserId(userId)
             if member is None:
@@ -33,6 +35,7 @@ class MemberInfoService:
             totalVoiceSeconds = memberDailyActivityRepository.getTotalVoiceSecondsByUserId(
                 userId,
             )
+            couple = coupleRepository.findActiveByUserId(userId)
 
         pendingChatCount = chatCountCache.get(userId, {}).get("total_chat_count", 0)
         pendingVoiceSeconds = sum(
@@ -49,6 +52,16 @@ class MemberInfoService:
             now = datetime.now(joinedAt.tzinfo) if joinedAt.tzinfo else datetime.now()
             currentVoiceSeconds = max(int((now - joinedAt).total_seconds()), 0)
 
+        partnerUserId = None
+        partnerName = "Không có"
+        marriageStatus = "Không"
+
+        if couple is not None:
+            partnerUserId = couple.user_2_id if couple.user_1_id == userId else couple.user_1_id
+            partnerMember = discordMember.guild.get_member(partnerUserId)
+            partnerName = partnerMember.display_name if partnerMember is not None else f"<@{partnerUserId}>"
+            marriageStatus = "Có"
+
         return {
             "member": member,
             "nickname": discordMember.display_name,
@@ -57,6 +70,9 @@ class MemberInfoService:
             "totalChatCount": (chat.total_chat_count if chat else 0) + pendingChatCount,
             "totalVoiceSeconds": totalVoiceSeconds + pendingVoiceSeconds + currentVoiceSeconds,
             "farmLevel": farm.farm_level if farm else None,
+            "partnerUserId": partnerUserId,
+            "partnerName": partnerName,
+            "marriageStatus": marriageStatus,
         }
 
     def getGenderLabel(self, discordMember):
