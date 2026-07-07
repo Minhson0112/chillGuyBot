@@ -69,6 +69,11 @@ class CoupleRepository:
         self.session.flush()
         return couple
 
+    def setCoupleRoleId(self, couple, roleId: int):
+        couple.couple_role_id = roleId
+        self.session.flush()
+        return couple
+
     def normalizeUserPair(self, user1Id: int, user2Id: int):
         if user1Id < user2Id:
             return user1Id, user2Id
