@@ -268,6 +268,7 @@ async def main():
         "bot.tasks.farmAnimalStarvationTask",
         "bot.tasks.farmTrainEventAutoTask",
         "bot.tasks.homiesRoleCheckTask",
+        "bot.tasks.coupleVoiceActivityTask",
         "bot.tasks.memberSyncTask",
         "bot.tasks.serverInviteSyncTask",
         "bot.tasks.partnerInviteCheckTask",

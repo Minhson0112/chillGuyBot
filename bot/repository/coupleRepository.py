@@ -7,6 +7,20 @@ class CoupleRepository:
     def __init__(self, session):
         self.session = session
 
+    def findActiveCouples(self):
+        return (
+            self.session.query(Couple)
+            .filter(Couple.divorcing_at.is_(None))
+            .all()
+        )
+
+    def findById(self, coupleId: int):
+        return (
+            self.session.query(Couple)
+            .filter(Couple.id == coupleId)
+            .first()
+        )
+
     def findActiveByUserId(self, userId: int):
         return (
             self.session.query(Couple)

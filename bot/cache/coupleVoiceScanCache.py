@@ -1,0 +1,3 @@
+lastCoupleVoiceScanAt = {
+    "value": None,
+}
