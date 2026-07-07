@@ -23,6 +23,25 @@ class ServerUserInventoryRepository:
             .all()
         )
 
+    def findById(self, inventoryId: int):
+        return (
+            self.session.query(ServerUserInventory)
+            .filter(ServerUserInventory.id == inventoryId)
+            .first()
+        )
+
+    def findAvailableRingsByUserId(self, userId: int):
+        return (
+            self.session.query(ServerUserInventory)
+            .filter(
+                ServerUserInventory.user_id == userId,
+                ServerUserInventory.quantity > 0,
+                ServerUserInventory.item.has(type="ring"),
+            )
+            .order_by(ServerUserInventory.item_id.asc())
+            .all()
+        )
+
     def upsertQuantity(self, userId: int, itemId: int, quantity: int):
         serverUserInventory = self.findByUserIdAndItemId(
             userId=userId,
@@ -42,3 +61,8 @@ class ServerUserInventoryRepository:
         serverUserInventory.quantity += quantity
         self.session.flush()
         return serverUserInventory
+
+    def decreaseQuantity(self, inventoryItem, quantity: int):
+        inventoryItem.quantity -= quantity
+        self.session.flush()
+        return inventoryItem
