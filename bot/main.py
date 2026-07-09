@@ -183,6 +183,7 @@ async def main():
         "bot.commands.farm.giveChillCoin",
         "bot.commands.farm.farmRecipe",
         "bot.commands.farm.farmCook",
+        "bot.commands.farm.achievement",
         "bot.commands.farm.createTrainEvent",
         "bot.commands.farm.closeTrainEvent",
         "bot.commands.farm.topFishing",
