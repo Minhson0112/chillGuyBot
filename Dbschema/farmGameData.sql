@@ -1724,7 +1724,7 @@ INNER JOIN farm_achievement_masters achievements
     ON achievements.achievement_code = reward_data.achievement_code
 ON DUPLICATE KEY UPDATE
     reward_amount = VALUES(reward_amount),
-    discord_role_id = COALESCE(VALUES(discord_role_id), discord_role_id);
+    discord_role_id = COALESCE(VALUES(discord_role_id), farm_achievement_rewards.discord_role_id);
 
 #gift 
 START TRANSACTION;
