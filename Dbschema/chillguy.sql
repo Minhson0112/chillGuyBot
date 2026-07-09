@@ -204,6 +204,10 @@ CREATE TABLE music_event_entry (
 ALTER TABLE member
 ADD COLUMN chill_coin INT NOT NULL DEFAULT 0 COMMENT 'server private currency';
 
+UPDATE member
+SET chill_coin = 300
+WHERE chill_coin = 0;
+
 #update 10 (farm)
 CREATE TABLE farm (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm id',

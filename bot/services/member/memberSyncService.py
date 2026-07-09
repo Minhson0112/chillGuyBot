@@ -7,6 +7,8 @@ from bot.services.farm.farmInitializeService import FarmInitializeService
 
 
 class MemberSyncService:
+    INITIAL_CHILL_COIN = 300
+
     def __init__(self):
         self.farmInitializeService = FarmInitializeService()
 
@@ -28,6 +30,7 @@ class MemberSyncService:
             "is_bot": discordMember.bot,
             "join_count": 1,
             "warning_count": 0,
+            "chill_coin": self.INITIAL_CHILL_COIN,
         }
 
     def syncMember(self, session, discordMember):
