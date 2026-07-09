@@ -158,6 +158,7 @@ def buildFarmAchievementEmbed(pageResult):
         embed.add_field(
             name=achievement["name"],
             value=(
+                f"Mục tiêu: {achievement['description'] or '-'}\n"
                 f"Tiến độ: **{achievement['progressText']}**\n"
                 f"Phần thưởng: {achievement['rewardText']}\n"
                 f"Trạng thái: {statusText}"

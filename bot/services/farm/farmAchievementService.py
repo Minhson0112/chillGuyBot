@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from bot.config.database import getDbSession
+from bot.config.emoji import FARM_GAME_EMOJI
 from bot.enums.farmAchievementConditionType import FarmAchievementConditionType
 from bot.enums.farmAchievementRewardType import FarmAchievementRewardType
 from bot.helper.numberFormatHelper import formatNumber
@@ -273,12 +274,14 @@ class FarmAchievementService:
             session.commit()
 
             rewardParts = []
+            chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
+            expEmoji = FARM_GAME_EMOJI["exp"]
 
             if totalChillCoin > 0:
-                rewardParts.append(f"**{formatNumber(totalChillCoin)}** chill coin")
+                rewardParts.append(f"**{formatNumber(totalChillCoin)}** {chillCoinEmoji}")
 
             if totalFarmExp > 0:
-                rewardParts.append(f"**{formatNumber(totalFarmExp)}** exp")
+                rewardParts.append(f"**{formatNumber(totalFarmExp)}** {expEmoji}")
 
             rewardText = ", ".join(rewardParts) if rewardParts else "role"
 
@@ -502,12 +505,14 @@ class FarmAchievementService:
 
     def buildRewardText(self, rewards):
         rewardParts = []
+        chillCoinEmoji = FARM_GAME_EMOJI["chill_coin"]
+        expEmoji = FARM_GAME_EMOJI["exp"]
 
         for reward in sorted(rewards, key=lambda item: item.id):
             if reward.reward_type == FarmAchievementRewardType.CHILL_COIN.value:
-                rewardParts.append(f"{formatNumber(reward.reward_amount)} coin")
+                rewardParts.append(f"{formatNumber(reward.reward_amount)} {chillCoinEmoji}")
             elif reward.reward_type == FarmAchievementRewardType.FARM_EXP.value:
-                rewardParts.append(f"{formatNumber(reward.reward_amount)} exp")
+                rewardParts.append(f"{formatNumber(reward.reward_amount)} {expEmoji}")
             elif reward.reward_type == FarmAchievementRewardType.DISCORD_ROLE.value:
                 if reward.discord_role_id is None:
                     rewardParts.append("role")
