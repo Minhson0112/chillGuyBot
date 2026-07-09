@@ -4,6 +4,7 @@ from bot.config.database import getDbSession
 from bot.helper.timeFormatHelper import formatMinutesSeconds
 from bot.helper.farmItemHelper import buildItemText
 from bot.repository.farmChickenCoopRepository import FarmChickenCoopRepository
+from bot.repository.farmEggHarvestHistoryRepository import FarmEggHarvestHistoryRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.itemRepository import ItemRepository
 from bot.repository.userInventoryRepository import UserInventoryRepository
@@ -22,6 +23,7 @@ class FarmChickenEggCollectService:
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmChickenCoopRepository = FarmChickenCoopRepository(session)
+            farmEggHarvestHistoryRepository = FarmEggHarvestHistoryRepository(session)
             itemRepository = ItemRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
             dailyTaskProgressService = DailyTaskProgressService(session)
@@ -78,6 +80,12 @@ class FarmChickenEggCollectService:
                 userId=userId,
                 itemId=eggItem.id,
                 quantity=eggQuantity,
+            )
+            farmEggHarvestHistoryRepository.create(
+                userId=userId,
+                itemId=eggItem.id,
+                quantity=eggQuantity,
+                harvestedAt=now,
             )
 
             farmChickenCoopRepository.markEggCollected(chickenCoop)

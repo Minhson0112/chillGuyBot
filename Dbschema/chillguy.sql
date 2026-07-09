@@ -2377,3 +2377,56 @@ ALTER TABLE member_payment_transaction
     DROP CHECK chk_member_payment_target_type,
     ADD CONSTRAINT chk_member_payment_target_type
         CHECK (payment_target_type IN ('role_shop', 'lotto_ticket', 'server_item', 'love_shop'));
+
+
+
+
+# add farm egg harvest history
+CREATE TABLE farm_egg_harvest_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm egg harvest history id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of the farm owner',
+    item_id BIGINT NOT NULL COMMENT 'harvested egg item id',
+    quantity INT NOT NULL COMMENT 'harvested egg quantity',
+    harvested_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'harvested at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_farm_egg_harvest_histories_user_harvested_at (user_id, harvested_at),
+    KEY idx_farm_egg_harvest_histories_item_id (item_id),
+
+    CONSTRAINT fk_farm_egg_harvest_histories_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_egg_harvest_histories_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_farm_egg_harvest_histories_quantity
+        CHECK (quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm egg harvest history';
+
+# add farm milk harvest history
+CREATE TABLE farm_milk_harvest_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm milk harvest history id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of the farm owner',
+    item_id BIGINT NOT NULL COMMENT 'harvested milk item id',
+    quantity INT NOT NULL COMMENT 'harvested milk quantity',
+    harvested_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'harvested at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_farm_milk_harvest_histories_user_harvested_at (user_id, harvested_at),
+    KEY idx_farm_milk_harvest_histories_item_id (item_id),
+
+    CONSTRAINT fk_farm_milk_harvest_histories_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_milk_harvest_histories_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_farm_milk_harvest_histories_quantity
+        CHECK (quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm milk harvest history';

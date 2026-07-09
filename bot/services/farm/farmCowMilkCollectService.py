@@ -6,6 +6,7 @@ from bot.helper.farmItemHelper import buildItemText
 from bot.enums.toolStatus import ToolStatus
 from bot.enums.toolType import ToolType
 from bot.repository.farmCowShedRepository import FarmCowShedRepository
+from bot.repository.farmMilkHarvestHistoryRepository import FarmMilkHarvestHistoryRepository
 from bot.repository.farmRepository import FarmRepository
 from bot.repository.farmToolEquipmentRepository import FarmToolEquipmentRepository
 from bot.repository.itemRepository import ItemRepository
@@ -25,6 +26,7 @@ class FarmCowMilkCollectService:
         with getDbSession() as session:
             farmRepository = FarmRepository(session)
             farmCowShedRepository = FarmCowShedRepository(session)
+            farmMilkHarvestHistoryRepository = FarmMilkHarvestHistoryRepository(session)
             farmToolEquipmentRepository = FarmToolEquipmentRepository(session)
             itemRepository = ItemRepository(session)
             userInventoryRepository = UserInventoryRepository(session)
@@ -88,6 +90,12 @@ class FarmCowMilkCollectService:
                 userId=userId,
                 itemId=milkItem.id,
                 quantity=milkQuantity,
+            )
+            farmMilkHarvestHistoryRepository.create(
+                userId=userId,
+                itemId=milkItem.id,
+                quantity=milkQuantity,
+                harvestedAt=now,
             )
 
             milkPailBroken = self.consumeMilkPailDurability(milkPailEquipment)

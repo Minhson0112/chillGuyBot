@@ -31,6 +31,8 @@ class Item(Base):
     fishingHistories = relationship("FishingHistory", back_populates="item")
     cookingHistories = relationship("FarmCookingHistory", back_populates="item")
     harvestHistories = relationship("FarmHarvestHistory", back_populates="item")
+    eggHarvestHistories = relationship("FarmEggHarvestHistory", back_populates="item")
+    milkHarvestHistories = relationship("FarmMilkHarvestHistory", back_populates="item")
     marketListings = relationship("FarmMarketListing", back_populates="item")
     foodRecipe = relationship(
         "FoodRecipe",

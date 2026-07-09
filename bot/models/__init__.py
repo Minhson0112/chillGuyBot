@@ -17,10 +17,12 @@ from bot.models.farmChickenCoop import FarmChickenCoop
 from bot.models.farmCookingHistory import FarmCookingHistory
 from bot.models.farmCowShed import FarmCowShed
 from bot.models.farmCropArea import FarmCropArea
+from bot.models.farmEggHarvestHistory import FarmEggHarvestHistory
 from bot.models.farmFishPond import FarmFishPond
 from bot.models.farmHarvestHistory import FarmHarvestHistory
 from bot.models.farmKitchen import FarmKitchen
 from bot.models.farmMarketListing import FarmMarketListing
+from bot.models.farmMilkHarvestHistory import FarmMilkHarvestHistory
 from bot.models.farmToolEquipment import FarmToolEquipment
 from bot.models.farmTheftHistory import FarmTheftHistory
 from bot.models.farmTrainEvent import FarmTrainEvent
