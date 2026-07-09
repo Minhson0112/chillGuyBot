@@ -528,6 +528,7 @@ CREATE TABLE farm_market_listings (
     KEY idx_farm_market_listings_buyer_user_id (buyer_user_id),
     KEY idx_farm_market_listings_item_id (item_id),
     KEY idx_farm_market_listings_is_sold_created_at (is_sold, created_at),
+    KEY idx_farm_market_listings_seller_sold_at (seller_user_id, is_sold, sold_at),
 
     CONSTRAINT fk_farm_market_listings_seller_user_id
         FOREIGN KEY (seller_user_id) REFERENCES member(user_id)
@@ -2214,6 +2215,202 @@ CREATE TABLE farm_cooking_histories (
         CHECK (quantity > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm cooking history';
 
+# add farm egg harvest history
+CREATE TABLE farm_egg_harvest_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm egg harvest history id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of the farm owner',
+    item_id BIGINT NOT NULL COMMENT 'harvested egg item id',
+    quantity INT NOT NULL COMMENT 'harvested egg quantity',
+    harvested_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'harvested at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_farm_egg_harvest_histories_user_harvested_at (user_id, harvested_at),
+    KEY idx_farm_egg_harvest_histories_item_id (item_id),
+
+    CONSTRAINT fk_farm_egg_harvest_histories_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_egg_harvest_histories_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_farm_egg_harvest_histories_quantity
+        CHECK (quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm egg harvest history';
+
+# add farm milk harvest history
+CREATE TABLE farm_milk_harvest_histories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm milk harvest history id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of the farm owner',
+    item_id BIGINT NOT NULL COMMENT 'harvested milk item id',
+    quantity INT NOT NULL COMMENT 'harvested milk quantity',
+    harvested_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'harvested at',
+
+    PRIMARY KEY (id),
+
+    KEY idx_farm_milk_harvest_histories_user_harvested_at (user_id, harvested_at),
+    KEY idx_farm_milk_harvest_histories_item_id (item_id),
+
+    CONSTRAINT fk_farm_milk_harvest_histories_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_milk_harvest_histories_item_id
+        FOREIGN KEY (item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_farm_milk_harvest_histories_quantity
+        CHECK (quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm milk harvest history';
+
+# add farm achievement system
+CREATE TABLE farm_achievement_categories (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm achievement category id',
+    category_code VARCHAR(100) NOT NULL COMMENT 'unique category code',
+    name VARCHAR(255) NOT NULL COMMENT 'category display name',
+    description VARCHAR(500) DEFAULT NULL COMMENT 'category description',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT 'display sort order',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'whether category is active',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_farm_achievement_categories_code (category_code),
+    KEY idx_farm_achievement_categories_active_sort (is_active, sort_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm achievement category master';
+
+CREATE TABLE farm_achievement_masters (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm achievement master id',
+    category_id BIGINT NOT NULL COMMENT 'farm achievement category id',
+    achievement_code VARCHAR(100) NOT NULL COMMENT 'unique achievement code',
+    name VARCHAR(255) NOT NULL COMMENT 'achievement display name',
+    description VARCHAR(500) DEFAULT NULL COMMENT 'achievement description',
+    condition_type VARCHAR(100) NOT NULL COMMENT 'achievement condition type',
+    target_item_id BIGINT DEFAULT NULL COMMENT 'target item id if condition targets an item',
+    target_item_type_code VARCHAR(50) DEFAULT NULL COMMENT 'target item type code if condition targets item type',
+    target_level INT DEFAULT NULL COMMENT 'target farm level or recipe level',
+    required_value BIGINT DEFAULT NULL COMMENT 'required progress value',
+    required_weight_kg DECIMAL(6,2) DEFAULT NULL COMMENT 'required minimum fish weight in kg',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT 'display sort order in category',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'whether achievement is active',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_farm_achievement_masters_code (achievement_code),
+    KEY idx_farm_achievement_masters_category_sort (category_id, sort_order),
+    KEY idx_farm_achievement_masters_condition (condition_type),
+    KEY idx_farm_achievement_masters_target_item_id (target_item_id),
+
+    CONSTRAINT fk_farm_achievement_masters_category_id
+        FOREIGN KEY (category_id) REFERENCES farm_achievement_categories(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_farm_achievement_masters_target_item_id
+        FOREIGN KEY (target_item_id) REFERENCES items(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_farm_achievement_masters_condition_type
+        CHECK (
+            condition_type IN (
+                'collect_item_quantity',
+                'catch_all_item_type',
+                'catch_all_item_type_with_min_weight',
+                'harvest_all_crops_by_level',
+                'cook_all_recipes_by_level',
+                'complete_train_order_count',
+                'earn_market_chill_coin'
+            )
+        ),
+
+    CONSTRAINT chk_farm_achievement_masters_required_value
+        CHECK (required_value IS NULL OR required_value > 0),
+
+    CONSTRAINT chk_farm_achievement_masters_required_weight
+        CHECK (required_weight_kg IS NULL OR required_weight_kg > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm achievement master';
+
+CREATE TABLE farm_achievement_rewards (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm achievement reward id',
+    achievement_id BIGINT NOT NULL COMMENT 'farm achievement master id',
+    reward_type VARCHAR(50) NOT NULL COMMENT 'reward type: chill_coin, farm_exp, discord_role',
+    reward_amount BIGINT DEFAULT NULL COMMENT 'reward amount for chill coin or farm exp',
+    discord_role_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord role id reward',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_farm_achievement_rewards_achievement_type (achievement_id, reward_type),
+    KEY idx_farm_achievement_rewards_achievement_id (achievement_id),
+
+    CONSTRAINT fk_farm_achievement_rewards_achievement_id
+        FOREIGN KEY (achievement_id) REFERENCES farm_achievement_masters(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_farm_achievement_rewards_type
+        CHECK (reward_type IN ('chill_coin', 'farm_exp', 'discord_role')),
+
+    CONSTRAINT chk_farm_achievement_rewards_value
+        CHECK (
+            (
+                reward_type IN ('chill_coin', 'farm_exp')
+                AND reward_amount IS NOT NULL
+                AND reward_amount > 0
+                AND discord_role_id IS NULL
+            )
+            OR
+            (
+                reward_type = 'discord_role'
+                AND reward_amount IS NULL
+            )
+        )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm achievement reward master';
+
+CREATE TABLE user_farm_achievements (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'user farm achievement id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    achievement_id BIGINT NOT NULL COMMENT 'farm achievement master id',
+    progress_value BIGINT NOT NULL DEFAULT 0 COMMENT 'latest calculated progress value',
+    is_completed TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'whether achievement condition is completed',
+    completed_at DATETIME DEFAULT NULL COMMENT 'completed at',
+    is_reward_claimed TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'whether reward has been claimed',
+    reward_claimed_at DATETIME DEFAULT NULL COMMENT 'reward claimed at',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_farm_achievements_user_achievement (user_id, achievement_id),
+    KEY idx_user_farm_achievements_user_id (user_id),
+    KEY idx_user_farm_achievements_claim (user_id, is_completed, is_reward_claimed),
+    KEY idx_user_farm_achievements_achievement_id (achievement_id),
+
+    CONSTRAINT fk_user_farm_achievements_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_user_farm_achievements_achievement_id
+        FOREIGN KEY (achievement_id) REFERENCES farm_achievement_masters(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_user_farm_achievements_progress_value
+        CHECK (progress_value >= 0),
+
+    CONSTRAINT chk_user_farm_achievements_completed_state
+        CHECK (
+            (is_completed = 0 AND completed_at IS NULL)
+            OR
+            (is_completed = 1 AND completed_at IS NOT NULL)
+        ),
+
+    CONSTRAINT chk_user_farm_achievements_claim_state
+        CHECK (
+            (is_reward_claimed = 0 AND reward_claimed_at IS NULL)
+            OR
+            (is_reward_claimed = 1 AND reward_claimed_at IS NOT NULL)
+        )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='user farm achievement progress and claim state';
+
 # add server item and couple system
 CREATE TABLE server_item_master (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'server item id',
@@ -2377,56 +2574,3 @@ ALTER TABLE member_payment_transaction
     DROP CHECK chk_member_payment_target_type,
     ADD CONSTRAINT chk_member_payment_target_type
         CHECK (payment_target_type IN ('role_shop', 'lotto_ticket', 'server_item', 'love_shop'));
-
-
-
-
-# add farm egg harvest history
-CREATE TABLE farm_egg_harvest_histories (
-    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm egg harvest history id',
-    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of the farm owner',
-    item_id BIGINT NOT NULL COMMENT 'harvested egg item id',
-    quantity INT NOT NULL COMMENT 'harvested egg quantity',
-    harvested_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'harvested at',
-
-    PRIMARY KEY (id),
-
-    KEY idx_farm_egg_harvest_histories_user_harvested_at (user_id, harvested_at),
-    KEY idx_farm_egg_harvest_histories_item_id (item_id),
-
-    CONSTRAINT fk_farm_egg_harvest_histories_user_id
-        FOREIGN KEY (user_id) REFERENCES member(user_id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_farm_egg_harvest_histories_item_id
-        FOREIGN KEY (item_id) REFERENCES items(id)
-        ON DELETE RESTRICT,
-
-    CONSTRAINT chk_farm_egg_harvest_histories_quantity
-        CHECK (quantity > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm egg harvest history';
-
-# add farm milk harvest history
-CREATE TABLE farm_milk_harvest_histories (
-    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'farm milk harvest history id',
-    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id of the farm owner',
-    item_id BIGINT NOT NULL COMMENT 'harvested milk item id',
-    quantity INT NOT NULL COMMENT 'harvested milk quantity',
-    harvested_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'harvested at',
-
-    PRIMARY KEY (id),
-
-    KEY idx_farm_milk_harvest_histories_user_harvested_at (user_id, harvested_at),
-    KEY idx_farm_milk_harvest_histories_item_id (item_id),
-
-    CONSTRAINT fk_farm_milk_harvest_histories_user_id
-        FOREIGN KEY (user_id) REFERENCES member(user_id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_farm_milk_harvest_histories_item_id
-        FOREIGN KEY (item_id) REFERENCES items(id)
-        ON DELETE RESTRICT,
-
-    CONSTRAINT chk_farm_milk_harvest_histories_quantity
-        CHECK (quantity > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='farm milk harvest history';

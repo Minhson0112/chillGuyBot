@@ -1544,6 +1544,188 @@ ON DUPLICATE KEY UPDATE
     weight = VALUES(weight),
     is_active = VALUES(is_active);
 
+# farm achievement categories
+INSERT INTO farm_achievement_categories (
+    category_code,
+    name,
+    description,
+    sort_order,
+    is_active
+)
+SELECT 'diligent_farmer', 'Nông dân chăm chỉ', 'Thành tựu thu hoạch đủ các loại cây theo cấp farm', 10, 1
+UNION ALL SELECT 'chicken_keeper', 'Người chăm sóc gà', 'Thành tựu thu hoạch trứng gà', 20, 1
+UNION ALL SELECT 'cowboy', 'Cao bồi', 'Thành tựu vắt sữa bò', 30, 1
+UNION ALL SELECT 'fishing', 'Ngư dân', 'Thành tựu câu cá', 40, 1
+UNION ALL SELECT 'cooking', 'Đầu bếp', 'Thành tựu nấu ăn', 50, 1
+UNION ALL SELECT 'train_delivery', 'Nông dân chạy đơn', 'Thành tựu hoàn thành đơn tàu hỏa', 60, 1
+UNION ALL SELECT 'business', 'Doanh nhân', 'Thành tựu kiếm chill coin từ shop cá nhân', 70, 1
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    description = VALUES(description),
+    sort_order = VALUES(sort_order),
+    is_active = VALUES(is_active);
+
+# farm achievements
+INSERT INTO farm_achievement_masters (
+    category_id,
+    achievement_code,
+    name,
+    description,
+    condition_type,
+    target_item_id,
+    target_item_type_code,
+    target_level,
+    required_value,
+    required_weight_kg,
+    sort_order,
+    is_active
+)
+SELECT
+    categories.id,
+    achievement_data.achievement_code,
+    achievement_data.name,
+    achievement_data.description,
+    achievement_data.condition_type,
+    items.id,
+    achievement_data.target_item_type_code,
+    achievement_data.target_level,
+    achievement_data.required_value,
+    achievement_data.required_weight_kg,
+    achievement_data.sort_order,
+    1
+FROM (
+    SELECT 'diligent_farmer_1' AS achievement_code, 'diligent_farmer' AS category_code, 'Nông dân chăm chỉ 1' AS name, 'Thu hoạch đủ tất cả cây level 1.' AS description, 'harvest_all_crops_by_level' AS condition_type, NULL AS target_item_code, NULL AS target_item_type_code, 1 AS target_level, NULL AS required_value, NULL AS required_weight_kg, 10 AS sort_order
+    UNION ALL SELECT 'diligent_farmer_2', 'diligent_farmer', 'Nông dân chăm chỉ 2', 'Thu hoạch đủ tất cả cây level 2.', 'harvest_all_crops_by_level', NULL, NULL, 2, NULL, NULL, 20
+    UNION ALL SELECT 'diligent_farmer_3', 'diligent_farmer', 'Nông dân chăm chỉ 3', 'Thu hoạch đủ tất cả cây level 3.', 'harvest_all_crops_by_level', NULL, NULL, 3, NULL, NULL, 30
+    UNION ALL SELECT 'diligent_farmer_4', 'diligent_farmer', 'Nông dân chăm chỉ 4', 'Thu hoạch đủ tất cả cây level 4.', 'harvest_all_crops_by_level', NULL, NULL, 4, NULL, NULL, 40
+
+    UNION ALL SELECT 'chicken_keeper_1', 'chicken_keeper', 'Người chăm sóc gà 1', 'Thu hoạch 100 trứng gà.', 'collect_item_quantity', 'egg', NULL, NULL, 100, NULL, 10
+    UNION ALL SELECT 'chicken_keeper_2', 'chicken_keeper', 'Người chăm sóc gà 2', 'Thu hoạch 500 trứng gà.', 'collect_item_quantity', 'egg', NULL, NULL, 500, NULL, 20
+    UNION ALL SELECT 'chicken_keeper_3', 'chicken_keeper', 'Người chăm sóc gà 3', 'Thu hoạch 1000 trứng gà.', 'collect_item_quantity', 'egg', NULL, NULL, 1000, NULL, 30
+    UNION ALL SELECT 'chicken_keeper_4', 'chicken_keeper', 'Người chăm sóc gà 4', 'Thu hoạch 10000 trứng gà.', 'collect_item_quantity', 'egg', NULL, NULL, 10000, NULL, 40
+
+    UNION ALL SELECT 'cowboy_1', 'cowboy', 'Cao bồi 1', 'Thu hoạch 100 sữa bò.', 'collect_item_quantity', 'milk', NULL, NULL, 100, NULL, 10
+    UNION ALL SELECT 'cowboy_2', 'cowboy', 'Cao bồi 2', 'Thu hoạch 500 sữa bò.', 'collect_item_quantity', 'milk', NULL, NULL, 500, NULL, 20
+    UNION ALL SELECT 'cowboy_3', 'cowboy', 'Cao bồi 3', 'Thu hoạch 1000 sữa bò.', 'collect_item_quantity', 'milk', NULL, NULL, 1000, NULL, 30
+    UNION ALL SELECT 'cowboy_4', 'cowboy', 'Cao bồi 4', 'Thu hoạch 10000 sữa bò.', 'collect_item_quantity', 'milk', NULL, NULL, 10000, NULL, 40
+
+    UNION ALL SELECT 'fishing_amateur', 'fishing', 'Ngư dân nghiệp dư', 'Câu đủ tất cả cá hiện có trong nhóm seafood.', 'catch_all_item_type', NULL, 'seafood', NULL, NULL, NULL, 10
+    UNION ALL SELECT 'fishing_professional', 'fishing', 'Ngư dân chuyên nghiệp', 'Câu đủ tất cả cá seafood, mỗi loài có ít nhất một lần trên 50kg.', 'catch_all_item_type_with_min_weight', NULL, 'seafood', NULL, NULL, 50.00, 20
+    UNION ALL SELECT 'fishing_legendary', 'fishing', 'Ngư dân huyền thoại', 'Câu đủ tất cả cá seafood, mỗi loài có ít nhất một lần trên 90kg.', 'catch_all_item_type_with_min_weight', NULL, 'seafood', NULL, NULL, 90.00, 30
+
+    UNION ALL SELECT 'cook_apprentice', 'cooking', 'Đầu bếp tập sự', 'Nấu đủ tất cả đồ ăn level 1.', 'cook_all_recipes_by_level', NULL, NULL, 1, NULL, NULL, 10
+    UNION ALL SELECT 'cook_professional', 'cooking', 'Đầu bếp chuyên nghiệp', 'Nấu đủ tất cả đồ ăn level 2.', 'cook_all_recipes_by_level', NULL, NULL, 2, NULL, NULL, 20
+    UNION ALL SELECT 'head_chef', 'cooking', 'Bếp trưởng', 'Nấu đủ tất cả đồ ăn level 3.', 'cook_all_recipes_by_level', NULL, NULL, 3, NULL, NULL, 30
+    UNION ALL SELECT 'cooking_king', 'cooking', 'Vua đầu bếp', 'Nấu đủ tất cả đồ ăn level 4.', 'cook_all_recipes_by_level', NULL, NULL, 4, NULL, NULL, 40
+
+    UNION ALL SELECT 'train_runner_1', 'train_delivery', 'Nông dân chạy đơn 1', 'Hoàn thành 10 đơn tàu hỏa.', 'complete_train_order_count', NULL, NULL, NULL, 10, NULL, 10
+    UNION ALL SELECT 'train_runner_2', 'train_delivery', 'Nông dân chạy đơn 2', 'Hoàn thành 50 đơn tàu hỏa.', 'complete_train_order_count', NULL, NULL, NULL, 50, NULL, 20
+    UNION ALL SELECT 'train_runner_3', 'train_delivery', 'Nông dân chạy đơn 3', 'Hoàn thành 500 đơn tàu hỏa.', 'complete_train_order_count', NULL, NULL, NULL, 500, NULL, 30
+    UNION ALL SELECT 'train_runner_4', 'train_delivery', 'Nông dân chạy đơn 4', 'Hoàn thành 5000 đơn tàu hỏa.', 'complete_train_order_count', NULL, NULL, NULL, 5000, NULL, 40
+
+    UNION ALL SELECT 'entrepreneur_1', 'business', 'Doanh nhân 1', 'Kiếm được 500 chill coin từ shop cá nhân.', 'earn_market_chill_coin', NULL, NULL, NULL, 500, NULL, 10
+    UNION ALL SELECT 'entrepreneur_2', 'business', 'Doanh nhân 2', 'Kiếm được 5000 chill coin từ shop cá nhân.', 'earn_market_chill_coin', NULL, NULL, NULL, 5000, NULL, 20
+    UNION ALL SELECT 'entrepreneur_3', 'business', 'Doanh nhân 3', 'Kiếm được 50000 chill coin từ shop cá nhân.', 'earn_market_chill_coin', NULL, NULL, NULL, 50000, NULL, 30
+    UNION ALL SELECT 'entrepreneur_4', 'business', 'Doanh nhân 4', 'Kiếm được 500000 chill coin từ shop cá nhân.', 'earn_market_chill_coin', NULL, NULL, NULL, 500000, NULL, 40
+    UNION ALL SELECT 'talented_entrepreneur', 'business', 'Doanh nhân tài ba', 'Kiếm được 5000000 chill coin từ shop cá nhân.', 'earn_market_chill_coin', NULL, NULL, NULL, 5000000, NULL, 50
+) AS achievement_data
+INNER JOIN farm_achievement_categories categories
+    ON categories.category_code = achievement_data.category_code
+LEFT JOIN items
+    ON items.code = achievement_data.target_item_code
+ON DUPLICATE KEY UPDATE
+    category_id = VALUES(category_id),
+    name = VALUES(name),
+    description = VALUES(description),
+    condition_type = VALUES(condition_type),
+    target_item_id = VALUES(target_item_id),
+    target_item_type_code = VALUES(target_item_type_code),
+    target_level = VALUES(target_level),
+    required_value = VALUES(required_value),
+    required_weight_kg = VALUES(required_weight_kg),
+    sort_order = VALUES(sort_order),
+    is_active = VALUES(is_active);
+
+# farm achievement rewards
+INSERT INTO farm_achievement_rewards (
+    achievement_id,
+    reward_type,
+    reward_amount,
+    discord_role_id
+)
+SELECT
+    achievements.id,
+    reward_data.reward_type,
+    reward_data.reward_amount,
+    reward_data.discord_role_id
+FROM (
+    SELECT 'diligent_farmer_1' AS achievement_code, 'chill_coin' AS reward_type, 1000 AS reward_amount, NULL AS discord_role_id
+    UNION ALL SELECT 'diligent_farmer_1', 'farm_exp', 100, NULL
+    UNION ALL SELECT 'diligent_farmer_2', 'chill_coin', 10000, NULL
+    UNION ALL SELECT 'diligent_farmer_2', 'farm_exp', 250, NULL
+    UNION ALL SELECT 'diligent_farmer_3', 'chill_coin', 30000, NULL
+    UNION ALL SELECT 'diligent_farmer_3', 'farm_exp', 1000, NULL
+    UNION ALL SELECT 'diligent_farmer_4', 'chill_coin', 50000, NULL
+    UNION ALL SELECT 'diligent_farmer_4', 'farm_exp', 1500, NULL
+    UNION ALL SELECT 'diligent_farmer_4', 'discord_role', NULL, NULL
+
+    UNION ALL SELECT 'chicken_keeper_1', 'chill_coin', 4000, NULL
+    UNION ALL SELECT 'chicken_keeper_1', 'farm_exp', 300, NULL
+    UNION ALL SELECT 'chicken_keeper_2', 'chill_coin', 8000, NULL
+    UNION ALL SELECT 'chicken_keeper_2', 'farm_exp', 350, NULL
+    UNION ALL SELECT 'chicken_keeper_3', 'chill_coin', 20000, NULL
+    UNION ALL SELECT 'chicken_keeper_3', 'farm_exp', 400, NULL
+    UNION ALL SELECT 'chicken_keeper_4', 'chill_coin', 30000, NULL
+    UNION ALL SELECT 'chicken_keeper_4', 'farm_exp', 450, NULL
+    UNION ALL SELECT 'chicken_keeper_4', 'discord_role', NULL, NULL
+
+    UNION ALL SELECT 'cowboy_1', 'chill_coin', 4000, NULL
+    UNION ALL SELECT 'cowboy_1', 'farm_exp', 300, NULL
+    UNION ALL SELECT 'cowboy_2', 'chill_coin', 8000, NULL
+    UNION ALL SELECT 'cowboy_2', 'farm_exp', 350, NULL
+    UNION ALL SELECT 'cowboy_3', 'chill_coin', 20000, NULL
+    UNION ALL SELECT 'cowboy_3', 'farm_exp', 400, NULL
+    UNION ALL SELECT 'cowboy_4', 'chill_coin', 30000, NULL
+    UNION ALL SELECT 'cowboy_4', 'farm_exp', 450, NULL
+    UNION ALL SELECT 'cowboy_4', 'discord_role', NULL, NULL
+
+    UNION ALL SELECT 'fishing_amateur', 'chill_coin', 5000, NULL
+    UNION ALL SELECT 'fishing_amateur', 'farm_exp', 200, NULL
+    UNION ALL SELECT 'fishing_professional', 'chill_coin', 30000, NULL
+    UNION ALL SELECT 'fishing_professional', 'farm_exp', 400, NULL
+    UNION ALL SELECT 'fishing_legendary', 'chill_coin', 1000000, NULL
+    UNION ALL SELECT 'fishing_legendary', 'discord_role', NULL, NULL
+
+    UNION ALL SELECT 'cook_apprentice', 'chill_coin', 3000, NULL
+    UNION ALL SELECT 'cook_apprentice', 'farm_exp', 200, NULL
+    UNION ALL SELECT 'cook_professional', 'chill_coin', 10000, NULL
+    UNION ALL SELECT 'cook_professional', 'farm_exp', 300, NULL
+    UNION ALL SELECT 'head_chef', 'chill_coin', 20000, NULL
+    UNION ALL SELECT 'head_chef', 'farm_exp', 350, NULL
+    UNION ALL SELECT 'cooking_king', 'discord_role', NULL, NULL
+
+    UNION ALL SELECT 'train_runner_1', 'chill_coin', 2000, NULL
+    UNION ALL SELECT 'train_runner_1', 'farm_exp', 100, NULL
+    UNION ALL SELECT 'train_runner_2', 'chill_coin', 20000, NULL
+    UNION ALL SELECT 'train_runner_2', 'farm_exp', 400, NULL
+    UNION ALL SELECT 'train_runner_3', 'chill_coin', 300000, NULL
+    UNION ALL SELECT 'train_runner_3', 'farm_exp', 450, NULL
+    UNION ALL SELECT 'train_runner_4', 'chill_coin', 5000000, NULL
+    UNION ALL SELECT 'train_runner_4', 'farm_exp', 1200, NULL
+    UNION ALL SELECT 'train_runner_4', 'discord_role', NULL, NULL
+
+    UNION ALL SELECT 'entrepreneur_1', 'discord_role', NULL, NULL
+    UNION ALL SELECT 'entrepreneur_2', 'discord_role', NULL, NULL
+    UNION ALL SELECT 'entrepreneur_3', 'discord_role', NULL, NULL
+    UNION ALL SELECT 'entrepreneur_4', 'discord_role', NULL, NULL
+    UNION ALL SELECT 'talented_entrepreneur', 'discord_role', NULL, NULL
+) AS reward_data
+INNER JOIN farm_achievement_masters achievements
+    ON achievements.achievement_code = reward_data.achievement_code
+ON DUPLICATE KEY UPDATE
+    reward_amount = VALUES(reward_amount),
+    discord_role_id = COALESCE(VALUES(discord_role_id), discord_role_id);
+
 #gift 
 START TRANSACTION;
 
