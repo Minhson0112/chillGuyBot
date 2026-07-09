@@ -1,22 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import func
 from bot.config.database import getDbSession
 from bot.helper.numberFormatHelper import formatNumber
-from bot.models.crop import Crop
-from bot.models.farmAchievementMaster import FarmAchievementMaster
-from bot.models.farmCookingHistory import FarmCookingHistory
-from bot.models.farmEggHarvestHistory import FarmEggHarvestHistory
-from bot.models.farmHarvestHistory import FarmHarvestHistory
-from bot.models.farmMarketListing import FarmMarketListing
-from bot.models.farmMilkHarvestHistory import FarmMilkHarvestHistory
-from bot.models.farmTrainEventHistory import FarmTrainEventHistory
-from bot.models.fishingHistory import FishingHistory
-from bot.models.foodRecipe import FoodRecipe
-from bot.models.items import Item
-from bot.models.shopItem import ShopItem
 from bot.repository.farmAchievementCategoryRepository import FarmAchievementCategoryRepository
+from bot.repository.farmCookingHistoryRepository import FarmCookingHistoryRepository
+from bot.repository.farmEggHarvestHistoryRepository import FarmEggHarvestHistoryRepository
+from bot.repository.farmHarvestHistoryRepository import FarmHarvestHistoryRepository
+from bot.repository.farmMarketListingRepository import FarmMarketListingRepository
+from bot.repository.farmMilkHarvestHistoryRepository import FarmMilkHarvestHistoryRepository
 from bot.repository.farmRepository import FarmRepository
+from bot.repository.farmTrainEventHistoryRepository import FarmTrainEventHistoryRepository
+from bot.repository.fishingHistoryRepository import FishingHistoryRepository
 from bot.repository.memberRepository import MemberRepository
 from bot.repository.userFarmAchievementRepository import UserFarmAchievementRepository
 
@@ -344,12 +338,8 @@ class FarmAchievementService:
             )
 
         if conditionType == "complete_train_order_count":
-            progressValue = (
-                session.query(func.count(FarmTrainEventHistory.id))
-                .filter(FarmTrainEventHistory.user_id == userId)
-                .scalar()
-                or 0
-            )
+            farmTrainEventHistoryRepository = FarmTrainEventHistoryRepository(session)
+            progressValue = farmTrainEventHistoryRepository.countByUserId(userId)
 
             return self.buildCountProgress(
                 progressValue=progressValue,
@@ -357,13 +347,8 @@ class FarmAchievementService:
             )
 
         if conditionType == "earn_market_chill_coin":
-            progressValue = (
-                session.query(func.coalesce(func.sum(FarmMarketListing.price), 0))
-                .filter(FarmMarketListing.seller_user_id == userId)
-                .filter(FarmMarketListing.is_sold.is_(True))
-                .scalar()
-                or 0
-            )
+            farmMarketListingRepository = FarmMarketListingRepository(session)
+            progressValue = farmMarketListingRepository.sumSoldPriceBySellerUserId(userId)
 
             return self.buildCountProgress(
                 progressValue=progressValue,
@@ -399,26 +384,20 @@ class FarmAchievementService:
                 requiredValue=achievement.required_value,
             )
 
-        historyModel = None
+        progressValue = 0
 
         if targetItem.code == "egg":
-            historyModel = FarmEggHarvestHistory
-        elif targetItem.code == "milk":
-            historyModel = FarmMilkHarvestHistory
-
-        if historyModel is None:
-            return self.buildCountProgress(
-                progressValue=0,
-                requiredValue=achievement.required_value,
+            farmEggHarvestHistoryRepository = FarmEggHarvestHistoryRepository(session)
+            progressValue = farmEggHarvestHistoryRepository.sumQuantityByUserIdAndItemId(
+                userId=userId,
+                itemId=targetItem.id,
             )
-
-        progressValue = (
-            session.query(func.coalesce(func.sum(historyModel.quantity), 0))
-            .filter(historyModel.user_id == userId)
-            .filter(historyModel.item_id == targetItem.id)
-            .scalar()
-            or 0
-        )
+        elif targetItem.code == "milk":
+            farmMilkHarvestHistoryRepository = FarmMilkHarvestHistoryRepository(session)
+            progressValue = farmMilkHarvestHistoryRepository.sumQuantityByUserIdAndItemId(
+                userId=userId,
+                itemId=targetItem.id,
+            )
 
         return self.buildCountProgress(
             progressValue=progressValue,
@@ -432,26 +411,15 @@ class FarmAchievementService:
         achievement,
         minWeightKg=None,
     ):
-        requiredValue = (
-            session.query(func.count(Item.id))
-            .filter(Item.type_code == achievement.target_item_type_code)
-            .filter(Item.is_active.is_(True))
-            .scalar()
-            or 0
+        fishingHistoryRepository = FishingHistoryRepository(session)
+        requiredValue = fishingHistoryRepository.countActiveItemsByTypeCode(
+            achievement.target_item_type_code,
         )
-
-        query = (
-            session.query(func.count(func.distinct(FishingHistory.item_id)))
-            .join(Item, Item.id == FishingHistory.item_id)
-            .filter(FishingHistory.user_id == userId)
-            .filter(Item.type_code == achievement.target_item_type_code)
-            .filter(Item.is_active.is_(True))
+        progressValue = fishingHistoryRepository.countDistinctCaughtItemsByUserIdAndTypeCode(
+            userId=userId,
+            typeCode=achievement.target_item_type_code,
+            minWeightKg=minWeightKg,
         )
-
-        if minWeightKg is not None:
-            query = query.filter(FishingHistory.weight_kg >= minWeightKg)
-
-        progressValue = query.scalar() or 0
 
         return self.buildCountProgress(
             progressValue=progressValue,
@@ -464,24 +432,13 @@ class FarmAchievementService:
         userId: int,
         achievement,
     ):
-        cropBaseQuery = (
-            session.query(Crop.id)
-            .join(ShopItem, ShopItem.item_id == Crop.seed_item_id)
-            .filter(ShopItem.required_farm_level == achievement.target_level)
-            .filter(ShopItem.is_active.is_(True))
+        farmHarvestHistoryRepository = FarmHarvestHistoryRepository(session)
+        requiredValue = farmHarvestHistoryRepository.countRequiredCropsBySeedLevel(
+            achievement.target_level,
         )
-
-        requiredValue = cropBaseQuery.count()
-
-        progressValue = (
-            session.query(func.count(func.distinct(Crop.id)))
-            .join(ShopItem, ShopItem.item_id == Crop.seed_item_id)
-            .join(FarmHarvestHistory, FarmHarvestHistory.item_id == Crop.crop_item_id)
-            .filter(ShopItem.required_farm_level == achievement.target_level)
-            .filter(ShopItem.is_active.is_(True))
-            .filter(FarmHarvestHistory.user_id == userId)
-            .scalar()
-            or 0
+        progressValue = farmHarvestHistoryRepository.countDistinctHarvestedCropsByUserIdAndSeedLevel(
+            userId=userId,
+            level=achievement.target_level,
         )
 
         return self.buildCountProgress(
@@ -495,22 +452,13 @@ class FarmAchievementService:
         userId: int,
         achievement,
     ):
-        requiredValue = (
-            session.query(func.count(FoodRecipe.id))
-            .filter(FoodRecipe.required_farm_level == achievement.target_level)
-            .filter(FoodRecipe.is_active.is_(True))
-            .scalar()
-            or 0
+        farmCookingHistoryRepository = FarmCookingHistoryRepository(session)
+        requiredValue = farmCookingHistoryRepository.countRequiredRecipesByLevel(
+            achievement.target_level,
         )
-
-        progressValue = (
-            session.query(func.count(func.distinct(FoodRecipe.id)))
-            .join(FarmCookingHistory, FarmCookingHistory.item_id == FoodRecipe.result_item_id)
-            .filter(FoodRecipe.required_farm_level == achievement.target_level)
-            .filter(FoodRecipe.is_active.is_(True))
-            .filter(FarmCookingHistory.user_id == userId)
-            .scalar()
-            or 0
+        progressValue = farmCookingHistoryRepository.countDistinctCookedRecipesByUserIdAndLevel(
+            userId=userId,
+            level=achievement.target_level,
         )
 
         return self.buildCountProgress(

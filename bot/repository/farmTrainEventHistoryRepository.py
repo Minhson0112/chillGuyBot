@@ -74,3 +74,14 @@ class FarmTrainEventHistoryRepository:
             .limit(10)
             .all()
         )
+
+    def countByUserId(
+        self,
+        userId: int,
+    ):
+        return (
+            self.session.query(func.count(FarmTrainEventHistory.id))
+            .filter(FarmTrainEventHistory.user_id == userId)
+            .scalar()
+            or 0
+        )

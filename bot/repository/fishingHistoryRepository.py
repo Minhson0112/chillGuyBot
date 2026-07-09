@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, func
 from sqlalchemy.orm import joinedload
 
 from bot.models.fishingHistory import FishingHistory
+from bot.models.items import Item
 
 
 class FishingHistoryRepository:
@@ -120,3 +121,34 @@ class FishingHistoryRepository:
             .limit(limit)
             .all()
         )
+
+    def countActiveItemsByTypeCode(
+        self,
+        typeCode: str,
+    ):
+        return (
+            self.session.query(func.count(Item.id))
+            .filter(Item.type_code == typeCode)
+            .filter(Item.is_active.is_(True))
+            .scalar()
+            or 0
+        )
+
+    def countDistinctCaughtItemsByUserIdAndTypeCode(
+        self,
+        userId: int,
+        typeCode: str,
+        minWeightKg=None,
+    ):
+        query = (
+            self.session.query(func.count(func.distinct(FishingHistory.item_id)))
+            .join(Item, Item.id == FishingHistory.item_id)
+            .filter(FishingHistory.user_id == userId)
+            .filter(Item.type_code == typeCode)
+            .filter(Item.is_active.is_(True))
+        )
+
+        if minWeightKg is not None:
+            query = query.filter(FishingHistory.weight_kg >= minWeightKg)
+
+        return query.scalar() or 0

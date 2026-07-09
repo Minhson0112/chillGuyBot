@@ -1,4 +1,5 @@
 from bot.models.farmEggHarvestHistory import FarmEggHarvestHistory
+from sqlalchemy import func
 
 
 class FarmEggHarvestHistoryRepository:
@@ -23,3 +24,16 @@ class FarmEggHarvestHistoryRepository:
         self.session.flush()
 
         return farmEggHarvestHistory
+
+    def sumQuantityByUserIdAndItemId(
+        self,
+        userId: int,
+        itemId: int,
+    ):
+        return (
+            self.session.query(func.coalesce(func.sum(FarmEggHarvestHistory.quantity), 0))
+            .filter(FarmEggHarvestHistory.user_id == userId)
+            .filter(FarmEggHarvestHistory.item_id == itemId)
+            .scalar()
+            or 0
+        )

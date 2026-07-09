@@ -1,4 +1,8 @@
+from sqlalchemy import func
+
+from bot.models.crop import Crop
 from bot.models.farmHarvestHistory import FarmHarvestHistory
+from bot.models.shopItem import ShopItem
 
 
 class FarmHarvestHistoryRepository:
@@ -25,3 +29,32 @@ class FarmHarvestHistoryRepository:
         self.session.flush()
 
         return farmHarvestHistory
+
+    def countRequiredCropsBySeedLevel(
+        self,
+        level: int,
+    ):
+        return (
+            self.session.query(func.count(Crop.id))
+            .join(ShopItem, ShopItem.item_id == Crop.seed_item_id)
+            .filter(ShopItem.required_farm_level == level)
+            .filter(ShopItem.is_active.is_(True))
+            .scalar()
+            or 0
+        )
+
+    def countDistinctHarvestedCropsByUserIdAndSeedLevel(
+        self,
+        userId: int,
+        level: int,
+    ):
+        return (
+            self.session.query(func.count(func.distinct(Crop.id)))
+            .join(ShopItem, ShopItem.item_id == Crop.seed_item_id)
+            .join(FarmHarvestHistory, FarmHarvestHistory.item_id == Crop.crop_item_id)
+            .filter(ShopItem.required_farm_level == level)
+            .filter(ShopItem.is_active.is_(True))
+            .filter(FarmHarvestHistory.user_id == userId)
+            .scalar()
+            or 0
+        )

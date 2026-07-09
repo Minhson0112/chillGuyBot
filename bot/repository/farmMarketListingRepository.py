@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import asc, desc, or_
+from sqlalchemy import asc, desc, func, or_
 from sqlalchemy.orm import joinedload
 
 from bot.config.farmMarket import FARM_MARKET_TIMEZONE
@@ -229,4 +229,16 @@ class FarmMarketListingRepository:
                 )
             )
             .all()
+        )
+
+    def sumSoldPriceBySellerUserId(
+        self,
+        sellerUserId: int,
+    ):
+        return (
+            self.session.query(func.coalesce(func.sum(FarmMarketListing.price), 0))
+            .filter(FarmMarketListing.seller_user_id == sellerUserId)
+            .filter(FarmMarketListing.is_sold.is_(True))
+            .scalar()
+            or 0
         )
