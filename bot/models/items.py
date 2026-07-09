@@ -33,6 +33,7 @@ class Item(Base):
     harvestHistories = relationship("FarmHarvestHistory", back_populates="item")
     eggHarvestHistories = relationship("FarmEggHarvestHistory", back_populates="item")
     milkHarvestHistories = relationship("FarmMilkHarvestHistory", back_populates="item")
+    targetAchievements = relationship("FarmAchievementMaster", back_populates="targetItem")
     marketListings = relationship("FarmMarketListing", back_populates="item")
     foodRecipe = relationship(
         "FoodRecipe",

@@ -13,6 +13,9 @@ from bot.models.dailyCheckinHistory import DailyCheckinHistory
 from bot.models.dailyCheckinReward import DailyCheckinReward
 from bot.models.dailyTaskMaster import DailyTaskMaster
 from bot.models.farm import Farm
+from bot.models.farmAchievementCategory import FarmAchievementCategory
+from bot.models.farmAchievementMaster import FarmAchievementMaster
+from bot.models.farmAchievementReward import FarmAchievementReward
 from bot.models.farmChickenCoop import FarmChickenCoop
 from bot.models.farmCookingHistory import FarmCookingHistory
 from bot.models.farmCowShed import FarmCowShed
@@ -64,6 +67,7 @@ from bot.models.toolTemplate import ToolTemplate
 from bot.models.tournamentEntry import TournamentEntry
 from bot.models.tournamentMaster import TournamentMaster
 from bot.models.userDailyTask import UserDailyTask
+from bot.models.userFarmAchievement import UserFarmAchievement
 from bot.models.userInventory import UserInventory
 from bot.models.userTool import UserTool
 from bot.models.word import Word

@@ -44,6 +44,7 @@ class Member(Base):
     harvestHistories = relationship("FarmHarvestHistory", back_populates="member", cascade="all, delete-orphan")
     eggHarvestHistories = relationship("FarmEggHarvestHistory", back_populates="member", cascade="all, delete-orphan")
     milkHarvestHistories = relationship("FarmMilkHarvestHistory", back_populates="member", cascade="all, delete-orphan")
+    farmAchievements = relationship("UserFarmAchievement", back_populates="member", cascade="all, delete-orphan")
     mergeGamePlayHistories = relationship("MergeGamePlayHistory", back_populates="member", cascade="all, delete-orphan")
     marketListings = relationship(
         "FarmMarketListing",
