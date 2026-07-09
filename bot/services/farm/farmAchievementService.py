@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from bot.config.database import getDbSession
+from bot.enums.farmAchievementConditionType import FarmAchievementConditionType
+from bot.enums.farmAchievementRewardType import FarmAchievementRewardType
 from bot.helper.numberFormatHelper import formatNumber
 from bot.repository.farmAchievementCategoryRepository import FarmAchievementCategoryRepository
 from bot.repository.farmCookingHistoryRepository import FarmCookingHistoryRepository
@@ -16,10 +18,6 @@ from bot.repository.userFarmAchievementRepository import UserFarmAchievementRepo
 
 
 class FarmAchievementService:
-    REWARD_TYPE_CHILL_COIN = "chill_coin"
-    REWARD_TYPE_FARM_EXP = "farm_exp"
-    REWARD_TYPE_DISCORD_ROLE = "discord_role"
-
     def getAchievementPage(
         self,
         userId: int,
@@ -123,7 +121,7 @@ class FarmAchievementService:
                     (
                         reward
                         for reward in achievement.rewards
-                        if reward.reward_type == self.REWARD_TYPE_DISCORD_ROLE
+                        if reward.reward_type == FarmAchievementRewardType.DISCORD_ROLE.value
                         and reward.discord_role_id is None
                     ),
                     None,
@@ -137,7 +135,7 @@ class FarmAchievementService:
 
                 for reward in achievement.rewards:
                     if (
-                        reward.reward_type == self.REWARD_TYPE_DISCORD_ROLE
+                        reward.reward_type == FarmAchievementRewardType.DISCORD_ROLE.value
                         and reward.discord_role_id is not None
                     ):
                         roleIds.append(reward.discord_role_id)
@@ -232,7 +230,7 @@ class FarmAchievementService:
                     (
                         reward
                         for reward in achievement.rewards
-                        if reward.reward_type == self.REWARD_TYPE_DISCORD_ROLE
+                        if reward.reward_type == FarmAchievementRewardType.DISCORD_ROLE.value
                         and reward.discord_role_id is None
                     ),
                     None,
@@ -246,9 +244,9 @@ class FarmAchievementService:
                     }
 
                 for reward in achievement.rewards:
-                    if reward.reward_type == self.REWARD_TYPE_CHILL_COIN:
+                    if reward.reward_type == FarmAchievementRewardType.CHILL_COIN.value:
                         totalChillCoin += reward.reward_amount or 0
-                    elif reward.reward_type == self.REWARD_TYPE_FARM_EXP:
+                    elif reward.reward_type == FarmAchievementRewardType.FARM_EXP.value:
                         totalFarmExp += reward.reward_amount or 0
 
                 userFarmAchievementRepository.markRewardClaimed(
@@ -301,21 +299,21 @@ class FarmAchievementService:
     ):
         conditionType = achievement.condition_type
 
-        if conditionType == "collect_item_quantity":
+        if conditionType == FarmAchievementConditionType.COLLECT_ITEM_QUANTITY.value:
             return self.calculateCollectItemQuantityProgress(
                 session=session,
                 userId=userId,
                 achievement=achievement,
             )
 
-        if conditionType == "catch_all_item_type":
+        if conditionType == FarmAchievementConditionType.CATCH_ALL_ITEM_TYPE.value:
             return self.calculateCatchAllItemTypeProgress(
                 session=session,
                 userId=userId,
                 achievement=achievement,
             )
 
-        if conditionType == "catch_all_item_type_with_min_weight":
+        if conditionType == FarmAchievementConditionType.CATCH_ALL_ITEM_TYPE_WITH_MIN_WEIGHT.value:
             return self.calculateCatchAllItemTypeProgress(
                 session=session,
                 userId=userId,
@@ -323,21 +321,21 @@ class FarmAchievementService:
                 minWeightKg=achievement.required_weight_kg,
             )
 
-        if conditionType == "harvest_all_crops_by_level":
+        if conditionType == FarmAchievementConditionType.HARVEST_ALL_CROPS_BY_LEVEL.value:
             return self.calculateHarvestAllCropsByLevelProgress(
                 session=session,
                 userId=userId,
                 achievement=achievement,
             )
 
-        if conditionType == "cook_all_recipes_by_level":
+        if conditionType == FarmAchievementConditionType.COOK_ALL_RECIPES_BY_LEVEL.value:
             return self.calculateCookAllRecipesByLevelProgress(
                 session=session,
                 userId=userId,
                 achievement=achievement,
             )
 
-        if conditionType == "complete_train_order_count":
+        if conditionType == FarmAchievementConditionType.COMPLETE_TRAIN_ORDER_COUNT.value:
             farmTrainEventHistoryRepository = FarmTrainEventHistoryRepository(session)
             progressValue = farmTrainEventHistoryRepository.countByUserId(userId)
 
@@ -346,7 +344,7 @@ class FarmAchievementService:
                 requiredValue=achievement.required_value,
             )
 
-        if conditionType == "earn_market_chill_coin":
+        if conditionType == FarmAchievementConditionType.EARN_MARKET_CHILL_COIN.value:
             farmMarketListingRepository = FarmMarketListingRepository(session)
             progressValue = farmMarketListingRepository.sumSoldPriceBySellerUserId(userId)
 
@@ -506,11 +504,11 @@ class FarmAchievementService:
         rewardParts = []
 
         for reward in sorted(rewards, key=lambda item: item.id):
-            if reward.reward_type == self.REWARD_TYPE_CHILL_COIN:
+            if reward.reward_type == FarmAchievementRewardType.CHILL_COIN.value:
                 rewardParts.append(f"{formatNumber(reward.reward_amount)} coin")
-            elif reward.reward_type == self.REWARD_TYPE_FARM_EXP:
+            elif reward.reward_type == FarmAchievementRewardType.FARM_EXP.value:
                 rewardParts.append(f"{formatNumber(reward.reward_amount)} exp")
-            elif reward.reward_type == self.REWARD_TYPE_DISCORD_ROLE:
+            elif reward.reward_type == FarmAchievementRewardType.DISCORD_ROLE.value:
                 if reward.discord_role_id is None:
                     rewardParts.append("role")
                 else:
