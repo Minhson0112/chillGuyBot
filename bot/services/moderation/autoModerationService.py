@@ -34,13 +34,21 @@ class AutoModerationService:
         if self.hasOwnerRole(message.author):
             return
 
-        if await self.handleAutoBanChannelMessage(bot, message):
-            return
-
-        if await self.handleEveryoneMention(bot, message):
-            return
-
         matchedWord = self.findMatchedBannedWord(message.content)
+        hasAutoBanChannelViolation = message.channel.id == AUTO_BAN_CHANNEL_ID
+        hasEveryoneMentionViolation = self.isEveryoneMentionViolation(message)
+
+        if not hasAutoBanChannelViolation and not hasEveryoneMentionViolation and matchedWord is None:
+            return
+
+        if self.isMemberModerationImmune(message.author.id):
+            return
+
+        if hasAutoBanChannelViolation and await self.handleAutoBanChannelMessage(bot, message):
+            return
+
+        if hasEveryoneMentionViolation and await self.handleEveryoneMention(bot, message):
+            return
 
         if matchedWord is None:
             return
@@ -218,6 +226,16 @@ class AutoModerationService:
 
     def hasOwnerRole(self, member: discord.Member):
         return any(role.id == OWNER_ROLE_ID for role in member.roles)
+
+    def isMemberModerationImmune(self, userId):
+        with getDbSession() as session:
+            memberRepository = MemberRepository(session)
+            member = memberRepository.findByUserId(userId)
+
+            if member is None:
+                return False
+
+            return member.is_mod or member.is_admin
 
     def findMatchedBannedWord(self, content):
         normalizedContent = content.lower()
