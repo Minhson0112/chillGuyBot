@@ -29,6 +29,12 @@ class QuizQuestionService:
         self.hasStarted = True
         await self.sendNextQuestion(bot)
 
+    async def resetAndSendQuestion(self, bot):
+        async with self.questionLock:
+            self.currentQuestion = None
+
+        return await self.sendNextQuestion(bot)
+
     async def sendNextQuestion(self, bot):
         channel = bot.get_channel(QUESTION_CHANNEL_ID)
         if channel is None:
@@ -36,7 +42,7 @@ class QuizQuestionService:
 
         questionData = await self.fetchQuestionData()
         if questionData is None:
-            await channel.send("Không thể lấy câu hỏi mới từ Open Trivia DB.")
+            await channel.send("Đã có lỗi trong quá trình tạo câu hỏi, hãy sử dụng lệnh `cg quiz` để thử lại.")
             return None
 
         async with self.questionLock:

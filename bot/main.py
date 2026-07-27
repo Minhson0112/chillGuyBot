@@ -242,6 +242,7 @@ async def main():
         "bot.commands.farm.info",
         "bot.commands.homies.setHomies",
         "bot.commands.ticket.createTicket",
+        "bot.commands.quiz.quiz",
         "bot.events.memberJoinEvent",
         "bot.events.memberLeaveEvent",
         "bot.events.memberUpdateEvent",
