@@ -72,3 +72,7 @@ class Member(Base):
         back_populates="member",
         cascade="all, delete-orphan",
     )
+    quizAnswerHistories = relationship(
+        "QuizAnswerHistory",
+        back_populates="member",
+    )

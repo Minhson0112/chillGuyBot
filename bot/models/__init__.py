@@ -56,6 +56,7 @@ from bot.models.musicEventEntry import MusicEventEntry
 from bot.models.owoDonateHistory import OwoDonateHistory
 from bot.models.owoExchangeCoinHistory import OwoExchangeCoinHistory
 from bot.models.partner import Partner
+from bot.models.quizAnswerHistory import QuizAnswerHistory
 from bot.models.roleShop import RoleShop
 from bot.models.serverInvite import ServerInvite
 from bot.models.serverItemGiftHistory import ServerItemGiftHistory

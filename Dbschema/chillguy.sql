@@ -2578,3 +2578,21 @@ ALTER TABLE member_payment_transaction
     DROP CHECK chk_member_payment_target_type,
     ADD CONSTRAINT chk_member_payment_target_type
         CHECK (payment_target_type IN ('role_shop', 'lotto_ticket', 'server_item', 'love_shop'));
+
+CREATE TABLE quiz_answer_history (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'quiz answer history id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
+    difficulty VARCHAR(20) NOT NULL COMMENT 'question difficulty: easy, medium, hard',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+    KEY idx_quiz_answer_history_user_created_at (user_id, created_at),
+    KEY idx_quiz_answer_history_difficulty_created_at (difficulty, created_at),
+
+    CONSTRAINT fk_quiz_answer_history_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_quiz_answer_history_difficulty
+        CHECK (difficulty IN ('easy', 'medium', 'hard'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='quiz answer history';
