@@ -19,7 +19,7 @@ class Wordle(commands.Cog):
         if ctx.channel.id != WORDLE_CHANNEL_ID:
             return
 
-        result = self.wordleGameService.guessWord(guessedWord, ctx.author.id)
+        result = await self.wordleGameService.guessWord(guessedWord, ctx.author.id)
 
         if not result["success"]:
             await ctx.send(result["message"])

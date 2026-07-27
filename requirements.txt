@@ -20,7 +20,7 @@ requests==2.31.0
 APScheduler==3.10.4
 
 # dịch thuật
-googletrans
+googletrans==4.0.2
 
 #AI gen
 google-genai

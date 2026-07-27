@@ -1,3 +1,4 @@
+import inspect
 import requests
 from googletrans import Translator
 
@@ -70,9 +71,13 @@ class WordleDefinitionService:
 
     async def translateToVietnamese(self, text: str):
         try:
-            translated = await self.translator.translate(text, src="en", dest="vi")
+            translated = self.translator.translate(text, src="en", dest="vi")
+            if inspect.isawaitable(translated):
+                translated = await translated
+
             return translated.text
-        except Exception:
+        except Exception as e:
+            print(f"Wordle translation failed: {e}")
             return None
 
 
