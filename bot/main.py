@@ -17,6 +17,7 @@ from bot.services.autoResponder.autoResponderCacheService import AutoResponderCa
 from bot.services.wordle.wordleStartupService import WordleStartupService
 from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryStartupService
 from bot.services.asset.assetImageService import assetImageService
+from bot.services.quiz.quizQuestionService import quizQuestionService
 from bot.views.giveaway.giveawayJoinButtonView import GiveawayJoinButtonView
 from bot.views.giveaway.giveawayRerollView import GiveawayRerollView
 from bot.views.lotto.lottoBuyTicketView import LottoBuyTicketView
@@ -78,6 +79,8 @@ async def on_ready():
         loadedWordCount = wordleDictionaryStartupService.loadWordsToCache()
         print(f"✅ Đã load wordle dictionary: {loadedWordCount} từ")
         assetImageService.preloadAssets()
+        await quizQuestionService.startOnReady(bot)
+        print("✅ Đã gửi câu hỏi quiz mới")
     except Exception as e:
         print(f"❌ Lỗi sync commands: {e}")
 
