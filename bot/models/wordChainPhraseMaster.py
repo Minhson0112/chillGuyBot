@@ -24,14 +24,22 @@ class WordChainPhraseMaster(Base):
         autoincrement=True,
         comment="word chain phrase master id",
     )
-    phrase = Column(String(100), nullable=False, comment="display phrase")
+    phrase = Column(String(100, collation="utf8mb4_bin"), nullable=False, comment="display phrase")
     normalized_phrase = Column(
-        String(100),
+        String(100, collation="utf8mb4_bin"),
         nullable=False,
         comment="normalized phrase used for lookup",
     )
-    first_word = Column(String(50), nullable=False, comment="first word in phrase")
-    last_word = Column(String(50), nullable=False, comment="last word in phrase")
+    first_word = Column(
+        String(50, collation="utf8mb4_bin"),
+        nullable=False,
+        comment="first word in phrase",
+    )
+    last_word = Column(
+        String(50, collation="utf8mb4_bin"),
+        nullable=False,
+        comment="last word in phrase",
+    )
     is_active = Column(
         Boolean,
         nullable=False,

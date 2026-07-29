@@ -29,7 +29,7 @@ class WordChainGameState(Base):
         comment="last phrase master id used in current chain",
     )
     last_word = Column(
-        String(50),
+        String(50, collation="utf8mb4_bin"),
         nullable=True,
         comment="last word players must connect from",
     )

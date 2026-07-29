@@ -3,6 +3,8 @@
 -- Generated at: 2026-07-29 17:15:37
 -- Accepted records: 48493
 
+USE chill_station;
+
 SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE word_chain_win_history;
@@ -10,6 +12,15 @@ TRUNCATE TABLE word_chain_game_state;
 TRUNCATE TABLE word_chain_phrase_master;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+ALTER TABLE word_chain_phrase_master
+    MODIFY phrase VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+    MODIFY normalized_phrase VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+    MODIFY first_word VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+    MODIFY last_word VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;
+
+ALTER TABLE word_chain_game_state
+    MODIFY last_word VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL;
 
 INSERT INTO word_chain_phrase_master (
     phrase,
@@ -1022,6 +1033,13 @@ ON DUPLICATE KEY UPDATE
     first_word = VALUES(first_word),
     last_word = VALUES(last_word),
     is_active = 1;
+
+INSERT INTO word_chain_game_state (
+    id
+) VALUES (
+    1
+) ON DUPLICATE KEY UPDATE
+    id = VALUES(id);
 
 INSERT INTO word_chain_phrase_master (
     phrase,

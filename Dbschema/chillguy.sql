@@ -2600,10 +2600,10 @@ CREATE TABLE quiz_answer_history (
 # word chain minigame
 CREATE TABLE word_chain_phrase_master (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'word chain phrase master id',
-    phrase VARCHAR(100) NOT NULL COMMENT 'display phrase',
-    normalized_phrase VARCHAR(100) NOT NULL COMMENT 'normalized phrase used for lookup',
-    first_word VARCHAR(50) NOT NULL COMMENT 'first word in phrase',
-    last_word VARCHAR(50) NOT NULL COMMENT 'last word in phrase',
+    phrase VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'display phrase',
+    normalized_phrase VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'normalized phrase used for lookup',
+    first_word VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'first word in phrase',
+    last_word VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'last word in phrase',
     is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'whether phrase is active',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
@@ -2638,7 +2638,7 @@ CREATE TABLE word_chain_win_history (
 CREATE TABLE word_chain_game_state (
     id TINYINT UNSIGNED NOT NULL COMMENT 'single word chain game state id',
     last_phrase_master_id BIGINT DEFAULT NULL COMMENT 'last phrase master id used in current chain',
-    last_word VARCHAR(50) DEFAULT NULL COMMENT 'last word players must connect from',
+    last_word VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'last word players must connect from',
     last_user_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord user id who submitted the last phrase',
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
 
