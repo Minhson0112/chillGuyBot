@@ -37,6 +37,13 @@ class WordChainGameService:
         if gameState is None or gameState.get("lastWord") is None:
             return self.buildInvalidResult()
 
+        if gameState.get("lastUserId") == userId:
+            return {
+                "success": False,
+                "isCompleted": False,
+                "message": "Bạn không thể tự nối tiếp từ của chính mình.",
+            }
+
         if phraseData["firstWord"] != gameState["lastWord"]:
             return self.buildInvalidResult()
 
