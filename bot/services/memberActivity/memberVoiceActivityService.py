@@ -1,5 +1,7 @@
 from datetime import datetime, time, timedelta, timezone
 
+import discord
+
 from bot.cache.memberDailyActivityCache import memberDailyActivityCache
 from bot.cache.voiceSessionCache import voiceSessionCache
 from bot.config.database import getDbSession
@@ -31,15 +33,17 @@ class MemberVoiceActivityService:
 
         if beforeChannel is not None and afterChannel is not None:
             if beforeChannel.id != afterChannel.id:
-                self.updateVoiceChannel(member, afterChannel)
+                return self.updateVoiceChannel(member, afterChannel)
 
         return None
 
     def startVoiceSession(self, member, channel):
         userId = member.id
+        now = datetime.now(self.gmt7)
 
         voiceSessionCache[userId] = {
-            "joined_at": datetime.now(self.gmt7),
+            "joined_at": now,
+            "last_tracked_at": now,
             "channel_id": channel.id,
         }
 
@@ -49,15 +53,17 @@ class MemberVoiceActivityService:
         if userId not in voiceSessionCache:
             return None
 
-        joinedAt = voiceSessionCache[userId]["joined_at"]
+        lastTrackedAt = voiceSessionCache[userId].get(
+            "last_tracked_at",
+            voiceSessionCache[userId]["joined_at"],
+        )
         channelId = voiceSessionCache[userId]["channel_id"]
         leftAt = datetime.now(self.gmt7)
 
-        self.addVoiceSecondsToDailyActivity(userId, joinedAt, leftAt)
-        dailyTaskMessage = self.addVoiceSecondsToDailyTask(
+        dailyTaskMessage = self.trackVoiceSeconds(
             userId=userId,
             channelId=channelId,
-            startedAt=joinedAt,
+            startedAt=lastTrackedAt,
             endedAt=leftAt,
         )
 
@@ -67,15 +73,135 @@ class MemberVoiceActivityService:
 
     def updateVoiceChannel(self, member, channel):
         userId = member.id
+        now = datetime.now(self.gmt7)
 
         if userId not in voiceSessionCache:
             voiceSessionCache[userId] = {
-                "joined_at": datetime.now(self.gmt7),
+                "joined_at": now,
+                "last_tracked_at": now,
                 "channel_id": channel.id,
             }
-            return
+            return None
 
+        lastTrackedAt = voiceSessionCache[userId].get(
+            "last_tracked_at",
+            voiceSessionCache[userId]["joined_at"],
+        )
+        previousChannelId = voiceSessionCache[userId]["channel_id"]
+        dailyTaskMessage = self.trackVoiceSeconds(
+            userId=userId,
+            channelId=previousChannelId,
+            startedAt=lastTrackedAt,
+            endedAt=now,
+        )
         voiceSessionCache[userId]["channel_id"] = channel.id
+        voiceSessionCache[userId]["last_tracked_at"] = now
+
+        return dailyTaskMessage
+
+    def trackCurrentVoiceSessions(self, guilds):
+        now = datetime.now(self.gmt7)
+        activeMemberByUserId = self.collectActiveVoiceMembers(guilds)
+        completedTaskMessages = []
+
+        for userId, member in activeMemberByUserId.items():
+            channel = member.voice.channel if member.voice else None
+
+            if channel is None:
+                continue
+
+            if userId not in voiceSessionCache:
+                voiceSessionCache[userId] = {
+                    "joined_at": now,
+                    "last_tracked_at": now,
+                    "channel_id": channel.id,
+                }
+                continue
+
+            lastTrackedAt = voiceSessionCache[userId].get(
+                "last_tracked_at",
+                voiceSessionCache[userId]["joined_at"],
+            )
+            channelId = voiceSessionCache[userId]["channel_id"]
+            dailyTaskMessage = self.trackVoiceSeconds(
+                userId=userId,
+                channelId=channelId,
+                startedAt=lastTrackedAt,
+                endedAt=now,
+            )
+
+            voiceSessionCache[userId]["channel_id"] = channel.id
+            voiceSessionCache[userId]["last_tracked_at"] = now
+
+            if dailyTaskMessage is not None:
+                completedTaskMessages.append((userId, member, dailyTaskMessage))
+
+        inactiveUserIds = [
+            userId
+            for userId in voiceSessionCache
+            if userId not in activeMemberByUserId
+        ]
+
+        for userId in inactiveUserIds:
+            voiceSession = voiceSessionCache[userId]
+            lastTrackedAt = voiceSession.get(
+                "last_tracked_at",
+                voiceSession["joined_at"],
+            )
+            channelId = voiceSession["channel_id"]
+            dailyTaskMessage = self.trackVoiceSeconds(
+                userId=userId,
+                channelId=channelId,
+                startedAt=lastTrackedAt,
+                endedAt=now,
+            )
+
+            del voiceSessionCache[userId]
+
+            if dailyTaskMessage is not None:
+                completedTaskMessages.append((userId, None, dailyTaskMessage))
+
+        return completedTaskMessages
+
+    def collectActiveVoiceMembers(self, guilds):
+        activeMemberByUserId = {}
+
+        for guild in guilds:
+            voiceChannels = list(guild.voice_channels) + list(guild.stage_channels)
+
+            for voiceChannel in voiceChannels:
+                if not isinstance(
+                    voiceChannel,
+                    (discord.VoiceChannel, discord.StageChannel),
+                ):
+                    continue
+
+                for member in voiceChannel.members:
+                    if member.bot:
+                        continue
+
+                    activeMemberByUserId[member.id] = member
+
+        return activeMemberByUserId
+
+    def trackVoiceSeconds(
+        self,
+        userId: int,
+        channelId: int,
+        startedAt,
+        endedAt,
+    ):
+        if endedAt <= startedAt:
+            return None
+
+        self.addVoiceSecondsToDailyActivity(userId, startedAt, endedAt)
+
+        return self.addVoiceSecondsToDailyTask(
+            userId=userId,
+            channelId=channelId,
+            startedAt=startedAt,
+            endedAt=endedAt,
+        )
 
     def addVoiceSecondsToDailyActivity(self, userId, startedAt, endedAt):
         currentStart = startedAt

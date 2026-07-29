@@ -48,9 +48,16 @@ class MemberInfoService:
         currentVoiceSeconds = 0
 
         if voiceSession is not None:
-            joinedAt = voiceSession["joined_at"]
-            now = datetime.now(joinedAt.tzinfo) if joinedAt.tzinfo else datetime.now()
-            currentVoiceSeconds = max(int((now - joinedAt).total_seconds()), 0)
+            lastTrackedAt = voiceSession.get(
+                "last_tracked_at",
+                voiceSession["joined_at"],
+            )
+            now = (
+                datetime.now(lastTrackedAt.tzinfo)
+                if lastTrackedAt.tzinfo
+                else datetime.now()
+            )
+            currentVoiceSeconds = max(int((now - lastTrackedAt).total_seconds()), 0)
 
         partnerUserId = None
         partnerName = "Không có"
