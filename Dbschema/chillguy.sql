@@ -2596,3 +2596,71 @@ CREATE TABLE quiz_answer_history (
     CONSTRAINT chk_quiz_answer_history_difficulty
         CHECK (difficulty IN ('easy', 'medium', 'hard'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='quiz answer history';
+
+# word chain minigame
+CREATE TABLE word_chain_phrase_master (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'word chain phrase master id',
+    phrase VARCHAR(100) NOT NULL COMMENT 'display phrase',
+    normalized_phrase VARCHAR(100) NOT NULL COMMENT 'normalized phrase used for lookup',
+    first_word VARCHAR(50) NOT NULL COMMENT 'first word in phrase',
+    last_word VARCHAR(50) NOT NULL COMMENT 'last word in phrase',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'whether phrase is active',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_word_chain_phrase_master_normalized_phrase (normalized_phrase),
+    KEY idx_word_chain_phrase_master_first_word (first_word),
+    KEY idx_word_chain_phrase_master_last_word (last_word),
+    KEY idx_word_chain_phrase_master_is_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='word chain phrase master';
+
+CREATE TABLE word_chain_win_history (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'word chain win history id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id who won',
+    phrase_master_id BIGINT NOT NULL COMMENT 'phrase master id used to win',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created at',
+
+    PRIMARY KEY (id),
+    KEY idx_word_chain_win_history_user_id (user_id),
+    KEY idx_word_chain_win_history_phrase_master_id (phrase_master_id),
+    KEY idx_word_chain_win_history_created_at (created_at),
+
+    CONSTRAINT fk_word_chain_win_history_user_id
+        FOREIGN KEY (user_id) REFERENCES member(user_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_word_chain_win_history_phrase_master_id
+        FOREIGN KEY (phrase_master_id) REFERENCES word_chain_phrase_master(id)
+        ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='word chain win history';
+
+CREATE TABLE word_chain_game_state (
+    id TINYINT UNSIGNED NOT NULL COMMENT 'single word chain game state id',
+    last_phrase_master_id BIGINT DEFAULT NULL COMMENT 'last phrase master id used in current chain',
+    last_word VARCHAR(50) DEFAULT NULL COMMENT 'last word players must connect from',
+    last_user_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'discord user id who submitted the last phrase',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'updated at',
+
+    PRIMARY KEY (id),
+    KEY idx_word_chain_game_state_last_phrase_master_id (last_phrase_master_id),
+    KEY idx_word_chain_game_state_last_user_id (last_user_id),
+
+    CONSTRAINT fk_word_chain_game_state_last_phrase_master_id
+        FOREIGN KEY (last_phrase_master_id) REFERENCES word_chain_phrase_master(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_word_chain_game_state_last_user_id
+        FOREIGN KEY (last_user_id) REFERENCES member(user_id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT chk_word_chain_game_state_single_row
+        CHECK (id = 1)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='single word chain game state';
+
+INSERT INTO word_chain_game_state (
+    id
+) VALUES (
+    1
+) ON DUPLICATE KEY UPDATE
+    id = VALUES(id);

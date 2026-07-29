@@ -72,5 +72,8 @@ from bot.models.userFarmAchievement import UserFarmAchievement
 from bot.models.userInventory import UserInventory
 from bot.models.userTool import UserTool
 from bot.models.word import Word
+from bot.models.wordChainGameState import WordChainGameState
+from bot.models.wordChainPhraseMaster import WordChainPhraseMaster
+from bot.models.wordChainWinHistory import WordChainWinHistory
 from bot.models.wordGuessHistory import WordGuessHistory
 from bot.models.wordGuessInput import WordGuessInput

@@ -16,6 +16,7 @@ from bot.services.anonymousMatch.anonymousMatchCacheService import AnonymousMatc
 from bot.services.autoResponder.autoResponderCacheService import AutoResponderCacheService
 from bot.services.wordle.wordleStartupService import WordleStartupService
 from bot.services.wordle.wordleDictionaryStartupService import WordleDictionaryStartupService
+from bot.services.wordChain.wordChainStartupService import WordChainStartupService
 from bot.services.asset.assetImageService import assetImageService
 from bot.services.quiz.quizQuestionService import quizQuestionService
 from bot.views.giveaway.giveawayJoinButtonView import GiveawayJoinButtonView
@@ -26,6 +27,7 @@ autoResponderCacheService = AutoResponderCacheService()
 anonymousMatchCacheService = AnonymousMatchCacheService()
 wordleStartupService = WordleStartupService()
 wordleDictionaryStartupService = WordleDictionaryStartupService()
+wordChainStartupService = WordChainStartupService()
 
 intents = discord.Intents.default()
 intents.members = True
@@ -78,6 +80,12 @@ async def on_ready():
 
         loadedWordCount = wordleDictionaryStartupService.loadWordsToCache()
         print(f"✅ Đã load wordle dictionary: {loadedWordCount} từ")
+        wordChainGameState = await wordChainStartupService.startOnReady(bot)
+        if wordChainGameState is not None:
+            print(f"✅ Đã load nối chữ với từ hiện tại: {wordChainGameState['lastWord']}")
+        else:
+            print("⚠️ Không load được nối chữ")
+
         assetImageService.preloadAssets()
         await quizQuestionService.startOnReady(bot)
         print("✅ Đã gửi câu hỏi quiz mới")
@@ -253,6 +261,7 @@ async def main():
         "bot.events.anonymousMatchMessageRelayEvent",
         "bot.events.serverInviteEvent",
         "bot.events.wordleEvent",
+        "bot.events.wordChainEvent",
         "bot.events.owoGiveEvent",
         "bot.events.voiceStateUpdateEvent",
         "bot.tasks.chatCountFlushTask",

@@ -76,3 +76,11 @@ class Member(Base):
         "QuizAnswerHistory",
         back_populates="member",
     )
+    wordChainWinHistories = relationship(
+        "WordChainWinHistory",
+        back_populates="member",
+    )
+    wordChainGameStates = relationship(
+        "WordChainGameState",
+        back_populates="lastUser",
+    )
