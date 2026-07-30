@@ -100,6 +100,9 @@ class FarmCowMilkCollectService:
 
             milkPailBroken = self.consumeMilkPailDurability(milkPailEquipment)
 
+            if milkPailBroken:
+                farmToolEquipmentRepository.delete(milkPailEquipment)
+
             farmCowShedRepository.markMilkCollected(cowShed)
             farmRepository.increaseFarmExp(farm, self.MILK_COLLECT_EXP)
 

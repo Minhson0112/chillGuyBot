@@ -132,6 +132,9 @@ class FarmFishingService:
             fishingSuccessRate = self.getFishingSuccessRate(fishingRodEquipment)
             fishingRodBroken = self.consumeFishingRodDurability(fishingRodEquipment)
 
+            if fishingRodBroken:
+                farmToolEquipmentRepository.delete(fishingRodEquipment)
+
             if not self.isFishingSuccess(fishingSuccessRate):
                 completedDailyTasks = dailyTaskProgressService.addProgress(
                     userId=userId,

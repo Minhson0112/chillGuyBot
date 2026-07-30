@@ -73,6 +73,9 @@ class FarmWaterService:
 
             wateringCanBroken = self.consumeWateringCanDurability(wateringCanEquipment)
 
+            if wateringCanBroken:
+                farmToolEquipmentRepository.delete(wateringCanEquipment)
+
             farmRepository.increaseFarmExp(farm, self.WATER_EXP)
 
             session.commit()

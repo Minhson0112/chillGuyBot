@@ -104,6 +104,9 @@ class FarmHarvestService:
             harvestQuantity = reducedHarvestQuantity + sickleBonusQuantity
             sickleBroken = self.consumeSickleDurability(sickleEquipment)
 
+            if sickleBroken:
+                farmToolEquipmentRepository.delete(sickleEquipment)
+
             userInventoryRepository.addOrCreate(
                 userId=userId,
                 itemId=crop.crop_item_id,
