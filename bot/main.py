@@ -169,6 +169,7 @@ async def main():
         "bot.commands.wordle.wordleTop",
         "bot.commands.wordChain.next",
         "bot.commands.wordChain.addWord",
+        "bot.commands.wordChain.topWordChain",
         "bot.commands.donate.topDonate",
         "bot.commands.donate.topMonthlyDonate",
         "bot.commands.donate.myDonate",
