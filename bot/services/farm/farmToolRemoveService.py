@@ -52,7 +52,11 @@ class FarmToolRemoveService:
                 }
 
             farmToolEquipmentRepository.delete(userTool.farm_tool_equipment)
-            userTool.status = ToolStatus.AVAILABLE.value
+
+            if userTool.status == ToolStatus.BROKEN.value or userTool.current_durability <= 0:
+                userTool.status = ToolStatus.BROKEN.value
+            else:
+                userTool.status = ToolStatus.AVAILABLE.value
 
             session.commit()
 

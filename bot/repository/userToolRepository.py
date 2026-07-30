@@ -39,6 +39,7 @@ class UserToolRepository:
             self.session.query(UserTool)
             .filter(UserTool.user_id == userId)
             .filter(UserTool.status != ToolStatus.BROKEN.value)
+            .filter(UserTool.current_durability > 0)
             .count()
         )
 
@@ -81,6 +82,7 @@ class UserToolRepository:
             )
             .filter(UserTool.user_id == userId)
             .filter(UserTool.status != ToolStatus.BROKEN.value)
+            .filter(UserTool.current_durability > 0)
             .order_by(UserTool.id.asc())
             .offset(offset)
             .limit(perPage)

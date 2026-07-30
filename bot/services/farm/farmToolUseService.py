@@ -92,7 +92,13 @@ class FarmToolUseService:
                 oldUserTool = existingEquipment.user_tool
 
                 if oldUserTool is not None:
-                    oldUserTool.status = ToolStatus.AVAILABLE.value
+                    if (
+                        oldUserTool.status == ToolStatus.BROKEN.value
+                        or oldUserTool.current_durability <= 0
+                    ):
+                        oldUserTool.status = ToolStatus.BROKEN.value
+                    else:
+                        oldUserTool.status = ToolStatus.AVAILABLE.value
 
                 farmToolEquipmentRepository.updateUserTool(
                     farmToolEquipment=existingEquipment,
