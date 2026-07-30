@@ -2,6 +2,7 @@ import re
 import unicodedata
 
 from bot.config.database import getDbSession
+from bot.repository.memberRepository import MemberRepository
 from bot.repository.wordChainGameStateRepository import WordChainGameStateRepository
 from bot.repository.wordChainWinHistoryRepository import WordChainWinHistoryRepository
 from bot.services.wordChain.wordChainCacheService import wordChainCacheService
@@ -10,6 +11,8 @@ from bot.services.wordChain.wordChainStartupService import WordChainStartupServi
 
 class WordChainGameService:
     RECENT_WIN_LIMIT = 10
+    PHRASE_REWARD_AMOUNT = 1
+    WIN_REWARD_AMOUNT = 10
 
     def __init__(self):
         self.wordChainStartupService = WordChainStartupService()
@@ -55,6 +58,8 @@ class WordChainGameService:
                 lastPhraseMasterId=phraseData["id"],
                 lastWord=phraseData["lastWord"],
                 lastUserId=userId,
+                rewardUserId=userId,
+                rewardAmount=self.PHRASE_REWARD_AMOUNT,
             )
 
             return {
@@ -62,6 +67,7 @@ class WordChainGameService:
                 "isCompleted": False,
                 "newGameState": wordChainCacheService.getCurrentGameState(),
                 "nextPhraseCount": nextPhraseCount,
+                "rewardAmount": self.PHRASE_REWARD_AMOUNT,
             }
 
         waitGameCount = self.getRecentWinWaitGameCount(phraseData["id"])
@@ -76,6 +82,7 @@ class WordChainGameService:
         self.createWinHistory(
             userId=userId,
             phraseMasterId=phraseData["id"],
+            rewardAmount=self.WIN_REWARD_AMOUNT,
         )
         newGameState = await self.wordChainStartupService.startNewGame(bot)
 
@@ -83,6 +90,7 @@ class WordChainGameService:
             "success": True,
             "isCompleted": True,
             "newGameState": newGameState,
+            "rewardAmount": self.WIN_REWARD_AMOUNT,
         }
 
     def updateGameState(
@@ -90,6 +98,8 @@ class WordChainGameService:
         lastPhraseMasterId,
         lastWord,
         lastUserId,
+        rewardUserId=None,
+        rewardAmount=0,
     ):
         with getDbSession() as session:
             gameStateRepository = WordChainGameStateRepository(session)
@@ -99,6 +109,12 @@ class WordChainGameService:
                 lastPhraseMasterId=lastPhraseMasterId,
                 lastWord=lastWord,
                 lastUserId=lastUserId,
+            )
+
+            self.rewardChillCoin(
+                session=session,
+                userId=rewardUserId,
+                amount=rewardAmount,
             )
             session.commit()
 
@@ -121,14 +137,32 @@ class WordChainGameService:
 
         return None
 
-    def createWinHistory(self, userId: int, phraseMasterId: int):
+    def createWinHistory(self, userId: int, phraseMasterId: int, rewardAmount=0):
         with getDbSession() as session:
             winHistoryRepository = WordChainWinHistoryRepository(session)
             winHistoryRepository.create(
                 userId=userId,
                 phraseMasterId=phraseMasterId,
             )
+            self.rewardChillCoin(
+                session=session,
+                userId=userId,
+                amount=rewardAmount,
+            )
             session.commit()
+
+    def rewardChillCoin(self, session, userId: int | None, amount: int):
+        if userId is None or amount <= 0:
+            return
+
+        memberRepository = MemberRepository(session)
+        member = memberRepository.findByUserIdForUpdate(userId)
+
+        if member is None:
+            return
+
+        member.chill_coin += amount
+        session.flush()
 
     def normalizePhrase(self, value: str):
         value = unicodedata.normalize("NFC", value)
