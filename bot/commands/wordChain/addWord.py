@@ -20,7 +20,6 @@ class AddWord(commands.Cog):
         phrases="Mỗi dòng là một cụm 2 từ cần thêm",
     )
     @canAddWord()
-    @isOwner()
     async def addWord(
         self,
         interaction: discord.Interaction,
