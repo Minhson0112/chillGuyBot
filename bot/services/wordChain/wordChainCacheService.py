@@ -43,6 +43,9 @@ class WordChainCacheService:
     def hasNextPhrase(self, firstWord):
         return bool(self.phraseIdsByFirstWord.get(self.normalizeText(firstWord)))
 
+    def countNextPhrases(self, firstWord):
+        return len(self.phraseIdsByFirstWord.get(self.normalizeText(firstWord), []))
+
     def setCurrentGameState(
         self,
         lastPhraseMasterId,

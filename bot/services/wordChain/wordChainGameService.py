@@ -41,15 +41,16 @@ class WordChainGameService:
             return {
                 "success": False,
                 "isCompleted": False,
+                "code": "same_user",
                 "message": "Bạn không thể tự nối tiếp từ của chính mình.",
             }
 
         if phraseData["firstWord"] != gameState["lastWord"]:
             return self.buildInvalidResult()
 
-        hasNextPhrase = wordChainCacheService.hasNextPhrase(phraseData["lastWord"])
+        nextPhraseCount = wordChainCacheService.countNextPhrases(phraseData["lastWord"])
 
-        if hasNextPhrase:
+        if nextPhraseCount > 0:
             self.updateGameState(
                 lastPhraseMasterId=phraseData["id"],
                 lastWord=phraseData["lastWord"],
@@ -60,6 +61,7 @@ class WordChainGameService:
                 "success": True,
                 "isCompleted": False,
                 "newGameState": wordChainCacheService.getCurrentGameState(),
+                "nextPhraseCount": nextPhraseCount,
             }
 
         waitGameCount = self.getRecentWinWaitGameCount(phraseData["id"])

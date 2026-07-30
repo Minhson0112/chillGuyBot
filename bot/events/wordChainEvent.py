@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 
 from bot.config.channel import WORD_CHAIN_CHANNEL_ID
-from bot.config.emoji import NO, PERFECT, YES
+from bot.config.emoji import NO, OMG, PERFECT, YES
 from bot.services.wordChain.wordChainGameService import WordChainGameService
 
 
@@ -25,6 +25,11 @@ class WordChainEvent(commands.Cog):
         if message.channel.id != WORD_CHAIN_CHANNEL_ID:
             return
 
+        ctx = await self.bot.get_context(message)
+
+        if ctx.valid:
+            return
+
         phrase = self.normalizePhrase(message.content)
 
         if len(phrase.split(" ")) != 2:
@@ -40,11 +45,21 @@ class WordChainEvent(commands.Cog):
             await message.add_reaction(NO)
 
             if result.get("message") is not None:
-                await message.channel.send(result["message"])
+                deleteAfter = 2 if result.get("code") == "same_user" else None
+                await message.channel.send(result["message"], delete_after=deleteAfter)
+
+                if deleteAfter is not None:
+                    try:
+                        await message.delete(delay=deleteAfter)
+                    except (discord.Forbidden, discord.NotFound):
+                        pass
 
             return
 
         await message.add_reaction(YES)
+
+        if not result["isCompleted"] and result.get("nextPhraseCount", 0) < 5:
+            await message.add_reaction(OMG)
 
         if result["isCompleted"]:
             await message.add_reaction(PERFECT)
