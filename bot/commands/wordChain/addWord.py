@@ -4,6 +4,7 @@ from discord.ext import commands
 
 from bot.services.wordChain.wordChainPhraseAdminService import WordChainPhraseAdminService
 from bot.validation.isOwnerValidation import isOwner
+from bot.validation.canAddWord import canAddWord
 
 
 class AddWord(commands.Cog):
@@ -18,6 +19,7 @@ class AddWord(commands.Cog):
     @app_commands.describe(
         phrases="Mỗi dòng là một cụm 2 từ cần thêm",
     )
+    @canAddWord()
     @isOwner()
     async def addWord(
         self,
