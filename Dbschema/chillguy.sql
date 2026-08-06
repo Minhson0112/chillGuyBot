@@ -481,7 +481,7 @@ CREATE TABLE chill_coin_transactions (
 CREATE TABLE fishing_history (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'fishing history id',
 
-    user_id BIGINT NOT NULL COMMENT 'discord user id',
+    user_id BIGINT UNSIGNED NOT NULL COMMENT 'discord user id',
     item_id BIGINT NOT NULL COMMENT 'caught seafood item id',
 
     weight_kg DECIMAL(5,2) NOT NULL COMMENT 'caught seafood weight in kg',
@@ -1660,6 +1660,7 @@ CREATE TABLE server_invites (
     expired_at DATETIME DEFAULT NULL COMMENT 'calculated invite expired at',
     deleted_at DATETIME DEFAULT NULL COMMENT 'invite deleted at',
     last_fetched_at DATETIME DEFAULT NULL COMMENT 'last fetched from discord',
+    PRIMARY KEY (id),
     UNIQUE KEY uq_server_invites_invite_code (invite_code),
 
     KEY idx_server_invites_inviter_user_id (inviter_user_id),

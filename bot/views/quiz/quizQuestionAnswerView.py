@@ -51,6 +51,7 @@ class QuizQuestionAnswerButton(discord.ui.Button):
             self.questionId,
             self.answerKey,
             interaction.user.id,
+            interaction.user.display_name,
         )
 
         if not result["success"]:
@@ -60,20 +61,16 @@ class QuizQuestionAnswerButton(discord.ui.Button):
             )
             return
 
-        self.disableViewButtons()
-        await interaction.message.edit(view=self.view)
-
-        if result["isCorrect"]:
+        if result["countdown_started"]:
             await interaction.response.send_message(
-                f"Chúc mừng {interaction.user.mention} đã trả lời đúng.",
+                "Chúc mừng bạn đã trả lời đầu tiên! Thời gian đếm ngược 10 giây bắt đầu để người khác cùng trả lời.",
+                ephemeral=True,
             )
         else:
-            correctAnswer = result["correctAnswerVi"] or result["correctAnswerEn"]
             await interaction.response.send_message(
-                f"{interaction.user.mention} bạn đã trả lời sai, câu trả lời đúng là **{correctAnswer}**.",
+                "Đã ghi nhận câu trả lời của bạn! Hãy chờ 10 giây đếm ngược kết thúc.",
+                ephemeral=True,
             )
-
-        await quizQuestionService.sendNextQuestion(interaction.client)
 
     def disableViewButtons(self):
         if self.view is None:

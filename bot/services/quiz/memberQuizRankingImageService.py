@@ -1,0 +1,123 @@
+from io import BytesIO
+from PIL import ImageDraw, ImageFont
+
+from bot.helper.discordResolverHelper import resolveMemberDisplayName
+from bot.helper.numberFormatHelper import formatNumber
+from bot.services.asset.assetImageService import assetImageService
+
+
+class MemberQuizRankingImageService:
+    FONT_PATH = "bot/assets/fonts/arial.ttf"
+
+    ROW_CENTER_Y_LIST = [
+        510,
+        615,
+        713,
+        798,
+        888,
+        972,
+        1060,
+        1145,
+        1232,
+        1313,
+    ]
+
+    NAME_BOX_LEFT = 350
+    NAME_BOX_RIGHT = 600
+
+    COUNT_BOX_LEFT = 825
+    COUNT_BOX_RIGHT = 925
+
+    TEXT_COLOR = (255, 221, 130, 255)
+    STROKE_COLOR = (58, 31, 10, 255)
+
+    def __init__(self, bot):
+        self.bot = bot
+
+    async def buildRankingImage(self, topMembers, guild):
+        image = assetImageService.getImage("quizRankingsScreen")
+        draw = ImageDraw.Draw(image)
+
+        for index, item in enumerate(topMembers):
+            rowCenterY = self.ROW_CENTER_Y_LIST[index]
+
+            member, score = item
+            displayName = await resolveMemberDisplayName(self.bot, guild, member.user_id)
+            displayName = self.truncateText(displayName, 24)
+
+            scoreStr = formatNumber(int(score))
+
+            nameBox = (
+                self.NAME_BOX_LEFT,
+                rowCenterY - 45,
+                self.NAME_BOX_RIGHT,
+                rowCenterY + 45,
+            )
+
+            countBox = (
+                self.COUNT_BOX_LEFT,
+                rowCenterY - 45,
+                self.COUNT_BOX_RIGHT,
+                rowCenterY + 45,
+            )
+
+            nameFont = self.getFitFont(
+                draw,
+                displayName,
+                44,
+                self.NAME_BOX_RIGHT - self.NAME_BOX_LEFT,
+            )
+
+            countFont = self.getFitFont(
+                draw,
+                scoreStr,
+                44,
+                self.COUNT_BOX_RIGHT - self.COUNT_BOX_LEFT,
+            )
+
+            self.drawCenteredText(draw, nameBox, displayName, nameFont)
+            self.drawCenteredText(draw, countBox, scoreStr, countFont)
+
+        buffer = BytesIO()
+        image.save(buffer, format="PNG")
+        buffer.seek(0)
+
+        return buffer
+
+    def truncateText(self, text, maxLength):
+        if len(text) > maxLength:
+            return f"{text[:maxLength - 3]}..."
+        return text
+
+    def getFont(self, fontSize):
+        try:
+            return ImageFont.truetype(self.FONT_PATH, fontSize)
+        except OSError:
+            return ImageFont.load_default()
+
+    def getFitFont(self, draw, text, fontSize, maxWidth):
+        currentFontSize = fontSize
+        while currentFontSize >= 26:
+            font = self.getFont(currentFontSize)
+            bbox = draw.textbbox((0, 0), text, font=font)
+            textWidth = bbox[2] - bbox[0]
+            if textWidth <= maxWidth:
+                return font
+            currentFontSize -= 2
+        return self.getFont(26)
+
+    def drawCenteredText(self, draw, box, text, font):
+        left, top, right, bottom = box
+        bbox = draw.textbbox((0, 0), text, font=font)
+        textWidth = bbox[2] - bbox[0]
+        textHeight = bbox[3] - bbox[1]
+        x = left + ((right - left) - textWidth) / 2
+        y = top + ((bottom - top) - textHeight) / 2 - 4
+        draw.text(
+            (x, y),
+            text,
+            font=font,
+            fill=self.TEXT_COLOR,
+            stroke_width=3,
+            stroke_fill=self.STROKE_COLOR,
+        )

@@ -295,6 +295,7 @@ ASSET_IMAGE_PATHS = {
     "chatRankingsScreen": "bot/assets/images/ui/chat_ranking.png",
     "staffChatRankingsScreen": "bot/assets/images/ui/staff_chat_ranking.png",
     "voiceRankingsScreen": "bot/assets/images/ui/voice_ranking.png",
+    "quizRankingsScreen": "bot/assets/images/ui/quiz_ranking.png",
     "train" : "bot/assets/images/farm/buildings/train.png",
     "item_bug": "bot/assets/images/farm/animals/bug.png",
     "memberInfo": "bot/assets/images/ui/memberInfo.png",
