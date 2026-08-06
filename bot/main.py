@@ -228,6 +228,7 @@ async def main():
         "bot.commands.minigame.bingo",
         "bot.commands.minigame.farmTrap",
         "bot.commands.minigame.mine",
+        "bot.commands.minigame.baucua",
         "bot.commands.mergeverse.topMergeGame",
         "bot.commands.mergeverse.myMergeGame",
         "bot.commands.fortune.fortune",

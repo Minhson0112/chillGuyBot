@@ -23,6 +23,18 @@ class LoadMember(commands.Cog):
             ephemeral=True
         )
 
+    @commands.command(name="loadmember")
+    @commands.has_permissions(administrator=True)
+    async def loadMemberText(self, ctx):
+        msg = await ctx.send("Đang đồng bộ danh sách thành viên...")
+        syncedCount = await self.memberSyncService.syncGuildMembers(ctx.guild)
+        await msg.edit(content=f"Đã lưu hoặc cập nhật {syncedCount} member vào database.")
+
+    @loadMemberText.error
+    async def loadMemberTextError(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.reply("Bạn không có quyền sử dụng lệnh này. Chỉ admin mới được dùng.")
+
 
 async def setup(bot):
     await bot.add_cog(LoadMember(bot))
