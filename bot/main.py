@@ -67,10 +67,6 @@ async def on_ready():
         bot.tree.copy_global_to(guild=chillStationGuild)
         synced = await bot.tree.sync(guild=chillStationGuild)
         print(f"🔧 Slash commands đã sync vào Chill Station: {len(synced)} lệnh")
-    except Exception as e:
-        print(f"⚠️ Không thể sync slash commands: {e}")
-
-    try:
         autoResponderCacheService.loadKeys()
         anonymousMatchCount = anonymousMatchCacheService.loadActiveMatches()
         print(f"Loaded anonymous match cache: {anonymousMatchCount}")
@@ -94,7 +90,7 @@ async def on_ready():
         await quizQuestionService.startOnReady(bot)
         print("✅ Đã gửi câu hỏi quiz mới")
     except Exception as e:
-        print(f"❌ Lỗi khởi động dịch vụ: {e}")
+        print(f"❌ Lỗi sync commands: {e}")
 
 async def registerPersistentViews():
     rerollEndedAfter = datetime.now(timezone(timedelta(hours=7))).replace(
