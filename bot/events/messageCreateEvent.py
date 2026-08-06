@@ -21,12 +21,6 @@ class MessageCreateEvent(commands.Cog):
         self.chatCountService.addMessageCount(message)
         self.memberDailyActivityService.addChatActivity(message)
 
-        # Check if the message is in the quiz channel to process fill-in guesses
-        from bot.config.channel import QUESTION_CHANNEL_ID
-        if message.channel.id == QUESTION_CHANNEL_ID:
-            from bot.services.quiz.quizQuestionService import quizQuestionService
-            await quizQuestionService.checkFillInAnswer(message)
-
         try:
             dailyTaskMessage = self.dailyTaskChatCacheService.addChatProgress(message)
 

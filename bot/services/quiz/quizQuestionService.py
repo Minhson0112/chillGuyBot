@@ -1,8 +1,8 @@
 import asyncio
 import json
-import os
 import random
-
+import re
+from sqlalchemy import text
 import discord
 
 from bot.config.channel import QUESTION_CHANNEL_ID
@@ -12,33 +12,27 @@ from bot.repository.quizAnswerHistoryRepository import QuizAnswerHistoryReposito
 
 class QuizQuestionService:
     def __init__(self):
-        self.questions = []
         self.recent_question_ids = []
         self.currentQuestion = None
-        self.answers_submitted = {}  # user_id -> (answer_key, is_correct, display_name)
+        self.answers_submitted = {}  # user_id -> (submitted_value, is_correct, display_name)
         self.countdown_task = None
         self.questionLock = asyncio.Lock()
         self.hasStarted = False
         self.active_view = None
-        self.load_questions()
-
-    def load_questions(self):
-        try:
-            path = "bot/assets/quiz/vnhsge_questions.json"
-            if os.path.exists(path):
-                with open(path, "r", encoding="utf-8") as f:
-                    self.questions = json.load(f)
-                print(f"✅ Loaded {len(self.questions)} local VNHSGE questions")
-            else:
-                print("❌ Local VNHSGE questions file not found!")
-        except Exception as e:
-            print(f"Error loading local questions: {e}")
+        self.current_channel = None
 
     async def startOnReady(self, bot):
         if self.hasStarted:
             return
 
         self.hasStarted = True
+        
+        # Wait up to 10 seconds for the Discord client guild/channel cache to populate
+        for _ in range(5):
+            if bot.guilds:
+                break
+            await asyncio.sleep(2)
+
         await self.sendNextQuestion(bot)
 
     async def resetAndSendQuestion(self, bot):
@@ -85,10 +79,12 @@ class QuizQuestionService:
 
         embed = self.buildQuestionEmbed(questionData)
 
+        from bot.views.quiz.quizQuestionAnswerView import QuizQuestionAnswerView
         if questionData["type"] == "fill_in":
-            await channel.send(embed=embed)
+            view = QuizQuestionAnswerView(questionData["id"], [], is_fill_in=True)
+            self.active_view = view
+            await channel.send(embed=embed, view=view)
         else:
-            from bot.views.quiz.quizQuestionAnswerView import QuizQuestionAnswerView
             view = QuizQuestionAnswerView(questionData["id"], questionData["answers"])
             self.active_view = view
             await channel.send(embed=embed, view=view)
@@ -96,51 +92,112 @@ class QuizQuestionService:
         return questionData
 
     def get_random_question(self):
-        if not self.questions:
+        try:
+            with getDbSession() as session:
+                if self.recent_question_ids:
+                    ids_str = ", ".join(f"'{qid}'" for qid in self.recent_question_ids)
+                    sql = f"SELECT id, question, type, difficulty, options, correct_answer FROM quiz_questions WHERE id NOT IN ({ids_str}) ORDER BY RAND() LIMIT 1"
+                else:
+                    sql = "SELECT id, question, type, difficulty, options, correct_answer FROM quiz_questions ORDER BY RAND() LIMIT 1"
+                
+                row = session.execute(text(sql)).fetchone()
+                
+                # Fallback if no questions left in current rotation
+                if not row and self.recent_question_ids:
+                    self.recent_question_ids = []
+                    sql = "SELECT id, question, type, difficulty, options, correct_answer FROM quiz_questions ORDER BY RAND() LIMIT 1"
+                    row = session.execute(text(sql)).fetchone()
+        except Exception as e:
+            print(f"Error fetching question from DB: {e}")
             return None
 
-        available = [q for q in self.questions if q["id"] not in self.recent_question_ids]
-        if not available:
-            self.recent_question_ids = []
-            available = self.questions
+        if not row:
+            return None
 
-        q = random.choice(available)
-        self.recent_question_ids.append(q["id"])
-        if len(self.recent_question_ids) > 15:
+        q_id, question_text, db_type, difficulty, options_json, correct_answer = row
+        self.recent_question_ids.append(q_id)
+        if len(self.recent_question_ids) > 100:
             self.recent_question_ids.pop(0)
 
-        # Structure answers
-        answers = []
-        if q["type"] == "multiple_choice":
-            for idx, opt in enumerate(q["options"]):
+        # Parse options list
+        try:
+            options = json.loads(options_json)
+        except Exception:
+            options = []
+
+        if not options:
+            options = [correct_answer]
+
+        # Dynamically determine the question type at runtime:
+        # 50% multiple_choice, 25% boolean, 25% fill_in
+        rand = random.random()
+        if rand < 0.50:
+            q_type = "multiple_choice"
+            answers = []
+            for idx, opt in enumerate(options):
                 answers.append({
                     "key": f"opt_{idx}",
                     "answerVi": opt,
-                    "isCorrect": opt == q["correct_answer"]
+                    "isCorrect": opt == correct_answer
                 })
             random.shuffle(answers)
-        elif q["type"] == "boolean":
+            
+            return {
+                "id": q_id,
+                "type": q_type,
+                "difficulty": difficulty,
+                "questionVi": question_text,
+                "correctAnswerVi": correct_answer,
+                "answers": answers,
+            }
+        elif rand < 0.75:
+            q_type = "boolean"
+            is_statement_correct = random.choice([True, False])
+            
+            if is_statement_correct:
+                selected_option = correct_answer
+                correct_bool_ans = "Đúng"
+            else:
+                wrong_options = [o for o in options if o != correct_answer]
+                if wrong_options:
+                    selected_option = random.choice(wrong_options)
+                else:
+                    selected_option = "đáp án không chính xác"
+                correct_bool_ans = "Sai"
+            
+            boolean_question_text = f"{question_text}\n\n👉 **Ý kiến:** *'{selected_option}' là Đúng hay Sai?*"
+            
             answers = [
                 {
                     "key": "true",
                     "answerVi": "Đúng",
-                    "isCorrect": q["correct_answer"] == "Đúng"
+                    "isCorrect": correct_bool_ans == "Đúng"
                 },
                 {
                     "key": "false",
                     "answerVi": "Sai",
-                    "isCorrect": q["correct_answer"] == "Sai"
+                    "isCorrect": correct_bool_ans == "Sai"
                 }
             ]
-
-        return {
-            "id": q["id"],
-            "type": q["type"],
-            "difficulty": q["difficulty"],
-            "questionVi": q["question"],
-            "correctAnswerVi": q["correct_answer"],
-            "answers": answers,
-        }
+            
+            return {
+                "id": q_id,
+                "type": q_type,
+                "difficulty": difficulty,
+                "questionVi": boolean_question_text,
+                "correctAnswerVi": correct_bool_ans,
+                "answers": answers,
+            }
+        else:
+            q_type = "fill_in"
+            return {
+                "id": q_id,
+                "type": q_type,
+                "difficulty": difficulty,
+                "questionVi": question_text,
+                "correctAnswerVi": correct_answer,
+                "answers": [],
+            }
 
     def buildQuestionEmbed(self, questionData: dict):
         difficulty_map = {
@@ -171,7 +228,7 @@ class QuizQuestionService:
         
         desc = questionData["questionVi"]
         if questionData["type"] == "fill_in":
-            desc += "\n\n👉 *Hãy gõ câu trả lời của bạn trực tiếp vào kênh chat này!*"
+            desc += "\n\n👉 *Hãy nhấn nút **Điền đáp án** bên dưới để gửi câu trả lời của bạn!*"
         
         embed.description = desc
         return embed
@@ -203,7 +260,7 @@ class QuizQuestionService:
                 }
 
             is_correct = selectedAnswer["isCorrect"]
-            self.answers_submitted[userId] = (answerKey, is_correct, display_name)
+            self.answers_submitted[userId] = (selectedAnswer["answerVi"], is_correct, display_name)
 
             first_answer = len(self.answers_submitted) == 1
             if first_answer:
@@ -215,34 +272,39 @@ class QuizQuestionService:
             "countdown_started": first_answer,
         }
 
-    async def checkFillInAnswer(self, message: discord.Message):
+    async def answerFillInQuestion(self, questionId: str, user_answer: str, userId: int, display_name: str):
         async with self.questionLock:
-            if self.currentQuestion is None or self.currentQuestion["type"] != "fill_in":
-                return
+            if self.currentQuestion is None or self.currentQuestion["id"] != questionId:
+                return {
+                    "success": False,
+                    "message": "Câu hỏi này đã hết hạn hoặc đang được xử lý.",
+                }
 
-            user_id = message.author.id
-            if user_id in self.answers_submitted:
-                return
+            if userId in self.answers_submitted:
+                return {
+                    "success": False,
+                    "message": "Bạn đã gửi đáp án cho câu hỏi này rồi!",
+                }
 
-            guess = message.content.strip().lower()
+            guess = user_answer.strip().lower()
             correct = self.currentQuestion["correctAnswerVi"].strip().lower()
             
-            is_correct = (guess == correct)
-            self.answers_submitted[user_id] = (guess, is_correct, message.author.display_name)
+            # Clean symbols or accents if typed differently
+            guess = re.sub(r'^[“"\'\s\.]+|[”"\'\s\.]+$', '', guess)
+            correct = re.sub(r'^[“"\'\s\.]+|[”"\'\s\.]+$', '', correct)
 
-            if is_correct:
-                await message.add_reaction("✅")
-            else:
-                await message.add_reaction("❌")
+            is_correct = (guess == correct)
+            self.answers_submitted[userId] = (user_answer, is_correct, display_name)
 
             first_answer = len(self.answers_submitted) == 1
             if first_answer:
-                from bot.main import bot as global_bot
-                self.countdown_task = asyncio.create_task(self.run_countdown_with_bot(global_bot, self.currentQuestion["id"]))
+                self.countdown_task = asyncio.create_task(self.run_countdown(questionId))
 
-    async def run_countdown_with_bot(self, bot, question_id):
-        await asyncio.sleep(10)
-        await self.end_question(bot, question_id)
+        return {
+            "success": True,
+            "isCorrect": is_correct,
+            "countdown_started": first_answer,
+        }
 
     async def run_countdown(self, question_id):
         await asyncio.sleep(10)
@@ -277,7 +339,7 @@ class QuizQuestionService:
 
         with getDbSession() as db_session:
             quiz_repo = QuizAnswerHistoryRepository(db_session)
-            for user_id, (key, is_correct, name) in answers.items():
+            for user_id, (submitted_val, is_correct, name) in answers.items():
                 if is_correct:
                     correct_users.append(name)
                     try:
