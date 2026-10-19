@@ -1,4 +1,5 @@
 import io
+import traceback
 
 import discord
 
@@ -17,7 +18,10 @@ class VoiceService:
         voiceClient = ctx.guild.voice_client
 
         if voiceClient is None:
-            return await targetChannel.connect()
+            print(f"[Voice] Connecting: channelId={targetChannel.id}", flush=True)
+            voiceClient = await targetChannel.connect()
+            print(f"[Voice] Connected: channelId={targetChannel.id}", flush=True)
+            return voiceClient
 
         if voiceClient.channel.id != targetChannel.id:
             await voiceClient.move_to(targetChannel)
@@ -38,7 +42,9 @@ class VoiceService:
         await ctx.send("Bot đã rời voice channel.")
 
     async def playBuffer(self, ctx, audioBuffer: io.BytesIO):
+        print(f"[Voice] Playback requested: messageId={ctx.message.id}", flush=True)
         if ctx.guild is None:
+            print("[Voice] Skipped: no guild", flush=True)
             audioBuffer.close()
             await ctx.send("Lệnh này chỉ dùng được trong server.")
             return
@@ -52,19 +58,23 @@ class VoiceService:
 
         if ctx.author.voice is None or ctx.author.voice.channel is None:
             audioBuffer.close()
+            print("[Voice] Skipped: author is not in voice", flush=True)
             await ctx.send("Bạn cần vào voice channel trước.")
             return
 
         if voiceClient.channel.id != ctx.author.voice.channel.id:
             audioBuffer.close()
+            print("[Voice] Skipped: author is in another voice channel", flush=True)
             await ctx.send("Bạn cần ở cùng voice channel với bot.")
             return
 
         if voiceClient.is_playing():
             audioBuffer.close()
+            print("[Voice] Skipped: already playing audio", flush=True)
             await ctx.send("Bot đang phát âm thanh khác.")
             return
 
+        print(f"[Voice] Creating FFmpeg audio source: connected={voiceClient.is_connected()}", flush=True)
         source = discord.FFmpegPCMAudio(
             audioBuffer,
             pipe=True,
@@ -78,6 +88,10 @@ class VoiceService:
                 pass
 
             if error:
-                print(f"Voice play error: {error}")
+                print(f"[Voice] Playback failed: messageId={ctx.message.id}, error={error!r}", flush=True)
+                traceback.print_exception(type(error), error, error.__traceback__)
+            else:
+                print(f"[Voice] Playback finished: messageId={ctx.message.id}", flush=True)
 
         voiceClient.play(source, after=afterPlay)
+        print(f"[Voice] Playback started: messageId={ctx.message.id}", flush=True)
